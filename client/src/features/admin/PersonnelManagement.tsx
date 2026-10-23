@@ -399,7 +399,7 @@ export default function PersonnelManagement() {
             roundName = matchedRound.name;
             const isFinal = matchedRound.advanceTopN === 0 || matchedRound.name.toLowerCase().includes("chung kết");
             const dashIndex = marker.indexOf("-");
-            let rawTrack = dashIndex >= 0
+            const rawTrack = dashIndex >= 0
               ? marker.substring(dashIndex + 1).trim()
               : (marker.match(/TRACK\s*\d+(?:\s*:\s*.+)?/i)?.[0] || "").replace(/\s*:\s*/g, ": ").trim();
 
@@ -430,7 +430,7 @@ export default function PersonnelManagement() {
             role = "judge";
             roundName = "Vòng sơ loại";
             const dashIndex = marker.indexOf("-");
-            let rawTrack = dashIndex >= 0
+            const rawTrack = dashIndex >= 0
               ? marker.substring(dashIndex + 1).trim()
               : (marker.match(/TRACK\s*\d+(?:\s*:\s*.+)?/i)?.[0] || "").replace(/\s*:\s*/g, ": ").trim();
             const matchedTrack = tracks.find((track: any) =>

@@ -11,6 +11,7 @@ const TeamMember = mongoose.model('TeamMember');
 const cronService = require('../events/cronService');
 const { parseAiResult } = require('../github-ai/aiService');
 const { authenticateToken } = require('../auth/authMiddleware');
+const { loadTeamForUser, isEventStaff } = require('../teams/teamAccess');
 
 /**
  * @route   GET /api/analytics/team/:teamId/commits
@@ -19,6 +20,9 @@ const { authenticateToken } = require('../auth/authMiddleware');
  */
 router.get('/team/:teamId/commits', authenticateToken, async (req, res) => {
   try {
+    const team = await loadTeamForUser(req, res, req.params.teamId, ['judge', 'mentor', 'member']);
+    if (!team) return;
+
     const commits = await Commit.find({ teamId: req.params.teamId, message: { $not: /initial commit/i } }).sort({ committedAt: -1 });
     res.json(commits);
   } catch (error) {
@@ -38,6 +42,8 @@ router.get('/commit/:commitId/ai-analysis', authenticateToken, async (req, res) 
     if (!analysis) {
       return res.status(404).json({ message: 'AI Analysis not found for this commit yet.' });
     }
+    const team = await loadTeamForUser(req, res, analysis.teamId, ['judge']);
+    if (!team) return;
     const obj = analysis.toObject();
     obj.result = parseAiResult(obj.result);
     res.json(obj);
@@ -56,6 +62,9 @@ router.get('/team/:teamId/summary', authenticateToken, async (req, res) => {
   const { teamId } = req.params;
 
   try {
+    const team = await loadTeamForUser(req, res, teamId, ['judge', 'mentor', 'member']);
+    if (!team) return;
+
     const commits = await Commit.find({ teamId, message: { $not: /initial commit/i } });
 
     // Aggregate contributions by authorName / authorGithubUsername
@@ -110,6 +119,12 @@ router.get('/team/:teamId/summary', authenticateToken, async (req, res) => {
  */
 router.post('/repo/:repoId/sync', authenticateToken, async (req, res) => {
   try {
+    const repo = await GithubRepository.findById(req.params.repoId);
+    if (!repo) return res.status(404).json({ message: 'Repository not found.' });
+    if (!(await isEventStaff(req.user, repo.eventId))) {
+      return res.status(403).json({ message: 'Chỉ Ban tổ chức mới được kích hoạt đồng bộ thủ công.' });
+    }
+
     const success = await cronService.syncRepo(req.params.repoId);
     if (success) {
       res.json({ message: 'Repository commits and code files synced successfully!' });

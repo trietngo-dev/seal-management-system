@@ -13,14 +13,22 @@ const aiService = require('./aiService');
 const { parseAiResult } = require('./aiService');
 const { authenticateToken } = require('../auth/authMiddleware');
 const { projectAnalysisForMentor } = require('./mentorAiProjection');
+const { loadTeamForUser } = require('../teams/teamAccess');
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 /**
  * @route   GET /api/ai-analyses/team/:teamId
  * @desc    Get all AI analyses (per-push and team aggregate reviews) for a team
- * @access  Private
+ * @access  Private (Judges and organisers only — reviews contain suggested scores and judge questions)
  */
 router.get('/team/:teamId', authenticateToken, async (req, res) => {
   try {
+    const team = await loadTeamForUser(req, res, req.params.teamId, ['judge']);
+    if (!team) return;
+
     const analyses = await AiAnalysis.find({ teamId: req.params.teamId })
       .populate('commitId', 'message commitSha committedAt authorGithubUsername authorName')
       .populate('teamId', 'name')
@@ -133,7 +141,9 @@ router.get('/:id', authenticateToken, async (req, res) => {
     if (!analysis) {
       return res.status(404).json({ message: 'Không tìm thấy phân tích AI.' });
     }
-    
+    const team = await loadTeamForUser(req, res, analysis.teamId?._id || analysis.teamId, ['judge']);
+    if (!team) return;
+
     const obj = analysis.toObject();
     obj.result = parseAiResult(obj.result);
     res.json(obj);
@@ -156,8 +166,9 @@ router.post('/team/:teamId/aggregate', authenticateToken, async (req, res) => {
     if (!roundId || !rubricId) {
       return res.status(400).json({ message: 'roundId and rubricId are required for Agent 2 analysis.' });
     }
-    const team = await Team.findById(teamId);
-    if (!team) return res.status(404).json({ message: 'Không tìm thấy đội thi.' });
+    // Each run calls the LLM, so only judges and organisers may trigger it.
+    const team = await loadTeamForUser(req, res, teamId, ['judge']);
+    if (!team) return;
 
     const repo = await GithubRepository.findOne({ teamId });
     if (!repo) return res.status(400).json({ message: 'Đội thi này chưa được thiết lập GitHub repository.' });
@@ -223,8 +234,12 @@ router.post('/team/:teamId/aggregate', authenticateToken, async (req, res) => {
  */
 router.post('/n8n-callback', async (req, res) => {
   const apiKey = req.headers['x-api-key'];
-  const expectedApiKey = process.env.N8N_API_KEY || 'seal-n8n-secret-key-2026';
-  
+  const expectedApiKey = process.env.N8N_API_KEY;
+
+  // No default key: a key published in the repo would let anyone overwrite AI reviews.
+  if (!expectedApiKey) {
+    return res.status(503).json({ message: 'n8n callback is disabled: N8N_API_KEY is not configured.' });
+  }
   if (apiKey !== expectedApiKey) {
     return res.status(401).json({ message: 'Unauthorized callback. Invalid X-API-Key.' });
   }
@@ -254,7 +269,7 @@ router.post('/n8n-callback', async (req, res) => {
       const foundTeam = await Team.findOne({
         $or: [
           { externalTeamCode: resolvedTeamId },
-          { name: new RegExp(`^${resolvedTeamId}$`, 'i') },
+          { name: new RegExp(`^${escapeRegex(resolvedTeamId)}$`, 'i') },
           { code: resolvedTeamId }
         ]
       });

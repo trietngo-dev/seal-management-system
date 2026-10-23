@@ -49,6 +49,14 @@ async function createTeamRepository(repoName, visibility = 'private', customOrgN
   } catch (error) {
     console.error('Error creating GitHub repository in org:', error.message);
 
+    // The name is taken in the org: let the caller pick another name instead of
+    // silently creating the repo somewhere else.
+    if (error.status === 422 && /already exists/i.test(error.message || '')) {
+      const takenError = new Error(`Repository "${activeOrgName}/${repoName}" already exists.`);
+      takenError.code = 'REPO_NAME_TAKEN';
+      throw takenError;
+    }
+
     // Attempt to fall back to creating in the authenticated user's account
     try {
       console.log(`[GITHUB FALLBACK] Attempting to create repository "${repoName}" under authenticated user's account...`);
@@ -66,13 +74,9 @@ async function createTeamRepository(repoName, visibility = 'private', customOrgN
       };
     } catch (fallbackError) {
       console.error('[GITHUB FALLBACK] Error creating GitHub repository under personal account:', fallbackError.message);
-      // If both fail, fall back to mock to keep the app working
-      console.log(`[GITHUB FALLBACK] Failsafe: Mocking repo creation for ${repoName}`);
-      return {
-        repoUrl: `https://github.com/${activeOrgName}/${repoName}`,
-        githubRepoId: `fallback-${Date.now()}`,
-        owner: activeOrgName
-      };
+      // Never return a fake record here: its URL can point at another team's real repo,
+      // which would hand that repo (push access, commits, AI review) to this team.
+      throw fallbackError;
     }
   }
 }

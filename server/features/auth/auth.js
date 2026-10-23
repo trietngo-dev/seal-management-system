@@ -62,7 +62,15 @@ function normalizeUniversityName(name) {
   return cleaned.trim();
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+const JWT_SECRET = require('./jwtSecret');
+
+// Mock OAuth logins accept any email without proving ownership, so they are
+// development-only and must be switched on explicitly with ALLOW_MOCK_AUTH=true.
+function isMockAuthAllowed() {
+  return process.env.ALLOW_MOCK_AUTH === 'true' && process.env.NODE_ENV !== 'production';
+}
+
+const MOCK_AUTH_DISABLED_MESSAGE = 'Đăng nhập giả lập đã bị tắt trên máy chủ này.';
 
 async function mapUserRoles(roles, user = null) {
   const mapped = [];
@@ -685,6 +693,9 @@ router.post('/google', async (req, res) => {
 
   if (isMock || !idToken) {
     // Mock simulation flow
+    if (!isMockAuthAllowed()) {
+      return res.status(403).json({ message: MOCK_AUTH_DISABLED_MESSAGE });
+    }
     if (!userEmail) {
       return res.status(400).json({ message: 'Email is required for Google Sign-in.' });
     }
@@ -697,6 +708,14 @@ router.post('/google', async (req, res) => {
         return res.status(400).json({ message: 'Invalid Google token.' });
       }
       const payload = await googleRes.json();
+      // tokeninfo accepts ID tokens issued to ANY Google client, so the audience must be ours.
+      const allowedClientIds = (process.env.GOOGLE_CLIENT_ID || '').split(',').map(id => id.trim()).filter(Boolean);
+      if (allowedClientIds.length > 0 && !allowedClientIds.includes(payload.aud)) {
+        return res.status(401).json({ message: 'Google token was not issued for this application.' });
+      }
+      if (payload.email_verified !== true && payload.email_verified !== 'true') {
+        return res.status(400).json({ message: 'Google account email is not verified.' });
+      }
       userEmail = payload.email;
       userName = payload.name || payload.email.split('@')[0];
       userAvatar = payload.picture;
@@ -802,8 +821,11 @@ router.post('/github', async (req, res) => {
 
   if (!isMock && code) {
     try {
-      const clientId = process.env.GITHUB_CLIENT_ID || 'Ov23liz8uHIFRtgdwDwE';
-      const clientSecret = process.env.GITHUB_CLIENT_SECRET || 'eb9a526811f9bc9b70b5ec1042974aa5e3c55df9';
+      const clientId = process.env.GITHUB_CLIENT_ID;
+      const clientSecret = process.env.GITHUB_CLIENT_SECRET;
+      if (!clientId || !clientSecret) {
+        return res.status(500).json({ message: 'GitHub OAuth chưa được cấu hình trên máy chủ.' });
+      }
 
       const exchangeBody = {
         client_id: clientId,
@@ -841,6 +863,9 @@ router.post('/github', async (req, res) => {
 
   if (isMock || !currentToken) {
     // Mock simulation flow
+    if (!isMockAuthAllowed()) {
+      return res.status(403).json({ message: MOCK_AUTH_DISABLED_MESSAGE });
+    }
     if (!userEmail) {
       return res.status(400).json({ message: 'Email is required for GitHub Sign-in.' });
     }
@@ -872,7 +897,8 @@ router.post('/github', async (req, res) => {
       let primaryEmail = profile.email;
       if (emailRes.ok) {
         const emails = await emailRes.json();
-        const primary = emails.find(e => e.primary);
+        // Only trust verified addresses: accounts are matched by email.
+        const primary = emails.find(e => e.primary && e.verified) || emails.find(e => e.verified);
         if (primary) primaryEmail = primary.email;
       }
 
@@ -1234,9 +1260,9 @@ router.get('/verify-email', async (req, res) => {
 /**
  * @route   GET /api/auth/test-email
  * @desc    Diagnose SMTP connection and credentials on the live server
- * @access  Public (For debugging)
+ * @access  Private (System Admin only)
  */
-router.get('/test-email', async (req, res) => {
+router.get('/test-email', authenticateToken, requireSystemAdmin, async (req, res) => {
   const config = {
     host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
     port: parseInt(process.env.EMAIL_PORT || '587'),
@@ -1278,7 +1304,7 @@ router.get('/test-email', async (req, res) => {
         port: config.port,
         secure: config.secure,
         user: config.auth.user,
-        passMasked: config.auth.pass ? `${config.auth.pass.substring(0, 4)}***` : 'None'
+        passConfigured: !!config.auth.pass
       },
       diagnosticLogs: logs
     });
@@ -1290,14 +1316,13 @@ router.get('/test-email', async (req, res) => {
       message: 'SMTP/API Diagnostics failed. See logs below.',
       errorDetails: {
         message: error.message,
-        stack: error.stack
       },
       configUsed: {
         host: config.host,
         port: config.port,
         secure: config.secure,
         user: config.auth.user,
-        passMasked: config.auth.pass ? `${config.auth.pass.substring(0, 4)}***` : 'None'
+        passConfigured: !!config.auth.pass
       },
       diagnosticLogs: logs
     });
@@ -1346,10 +1371,12 @@ router.get('/users', authenticateToken, requireAdminOrAssistant, async (req, res
     const { search } = req.query;
     let query = { isSystemAdmin: { $ne: true } };
     if (search) {
+      // Escape so searches like "c++" match literally instead of throwing.
+      const pattern = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { studentId: { $regex: search, $options: 'i' } }
+        { fullName: { $regex: pattern, $options: 'i' } },
+        { email: { $regex: pattern, $options: 'i' } },
+        { studentId: { $regex: pattern, $options: 'i' } }
       ];
     }
 
@@ -1791,16 +1818,17 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    let fallbackClientUrl = 'http://localhost:5173';
-    if (req.headers.origin) {
-      fallbackClientUrl = req.headers.origin;
-    } else if (req.headers.referer) {
-      try {
-        const parsed = new URL(req.headers.referer);
-        fallbackClientUrl = `${parsed.protocol}//${parsed.host}`;
-      } catch (err) {
-        // ignore
+    // Origin/Referer are attacker-controlled: trusting them would let anyone make the
+    // reset email point at their own domain and capture the token. Only honour them
+    // for local development hosts.
+    let fallbackClientUrl = 'https://seal-management-staging.vercel.app';
+    try {
+      const requestOrigin = req.headers.origin || (req.headers.referer && new URL(req.headers.referer).origin);
+      if (requestOrigin && ['localhost', '127.0.0.1'].includes(new URL(requestOrigin).hostname)) {
+        fallbackClientUrl = requestOrigin;
       }
+    } catch (err) {
+      // ignore malformed headers
     }
     const clientUrl = process.env.CLIENT_URL || fallbackClientUrl;
     const resetLink = `${clientUrl}/reset-password?token=${token}&email=${encodeURIComponent(user.email)}`;

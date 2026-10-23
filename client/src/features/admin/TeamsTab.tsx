@@ -134,6 +134,27 @@ export default function TeamsTab({
     setEmailResult(null);
   }, [selectedEvent?._id]);
 
+  const [creatingRepoTeamId, setCreatingRepoTeamId] = useState<string | null>(null);
+
+  const handleCreateRepo = async (teamId: string) => {
+    setCreatingRepoTeamId(teamId);
+    try {
+      const token = localStorage.getItem("token");
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      await axios.post(
+        `${apiBase}/api/github-repositories/create`,
+        { teamId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success("Đã tạo GitHub repository và mời các thành viên.");
+      await onRefreshTeams?.();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Không thể tạo GitHub repository.");
+    } finally {
+      setCreatingRepoTeamId(null);
+    }
+  };
+
   const handleDismissImportResult = () => {
     setImportResult(null);
     persistFlowState(null, emailStep, emailResult);
@@ -915,9 +936,31 @@ export default function TeamsTab({
                           </button>
                         )}
                       </p>
+                    ) : team.status === "confirmed" ? (
+                      // Confirmed teams without a repo cannot be scored, so make it visible and fixable.
+                      <p className="flex items-center gap-2 flex-wrap min-w-0 text-rose-600">
+                        <AlertCircle size={12} className="shrink-0" />
+                        <span>Chưa có GitHub Repo (chưa thể chấm điểm)</span>
+                        {!readOnly && (
+                          <button
+                            onClick={() => handleCreateRepo(team._id)}
+                            disabled={loading || creatingRepoTeamId === team._id}
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-lg border transition-all inline-flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                          >
+                            {creatingRepoTeamId === team._id ? (
+                              <Loader2 size={10} className="animate-spin" />
+                            ) : (
+                              <RefreshCw size={10} />
+                            )}
+                            <span>
+                              {creatingRepoTeamId === team._id ? "Đang tạo..." : "Tạo repo"}
+                            </span>
+                          </button>
+                        )}
+                      </p>
                     ) : (
                       <p className="text-slate-400 italic">
-                        GitHub Repo: Chưa cấp phát (chờ chia bảng)
+                        GitHub Repo: Chưa cấp phát (chờ đủ thành viên xác nhận)
                       </p>
                     )}
                   </div>

@@ -661,6 +661,9 @@ router.post('/submit', authenticateToken, async (req, res) => {
 
     const round = await Round.findById(roundId);
     if (!round) return res.status(404).json({ message: 'Round not found.' });
+    if (rubric.roundId.toString() !== round._id.toString()) {
+      return res.status(400).json({ message: 'Rubric không thuộc vòng thi đang chấm.' });
+    }
     if (round.status === 'completed') {
       return res.status(400).json({ message: 'Vòng đấu này đã bị khoá. Điểm số đã được chốt và không thể sửa đổi.' });
     }
@@ -696,6 +699,13 @@ router.post('/submit', authenticateToken, async (req, res) => {
     }
 
     const repo = await GithubRepository.findOne({ teamId });
+    // Score requires both (schema + unique index); fail with a clear message instead of a 500.
+    if (!repo) {
+      return res.status(400).json({ message: 'Đội thi chưa có GitHub repository nên chưa thể chấm điểm. Vui lòng liên hệ Ban tổ chức.' });
+    }
+    if (!team.trackId) {
+      return res.status(400).json({ message: 'Đội thi chưa được phân vào bảng đấu nên chưa thể chấm điểm.' });
+    }
     const snapshot = await RepositorySnapshot.findOne({ teamId, roundId });
 
     const existingScores = await Score.find({ teamId, roundId }).sort({ createdAt: 1 });
@@ -744,13 +754,27 @@ router.post('/submit', authenticateToken, async (req, res) => {
 
     const criteriaList = await Criterion.find({ rubricId });
     const detailsToSave = [];
+    const scoredCriterionIds = new Set();
 
     for (const d of details) {
-      const { criterionId, scoreValue, comment } = d;
-      const criterion = criteriaList.find(c => c._id.toString() === criterionId.toString());
+      const { criterionId, comment } = d;
+      // Coerce explicitly: a string "5" would otherwise be concatenated into the total,
+      // and null/undefined would slip past the range check below.
+      const scoreValue = typeof d.scoreValue === 'string' && d.scoreValue.trim() !== ''
+        ? Number(d.scoreValue)
+        : d.scoreValue;
+      const criterion = criterionId && criteriaList.find(c => c._id.toString() === criterionId.toString());
 
       if (!criterion) {
         return res.status(400).json({ message: `Criterion ID ${criterionId} not found in rubric.` });
+      }
+      if (scoredCriterionIds.has(criterion._id.toString())) {
+        return res.status(400).json({ message: `Tiêu chí "${criterion.name}" bị chấm trùng.` });
+      }
+      scoredCriterionIds.add(criterion._id.toString());
+
+      if (typeof scoreValue !== 'number' || !Number.isFinite(scoreValue)) {
+        return res.status(400).json({ message: `Điểm của tiêu chí "${criterion.name}" không hợp lệ.` });
       }
 
       if (scoreValue < 0 || scoreValue > criterion.maxScore) {
@@ -770,6 +794,14 @@ router.post('/submit', authenticateToken, async (req, res) => {
         scoreValue,
         weightedScore: Math.round(wScore * 100) / 100,
         comment
+      });
+    }
+
+    // A partial sheet would rank the team on a smaller total than everyone else.
+    const missingCriteria = criteriaList.filter(c => !scoredCriterionIds.has(c._id.toString()));
+    if (missingCriteria.length > 0) {
+      return res.status(400).json({
+        message: `Chưa chấm đủ tiêu chí: ${missingCriteria.map(c => c.name).join(', ')}.`
       });
     }
 

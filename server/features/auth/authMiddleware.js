@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = mongoose.model('User');
 const EventRole = mongoose.model('EventRole');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+const JWT_SECRET = require('./jwtSecret');
 
 /**
  * Middleware to verify user JWT token.
@@ -95,25 +95,29 @@ function requireEventRole(allowedRoles) {
     }
 
     try {
-      const eventRole = await EventRole.findOne({
+      // A user can hold several roles in one event (e.g. mentor + judge), so check all of them.
+      const eventRoles = await EventRole.find({
         userId: req.user._id,
         eventId: eventId,
         status: 'active'
       }).populate('eventId');
 
-      if (!eventRole) {
-        return res.status(403).json({ 
-          message: `Access denied. You do not have roles in this event.` 
+      if (eventRoles.length === 0) {
+        return res.status(403).json({
+          message: `Access denied. You do not have roles in this event.`
         });
       }
 
       // If the event is completed or cancelled, demote role to participant
-      let effectiveRole = eventRole.role;
-      if (eventRole.eventId && (eventRole.eventId.status === 'completed' || eventRole.eventId.status === 'cancelled')) {
-        effectiveRole = 'participant';
-      }
+      const effectiveRoleOf = (role) => (
+        role.eventId && (role.eventId.status === 'completed' || role.eventId.status === 'cancelled')
+          ? 'participant'
+          : role.role
+      );
+      const eventRole = eventRoles.find(role => allowedRoles.includes(effectiveRoleOf(role)));
+      const effectiveRole = eventRole ? effectiveRoleOf(eventRole) : null;
 
-      if (!allowedRoles.includes(effectiveRole)) {
+      if (!eventRole) {
         return res.status(403).json({ 
           message: `Access denied. You do not have the required role(s) [${allowedRoles.join(', ')}] in this event.` 
         });

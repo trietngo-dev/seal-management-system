@@ -16,29 +16,9 @@ const EventLog = mongoose.model('EventLog');
 const emailService = require('../notifications/emailService');
 const githubService = require('../github-ai/githubService');
 const { ensureChatRoomForTeam, ensureChatRoomsForMentorTrack } = require('../chat/chatRoomService');
+const { provisionTeamRepository } = require('../github-ai/repoProvisioning');
+const { syncTeamToExternalSimulator } = require('../teams/externalTeamService');
 
-function getSemesterSuffix(event) {
-  if (!event || !event.semester || !event.year) return '';
-  const semLower = event.semester.toLowerCase();
-  let semCode = '';
-  if (semLower === 'spring') semCode = 'sp';
-  else if (semLower === 'summer') semCode = 'su';
-  else if (semLower === 'fall') semCode = 'fa';
-  return semCode ? `_${semCode}${event.year}` : '';
-}
-
-function vietnameseSlug(text) {
-  if (!text) return '';
-  let slug = text;
-  slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  slug = slug.replace(/đ/g, 'd').replace(/Đ/g, 'D');
-  slug = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
-  return slug;
-}
 const {
   extractDriveFileId,
   sanitizeRoundForAdmin
@@ -199,7 +179,7 @@ router.get('/', async (req, res) => {
   if (status) filter.status = status;
 
   // Check optional auth to decide if archived events can be shown
-  const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+  const JWT_SECRET = require('../auth/jwtSecret');
   const jwt = require('jsonwebtoken');
   const User = mongoose.model('User');
   const EventRole = mongoose.model('EventRole');
@@ -457,7 +437,7 @@ router.get('/:id', async (req, res) => {
 
     if (event.isArchived) {
       // Enforce auth check for archived events
-      const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+      const JWT_SECRET = require('../auth/jwtSecret');
       const jwt = require('jsonwebtoken');
       const User = mongoose.model('User');
       const EventRole = mongoose.model('EventRole');
@@ -1315,7 +1295,6 @@ router.post('/:eventId/distribute-teams', authenticateToken, async (req, res) =>
     // Fetch Event to get org name
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: 'Không tìm thấy sự kiện.' });
-    const orgName = event ? event.githubOrgName : undefined;
 
     // 2. Fetch tracks, excluding those belonging to the final round(s)
     const Round = mongoose.model('Round');
@@ -1360,36 +1339,13 @@ router.post('/:eventId/distribute-teams', authenticateToken, async (req, res) =>
       team.trackId = track._id;
       await team.save();
 
-      // Trigger GitHub Repo creation in the background
-      const suffix = getSemesterSuffix(event);
-      const slugRepoName = vietnameseSlug(team.name) + suffix;
+      // Teams confirmed before distribution had no track yet, so they still need their
+      // simulator (MQTT) credentials; the repo usually exists already and only needs its trackId.
+      await syncTeamToExternalSimulator(team);
 
-      githubService.createTeamRepository(slugRepoName, 'private', orgName)
-        .then(async (gitResult) => {
-          // Check if repo already exists for this team
-          const existingRepo = await GithubRepository.findOne({ teamId: team._id });
-          if (!existingRepo) {
-            const actualOrgName = gitResult.owner || orgName;
-
-            const newRepo = new GithubRepository({
-              eventId: team.eventId,
-              trackId: track._id,
-              teamId: team._id,
-              orgName: actualOrgName,
-              repoName: slugRepoName,
-              repoUrl: gitResult.repoUrl,
-              githubRepoId: gitResult.githubRepoId,
-              syncStatus: 'not_synced'
-            });
-            await newRepo.save();
-
-            // Add collaborators
-            const populatedMembers = await TeamMember.find({ teamId: team._id }).populate('userId');
-            for (const tm of populatedMembers) {
-              if (tm.userId && tm.userId.githubUsername) {
-                await githubService.addCollaborator(slugRepoName, tm.userId.githubUsername, 'push', actualOrgName);
-              }
-            }
+      provisionTeamRepository(team, { trackId: track._id })
+        .then(({ created }) => {
+          if (created) {
             console.log(`[DISTRIBUTION] Provisioned GitHub repo and added collaborators for team: ${team.name}`);
           }
         })

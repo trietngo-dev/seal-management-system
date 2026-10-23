@@ -12,28 +12,11 @@ const githubService = require('./githubService');
 const cronService = require('../events/cronService');
 const githubAiQueue = require('./githubAiQueue');
 const { authenticateToken } = require('../auth/authMiddleware');
+const { loadTeamForUser, isEventStaff } = require('../teams/teamAccess');
+const { provisionTeamRepository } = require('./repoProvisioning');
 
-function getSemesterSuffix(event) {
-  if (!event || !event.semester || !event.year) return '';
-  const semLower = event.semester.toLowerCase();
-  let semCode = '';
-  if (semLower === 'spring') semCode = 'sp';
-  else if (semLower === 'summer') semCode = 'su';
-  else if (semLower === 'fall') semCode = 'fa';
-  return semCode ? `_${semCode}${event.year}` : '';
-}
-
-function vietnameseSlug(text) {
-  if (!text) return '';
-  let slug = text;
-  slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  slug = slug.replace(/đ/g, 'd').replace(/Đ/g, 'D');
-  slug = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
-  return slug;
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -104,6 +87,9 @@ router.get('/', authenticateToken, async (req, res) => {
  */
 router.get('/team/:teamId', authenticateToken, async (req, res) => {
   try {
+    const team = await loadTeamForUser(req, res, req.params.teamId, ['judge', 'mentor', 'member']);
+    if (!team) return;
+
     const repo = await GithubRepository.findOne({ teamId: req.params.teamId });
     if (!repo) {
       return res.status(404).json({ message: 'Chưa có GitHub repository cho đội thi này.' });
@@ -129,8 +115,8 @@ router.post('/create', authenticateToken, async (req, res) => {
     if (!team) return res.status(404).json({ message: 'Không tìm thấy đội thi.' });
 
     // Auth check
-    if (!req.user.isSystemAdmin) {
-      return res.status(403).json({ message: 'Quyền truy cập bị từ chối. Chỉ quản trị viên mới được quyền tạo repository.' });
+    if (!(await isEventStaff(req.user, team.eventId))) {
+      return res.status(403).json({ message: 'Quyền truy cập bị từ chối. Chỉ Ban tổ chức mới được quyền tạo repository.' });
     }
 
     // Check if repository already exists
@@ -139,47 +125,15 @@ router.post('/create', authenticateToken, async (req, res) => {
       return res.status(400).json({ message: 'Đội thi này đã có repository.' });
     }
 
-    // Fetch Event to get org name
-    const Event = mongoose.model('Event');
-    const event = await Event.findById(team.eventId);
-    const orgName = event ? event.githubOrgName : undefined;
-
-    // Slugify repo name
-    const suffix = getSemesterSuffix(event);
-    const slugRepoName = vietnameseSlug(team.name) + suffix;
-    const gitResult = await githubService.createTeamRepository(slugRepoName, 'private', orgName);
-
-    const actualOrgName = gitResult.owner || orgName;
-
-    const newRepo = new GithubRepository({
-      eventId: team.eventId,
-      trackId: team.trackId,
-      teamId: team._id,
-      orgName: actualOrgName,
-      repoName: slugRepoName,
-      repoUrl: gitResult.repoUrl,
-      githubRepoId: gitResult.githubRepoId,
-      createdBySystem: true,
-      createdBy: req.user._id,
-      syncStatus: 'not_synced'
-    });
-    await newRepo.save();
-
-    // Invite collaborators
-    const members = await TeamMember.find({ teamId: team._id }).populate('userId');
-    for (const tm of members) {
-      if (tm.userId && tm.userId.githubUsername) {
-        await githubService.addCollaborator(slugRepoName, tm.userId.githubUsername, 'push', actualOrgName);
-      }
-    }
+    const { repository } = await provisionTeamRepository(team, { createdBy: req.user._id });
 
     res.status(201).json({
       message: 'Đã khởi tạo GitHub repository và mời các thành viên tham gia cộng tác thành công!',
-      repository: newRepo
+      repository
     });
   } catch (error) {
     console.error('Create repository error:', error.message);
-    res.status(500).json({ message: 'Server error creating GitHub repository.' });
+    res.status(500).json({ message: `Không thể tạo GitHub repository: ${error.message}` });
   }
 });
 
@@ -249,6 +203,9 @@ router.post('/sync-all', authenticateToken, async (req, res) => {
     if (!eventId) {
       return res.status(400).json({ message: 'Thiếu tham số eventId.' });
     }
+    if (!(await isEventStaff(req.user, eventId))) {
+      return res.status(403).json({ message: 'Chỉ Ban tổ chức mới được kích hoạt đồng bộ.' });
+    }
 
     const filter = { eventId, isArchived: false };
     if (repositoryIds && repositoryIds.length > 0) {
@@ -280,6 +237,9 @@ router.get('/sync-progress', authenticateToken, async (req, res) => {
     const { eventId, repositoryIds } = req.query;
     if (!eventId) {
       return res.status(400).json({ message: 'Thiếu tham số eventId.' });
+    }
+    if (!(await isEventStaff(req.user, eventId))) {
+      return res.status(403).json({ message: 'Không có quyền xem tiến trình đồng bộ.' });
     }
 
     const filter = { eventId, isArchived: false };
@@ -314,6 +274,12 @@ router.get('/sync-progress', authenticateToken, async (req, res) => {
  */
 router.post('/:id/sync', authenticateToken, async (req, res) => {
   try {
+    const repo = await GithubRepository.findById(req.params.id);
+    if (!repo) return res.status(404).json({ message: 'Không tìm thấy repository.' });
+    if (!(await isEventStaff(req.user, repo.eventId))) {
+      return res.status(403).json({ message: 'Chỉ Ban tổ chức mới được kích hoạt đồng bộ thủ công.' });
+    }
+
     const success = await cronService.syncRepo(req.params.id);
     if (success) {
       res.json({ message: 'Đồng bộ repository và phân tích AI hoàn thành thành công!' });
@@ -454,8 +420,8 @@ router.post('/webhook', async (req, res) => {
 
     // Find repository in database (case-insensitive)
     const repo = await GithubRepository.findOne({
-      repoName: { $regex: new RegExp(`^${repoName}$`, 'i') },
-      orgName: { $regex: new RegExp(`^${orgName}$`, 'i') },
+      repoName: { $regex: new RegExp(`^${escapeRegex(repoName)}$`, 'i') },
+      orgName: { $regex: new RegExp(`^${escapeRegex(orgName)}$`, 'i') },
       isArchived: false
     });
 

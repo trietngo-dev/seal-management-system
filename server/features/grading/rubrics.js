@@ -28,6 +28,7 @@ const Round = mongoose.model("Round");
 const Track = mongoose.model("Track");
 const EventRole = mongoose.model("EventRole");
 const { authenticateToken } = require("../auth/authMiddleware");
+const { isEventStaff } = require("../teams/teamAccess");
 
 function toNumber(value, fallback) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -35,9 +36,9 @@ function toNumber(value, fallback) {
   return Number.isNaN(parsed) ? fallback : parsed;
 }
 
+// Rubrics decide how every team is scored, so only organisers may change them.
 async function canManageRubric(req, eventId) {
-  if (req.user) return true;
-  return false;
+  return isEventStaff(req.user, eventId);
 }
 
 async function loadRubricOr404(rubricId, res) {
@@ -658,14 +659,8 @@ router.post('/clone', authenticateToken, async (req, res) => {
 
   try {
     // Auth Check
-    if (!req.user.isSystemAdmin) {
-      const coordinatorRole = await EventRole.findOne({
-        userId: req.user._id,
-        eventId,
-        role: { $in: ["coordinator", "admin", "organizer"] },
-        status: "active"
-      });
-      if (!coordinatorRole && !req.user) return res.status(403).json({ message: 'Unauthorized.' });
+    if (!(await canManageRubric(req, eventId))) {
+      return res.status(403).json({ message: 'Unauthorized.' });
     }
 
     // Check if rubric already exists for this target round

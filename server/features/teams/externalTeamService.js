@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+const mongoose = require('mongoose');
 const BASE_URL = 'https://api-hackathon.lexatek.vn/api';
 
 /**
@@ -180,8 +182,100 @@ async function getEnvironment(environmentId) {
   return callSimulatorAdmin(`/environment/${environmentId}`, 'GET');
 }
 
+/**
+ * Derives the simulator team code from a team name (ASCII, uppercase, underscores).
+ */
+function generateTeamCode(teamName) {
+  return teamName
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+async function syncTeamToExternalSimulator(team) {
+  try {
+    if (team.externalTeamId || team.testApiKey) {
+      console.log(
+        `[MQTT SERVICE] Team "${team.name}" is already synced to external API.`,
+      );
+      return;
+    }
+
+    if (!team.trackId) {
+      console.warn(
+        `[MQTT SERVICE] Team "${team.name}" has no trackId assigned. Skipping external sync.`,
+      );
+      return;
+    }
+
+    const targetTrackId = team.originalTrackId || team.trackId;
+    const track = await mongoose.model('Track').findById(targetTrackId);
+    if (!track || !track.environmentId) {
+      console.warn(
+        `[MQTT SERVICE] Track not found or environmentId is empty for track "${targetTrackId}". Skipping external sync.`,
+      );
+      return;
+    }
+
+    let baseCode = generateTeamCode(team.name);
+    if (!baseCode) {
+      baseCode = `TEAM_${team._id.toString().substring(18).toUpperCase()}`;
+    }
+
+    let code = baseCode;
+    let syncSuccess = false;
+    let result = null;
+    let attempts = 0;
+
+    while (!syncSuccess && attempts < 3) {
+      try {
+        attempts++;
+        result = await createExternalTeam(code, team.name, track.environmentId);
+        syncSuccess = true;
+      } catch (err) {
+        if (err.code === "TEAM_CODE_EXISTS" && attempts < 3) {
+          const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
+          code = `${baseCode}_${suffix}`;
+          console.log(
+            `[MQTT SERVICE] Team code conflicted. Retrying with new code: ${code}`,
+          );
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (result) {
+      team.externalTeamId = result.team?.id || "";
+      team.externalTeamCode = code;
+      team.accessCode = result.accessCode || "";
+      team.testApiKey = result.testApiKey || "";
+      team.judgeApiKey = result.judgeApiKey || "";
+      team.mqttUsername = result.mqttUsername || "";
+      team.mqttPassword = result.mqttPassword || "";
+      team.testTopic = `hackathon/${code.toLowerCase()}/test/telemetry`;
+      team.judgeTopic = `hackathon/${code.toLowerCase()}/judge/telemetry`;
+      await team.save();
+
+      console.log(
+        `[MQTT SERVICE] Successfully synchronized team "${team.name}" to simulator. Code: ${code}`,
+      );
+    }
+  } catch (error) {
+    console.error(
+      `[MQTT SERVICE] Failed to sync team "${team.name}" to external API:`,
+      error.message,
+    );
+  }
+}
+
 module.exports = {
   createExternalTeam,
+  generateTeamCode,
+  syncTeamToExternalSimulator,
   fetchExternalKeys,
   toggleJudgeActive,
   updateJudgeScenario,
