@@ -73,7 +73,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   );
 
   const displayedUsers = (() => {
-    let list = isAssistant ? users.filter((u: any) => u.isTeamMember) : users;
+    const list = isAssistant ? users.filter((u: any) => u.isTeamMember) : users;
     return [...list].sort((a, b) => {
       if (isAssistant) {
         const aMerch = merchandise.find(

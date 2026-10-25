@@ -973,7 +973,8 @@ export default function RegisterTeam() {
                   type="email"
                   required
                   value={leaderEmail}
-                  onChange={e => setLeaderEmail(e.target.value)}
+                  readOnly
+                  title="Trưởng nhóm là tài khoản đang đăng nhập"
                   className="w-full bg-slate-900/50 border border-slate-800 text-white px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-cyan-500/50 focus:shadow-[0_0_15px_rgba(0,240,255,0.05)] transition-all font-mono"
                   placeholder="Email Trưởng nhóm"
                 />

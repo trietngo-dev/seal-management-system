@@ -6,6 +6,7 @@ const Rubric = mongoose.model("Rubric");
 const Criterion = mongoose.model("Criterion");
 const EventRole = mongoose.model("EventRole");
 const { authenticateToken } = require("../auth/authMiddleware");
+const { isEventStaff } = require("../teams/teamAccess");
 
 function toNumber(value, fallback) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -69,17 +70,9 @@ function validateGradingLevels(levels) {
   return { ok: true, levels: normalized };
 }
 
+// "coordinator" is not a valid EventRole, so organisers are resolved via isEventStaff.
 async function canManageRubric(req, eventId) {
-  if (req.user.isSystemAdmin) return true;
-
-  const role = await EventRole.findOne({
-    userId: req.user._id,
-    eventId,
-    role: "coordinator",
-    status: "active",
-  });
-
-  return !!role;
+  return isEventStaff(req.user, eventId);
 }
 
 async function loadRubricOr404(rubricId, res) {

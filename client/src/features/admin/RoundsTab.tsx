@@ -226,7 +226,7 @@ export default function RoundsTab({
   const handleExportRubric = async (rubricId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/rubrics/${rubricId}/export`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/rubrics/${rubricId}/export`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -272,7 +272,7 @@ export default function RoundsTab({
         }
 
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/rubrics/import", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/rubrics/import`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
