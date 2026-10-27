@@ -78,6 +78,11 @@ export default function JudgeScoring() {
 
   // Dynamic Average Score calculation
   const averageCalc = useMemo(() => {
+    const fallbackMax = Number(rubric?.maxCriterionScore) || 10;
+    const defaultMax = criteria.length > 0
+      ? criteria.reduce((acc: number, c: any) => acc + (Number(c.maxScore) || fallbackMax), 0) / criteria.length
+      : fallbackMax;
+
     let sum = 0;
     let maxSum = 0;
     let count = 0;
@@ -87,21 +92,21 @@ export default function JudgeScoring() {
         const num = parseFloat(val);
         if (!isNaN(num)) {
           sum += num;
-          maxSum += c.maxScore || 5;
+          maxSum += Number(c.maxScore) || fallbackMax;
           count++;
         }
       }
     });
 
     const averageScore = count > 0 ? (sum / count).toFixed(2) : '0.00';
-    const averageMax = count > 0 ? (maxSum / count).toFixed(1) : '5.0';
+    const averageMax = count > 0 ? (maxSum / count).toFixed(1) : defaultMax.toFixed(1);
 
     return {
       averageScore,
       averageMax,
       enteredCount: count
     };
-  }, [criteria, scores]);
+  }, [criteria, scores, rubric]);
 
   // Status indicators
   const [aiLoading, setAiLoading] = useState(false);
@@ -457,7 +462,7 @@ export default function JudgeScoring() {
       const num = parseFloat(val);
       if (!isNaN(num)) {
         const currentCrit = criteria?.find((item: any) => item._id === critId);
-        const maxLimit = currentCrit?.maxScore ?? 5;
+        const maxLimit = currentCrit?.maxScore ?? rubric?.maxCriterionScore ?? 10;
         if (num < 0) {
           finalVal = 0;
         } else if (num > maxLimit) {
@@ -707,6 +712,19 @@ export default function JudgeScoring() {
         }
         input[type=number] {
           -moz-appearance: textfield;
+        }
+        .judge-scoring-textarea {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+        }
+        .judge-scoring-textarea:focus,
+        .judge-scoring-textarea:active,
+        .judge-scoring-textarea:focus-visible {
+          background-color: #ffffff !important;
+          color: #0f172a !important;
+          border-color: #F27024 !important;
+          box-shadow: 0 0 0 2px rgba(242, 112, 36, 0.2) !important;
+          outline: none !important;
         }
       `}</style>
       {isHighlighted && (
@@ -996,7 +1014,8 @@ export default function JudgeScoring() {
                             value={overallComment}
                             onChange={e => setOverallComment(e.target.value)}
                             disabled={isRoundLocked}
-                            className="bg-white border border-slate-250 rounded-xl text-slate-700 text-xs sm:text-[13px] px-3 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] disabled:opacity-50 font-sans shadow-inner placeholder-slate-400"
+                            style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
+                            className="judge-scoring-textarea !bg-white bg-white border border-slate-300 rounded-xl !text-slate-900 text-slate-900 text-xs sm:text-[13px] px-3 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] focus:!bg-white disabled:opacity-50 font-sans shadow-sm placeholder-slate-400"
                           ></textarea>
                         </div>
                       </div>
@@ -1106,7 +1125,8 @@ export default function JudgeScoring() {
                                 onChange={e => handleScoreChange(c._id, 'comment', e.target.value)}
                                 disabled={isRoundLocked}
                                 rows={4}
-                                className="bg-white border border-slate-250 rounded-xl text-slate-700 text-xs sm:text-[13px] px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] disabled:opacity-50 shadow-inner placeholder-slate-400 font-sans leading-relaxed resize-y"
+                                style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
+                                className="judge-scoring-textarea !bg-white bg-white border border-slate-300 rounded-xl !text-slate-900 text-slate-900 text-xs sm:text-[13px] px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] focus:!bg-white disabled:opacity-50 shadow-sm placeholder-slate-400 font-sans leading-relaxed resize-y"
                               />
                             </div>
                           </div>
