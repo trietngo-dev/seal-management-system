@@ -73,11 +73,12 @@ async function getEligibleUserIdsForRound(roundId) {
 }
 
 function isRoundExamOpen(round) {
-  // Phòng thi mở khi có link Drive (id hoặc url) và đã đến giờ hoặc được mở thủ công
+  // Phòng thi mở khi có link Drive (id hoặc url) và đã đến giờ hoặc được mở thủ công.
+  // Chưa cấu hình giờ mở thì đề vẫn khóa cho đến khi admin bấm "Mở vòng & đề bài".
   const hasMaterial = !!(round?.driveFileId || round?.driveFileUrl);
   if (!hasMaterial) return false;
   if (round?.isExamManualOpen || round?.status === 'active') return true;
-  if (!round.startTime) return true;
+  if (!round.startTime) return false;
   return new Date() >= new Date(round.startTime);
 }
 
@@ -141,7 +142,7 @@ async function canUserAccessRoundExam(userId, roundId) {
     return { ok: false, reason: 'no_material', message: 'Vòng thi chưa có đề bài được gắn.' };
   }
 
-  if (round.startTime && new Date() < new Date(round.startTime) && !round.isExamManualOpen && round.status !== 'active') {
+  if (!isRoundExamOpen(round)) {
     return { ok: false, reason: 'not_started', message: 'Đề bài chưa đến giờ mở.' };
   }
 
@@ -153,14 +154,15 @@ async function canUserAccessRoundExam(userId, roundId) {
 
 /**
  * Kiểm tra xem đề của một Track có đang mở không.
- * Logic: có link Drive của track + (đã đến giờ startTime hoặc isExamManualOpen / round active bật)
+ * Logic: có link Drive của track + (đã đến giờ startTime hoặc isExamManualOpen / round active bật).
+ * Không có startTime thì đề khóa cho đến khi được mở thủ công.
  */
 function isTrackExamOpen(track, round) {
   const hasMaterial = !!(track?.examDriveFileId || track?.examDriveFileUrl);
   if (!hasMaterial) return false;
   if (track?.isExamManualOpen || round?.isExamManualOpen || round?.status === 'active') return true;
   const startTime = track?.startTime || round?.startTime;
-  if (!startTime) return true;
+  if (!startTime) return false;
   return new Date() >= new Date(startTime);
 }
 

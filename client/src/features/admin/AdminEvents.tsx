@@ -265,6 +265,9 @@ export default function AdminEvents({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isEditingEventTitle]);
   const socketRef = React.useRef<Socket | null>(null);
+  // True between starting the create wizard and the eventId URL param being cleared;
+  // router updates can land a render later, so the URL-sync effect must wait for it.
+  const pendingCreationRef = React.useRef(false);
   // Sidebar collapse state (for premium slide effect)
   // const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -674,6 +677,7 @@ export default function AdminEvents({
 
   useEffect(() => {
     if (eventIdParam) {
+      if (pendingCreationRef.current) return;
       const creatingId = sessionStorage.getItem("creatingEventId");
       if (!creatingId || eventIdParam !== creatingId) {
         setIsWizardMode(false);
@@ -682,6 +686,8 @@ export default function AdminEvents({
       if (foundEvent && selectedEvent?._id !== foundEvent._id) {
         handleSelectEvent(foundEvent);
       }
+    } else if (pendingCreationRef.current) {
+      pendingCreationRef.current = false;
     } else if (!isWizardMode && displayedEvents.length > 0 && !selectedEvent) {
       const savedEventId = sessionStorage.getItem("lastSelectedEventId") || localStorage.getItem("lastSelectedEventId");
       const foundSaved = savedEventId ? displayedEvents.find((e) => e._id === savedEventId) : null;
@@ -746,14 +752,7 @@ export default function AdminEvents({
   useEffect(() => {
     const createParam = searchParams.get("create");
     if (createParam === "true" && currentUser?.isSystemAdmin) {
-      sessionStorage.removeItem("creatingEventId");
-      setSelectedEvent(null);
-      setIsWizardMode(true);
-      setWizardStep(1);
-
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete("create");
-      setSearchParams(newParams, { replace: true });
+      startEventCreation();
     }
   }, [searchParams, setSearchParams, currentUser]);
 
@@ -1092,6 +1091,25 @@ export default function AdminEvents({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Enter the create-event wizard. The eventId URL param must be cleared too, otherwise the
+  // URL-sync effect re-selects that event and immediately closes the wizard.
+  const startEventCreation = () => {
+    if (searchParams.get("eventId")) pendingCreationRef.current = true;
+    sessionStorage.removeItem("creatingEventId");
+    setSelectedEvent(null);
+    setIsWizardMode(true);
+    setWizardStep(1);
+    setSearchParams(
+      (prev) => {
+        const updated = new URLSearchParams(prev);
+        updated.delete("eventId");
+        updated.delete("create");
+        return updated;
+      },
+      { replace: true }
+    );
   };
 
   const handleSelectEvent = (eventObj: any) => {
@@ -2706,10 +2724,7 @@ export default function AdminEvents({
               {!readOnly && currentUser?.isSystemAdmin && (
                 <button
                   onClick={() => {
-                    sessionStorage.removeItem("creatingEventId");
-                    setSelectedEvent(null);
-                    setIsWizardMode(true);
-                    setWizardStep(1);
+                    startEventCreation();
                     setActiveTab("events");
                   }}
                   className="bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white px-3.5 py-2 rounded-xl border border-slate-800 text-xs font-mono flex items-center gap-1.5 cursor-pointer shrink-0 transition-all shadow-md active:scale-95 z-20"
@@ -3094,11 +3109,7 @@ export default function AdminEvents({
                       <>
                         <button
                           type="button"
-                          onClick={() => {
-                            setSelectedEvent(null);
-                            setIsWizardMode(true);
-                            setWizardStep(1);
-                          }}
+                          onClick={startEventCreation}
                           className="btn-cancel bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm border border-slate-700 font-mono flex items-center gap-1.5 cursor-pointer"
                         >
                           Hủy & Tạo mới

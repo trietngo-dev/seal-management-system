@@ -17,6 +17,7 @@ const emailService = require('../notifications/emailService');
 const githubService = require('../github-ai/githubService');
 const { ensureChatRoomForTeam, ensureChatRoomsForMentorTrack } = require('../chat/chatRoomService');
 const { provisionTeamRepository } = require('../github-ai/repoProvisioning');
+const { findJudgeRoleForRound } = require('../teams/teamAccess');
 
 const {
   extractDriveFileId,
@@ -355,14 +356,11 @@ router.get('/judge/active-contest', authenticateToken, async (req, res) => {
       tracks = await Track.find({ roundId: currentRound._id }).lean();
     }
 
-    // 5. Find the judge's assigned track (if any)
+    // 5. Find the judge's assigned track in the current round (if any)
     let assignedTrack = null;
-    const userRole = await EventRole.findOne({
-      userId: req.user._id,
-      eventId: event._id,
-      role: 'judge',
-      status: 'active'
-    });
+    const userRole = currentRound
+      ? await findJudgeRoleForRound(req.user._id, event._id, currentRound._id)
+      : null;
 
     let isFinalRound = false;
     if (currentRound) {

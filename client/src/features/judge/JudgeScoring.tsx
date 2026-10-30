@@ -1170,7 +1170,7 @@ export default function JudgeScoring() {
                       className="flex items-center gap-1.5 bg-[#F27024]/10 hover:bg-[#F27024]/20 text-[#F27024] border border-[#F27024]/30 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
                     >
                       <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
-                      <span>{aiLoading ? 'Agent 2 đang phân tích...' : (teamAggregateReview ? 'Phân tích lại cấp Team' : 'Chạy Phân Tích Cấp Team')}</span>
+                      <span>{aiLoading ? 'AI đang phân tích...' : (teamAggregateReview ? 'Phân tích lại' : 'Chạy Phân Tích AI ')}</span>
                     </button>
                   )}
                 </div>
@@ -1502,7 +1502,7 @@ export default function JudgeScoring() {
                     {teamAggregateReview.result.final_summary && (
                       <div className="bg-amber-50/60 border border-amber-250 p-4 rounded-xl space-y-1.5 shadow-sm">
                         <span className="text-xs font-bold text-[#F27024] uppercase tracking-normal flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-[#F27024]" /> Tổng kết Đánh giá Toàn diện từ Agent 2
+                          <Sparkles size={13} className="text-[#F27024]" /> Tổng kết Đánh giá Toàn diện từ AI
                         </span>
                         <p className="text-slate-700 text-xs sm:text-sm leading-relaxed font-medium">
                           {typeof teamAggregateReview.result.final_summary === 'object'
@@ -1516,7 +1516,7 @@ export default function JudgeScoring() {
                   <div className="py-8 text-center text-slate-400 italic text-xs flex flex-col items-center justify-center gap-3 bg-slate-50 rounded-xl border border-slate-100 p-6">
                     <div className="flex items-center gap-1.5 text-slate-500 font-medium">
                       <AlertCircle size={14} className="text-slate-400" />
-                      <span>Chưa có dữ liệu phân tích tổng hợp cấp team từ Gemini AI cho vòng thi này.</span>
+                      <span>Chưa có dữ liệu phân tích tổng hợp cấp team từ AI cho vòng thi này.</span>
                     </div>
                     {!isRoundLocked && rubric && (
                       <button
@@ -1526,7 +1526,7 @@ export default function JudgeScoring() {
                         className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
                       >
                         <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
-                        <span>{aiLoading ? 'Agent 2 đang phân tích toàn diện...' : 'Kích hoạt Phân tích Toàn diện & Gợi ý điểm (Agent 2)'}</span>
+                        <span>{aiLoading ? 'Agent 2 đang phân tích toàn diện...' : 'Chạy AI phân tích source code'}</span>
                       </button>
                     )}
                   </div>

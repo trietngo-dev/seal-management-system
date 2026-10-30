@@ -77,8 +77,31 @@ async function isEventStaff(user, eventId) {
   }));
 }
 
+/**
+ * The judge's assignment for one round. A judge holds one EventRole per round
+ * (e.g. track A in the qualifier and the final track), so the role must be matched
+ * to the round's tracks rather than taken at random. Falls back to a round-wide
+ * role (no track); returns null when the judge has nothing in this round.
+ */
+async function findJudgeRoleForRound(userId, eventId, roundId) {
+  const roles = await mongoose.model('EventRole').find({
+    userId,
+    eventId,
+    role: 'judge',
+    status: 'active',
+  }).lean();
+  if (!roundId) return roles.find((r) => !r.trackId) || null;
+
+  const roundTrackIds = (await mongoose.model('Track').find({ roundId }).select('_id').lean())
+    .map((t) => t._id.toString());
+  return roles.find((r) => r.trackId && roundTrackIds.includes(r.trackId.toString()))
+    || roles.find((r) => !r.trackId && (!r.roundId || r.roundId.toString() === roundId.toString()))
+    || null;
+}
+
 module.exports = {
   getTeamAccess,
   loadTeamForUser,
   isEventStaff,
+  findJudgeRoleForRound,
 };

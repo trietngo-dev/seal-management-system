@@ -32,6 +32,7 @@ const { authenticateToken } = require('../auth/authMiddleware');
 const { addInAppJob, isQueueAvailable } = require('../notifications/notificationQueue');
 const { validateScoreSubmissionPolicy, buildScoreChangeSummary } = require('./scorePolicy');
 const { findActiveRubric } = require('./rubricResolver');
+const { findJudgeRoleForRound } = require('../teams/teamAccess');
 
 const AUTO_GRANT_WINDOW_MS = 5 * 60 * 1000;
 
@@ -1722,12 +1723,7 @@ router.get('/export-grading-sheet/:roundId', authenticateToken, async (req, res)
     if (trackId) {
       track = await Track.findById(trackId);
     } else if (targetJudgeId) {
-      const judgeRole = await EventRole.findOne({
-        userId: targetJudgeId,
-        eventId: round.eventId,
-        role: 'judge',
-        status: 'active'
-      });
+      const judgeRole = await findJudgeRoleForRound(targetJudgeId, round.eventId, round._id);
       if (judgeRole && judgeRole.trackId) {
         track = await Track.findById(judgeRole.trackId);
       }
