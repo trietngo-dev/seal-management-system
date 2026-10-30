@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Target
 } from 'lucide-react';
+import { parseImprovementPriority } from './improvementPriority';
 
 export default function JudgeTeamActivity() {
   const { teamId } = useParams();
@@ -382,10 +383,8 @@ export default function JudgeTeamActivity() {
                       <Target size={13} className="text-[#F27024]" /> Danh sách Ưu tiên Cải thiện
                     </span>
                     <div className="space-y-2">
-                      {aiInsight.improvement_priorities.map((item: any, idx: number) => {
-                        const isObj = typeof item === 'object' && item !== null;
-                        const priority = isObj ? item.priority : (typeof item === 'string' && item.startsWith('P0') ? 'P0' : item.startsWith('P1') ? 'P1' : 'P2');
-                        const text = isObj ? `${item.requirement_gap ? `[${item.requirement_gap}] ` : ''}${item.actionable_step || ''}` : item;
+                      {aiInsight.improvement_priorities.map((item: unknown, idx: number) => {
+                        const { priority, text } = parseImprovementPriority(item);
                         return (
                           <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-start gap-2.5 text-xs">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-black shrink-0 ${
