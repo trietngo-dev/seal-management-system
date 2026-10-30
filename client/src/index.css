@@ -147,6 +147,16 @@ input:focus, select:focus, textarea:focus {
   outline: none !important;
 }
 
+/* Judge Scoring Textarea Light Mode Fix - Prevents global textarea:focus dark background override */
+.judge-scoring-textarea,
+.judge-scoring-textarea:focus,
+.judge-scoring-textarea:active,
+.judge-scoring-textarea:focus-visible {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #f27024 !important;
+}
+
 /* Font Utility */
 .font-mono-tech {
   font-family: var(--font-mono);
