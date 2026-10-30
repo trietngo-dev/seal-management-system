@@ -263,16 +263,10 @@ router.post('/n8n-callback', async (req, res) => {
   try {
     const parsedResult = parseAiResult(rawResult);
 
-    // Resolve teamId if externalTeamCode or name is provided
+    // Resolve teamId if a team name is provided
     let resolvedTeamId = teamId || req.body.team_id || req.body.teamCode;
     if (resolvedTeamId && !mongoose.Types.ObjectId.isValid(resolvedTeamId)) {
-      const foundTeam = await Team.findOne({
-        $or: [
-          { externalTeamCode: resolvedTeamId },
-          { name: new RegExp(`^${escapeRegex(resolvedTeamId)}$`, 'i') },
-          { code: resolvedTeamId }
-        ]
-      });
+      const foundTeam = await Team.findOne({ name: new RegExp(`^${escapeRegex(resolvedTeamId)}$`, 'i') });
       if (foundTeam) resolvedTeamId = foundTeam._id;
     }
 

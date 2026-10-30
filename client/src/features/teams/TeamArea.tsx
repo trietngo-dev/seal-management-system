@@ -2,16 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { io } from "socket.io-client";
 import {
-  CheckCircle,
   Clock,
   BookOpen,
   Users,
   MessageSquare,
-  Cpu,
-  Copy,
-  RefreshCw,
   Crown,
   Trophy,
   Edit3,
@@ -213,8 +208,6 @@ export default function TeamArea() {
     (data?.team?.eventId?.contestStart &&
       new Date(data.team.eventId.contestStart) <= currentTime)
   );
-  const [syncingMqtt, setSyncingMqtt] = useState(false);
-  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [savingBasicInfo, setSavingBasicInfo] = useState(false);
@@ -371,15 +364,6 @@ export default function TeamArea() {
 
   const track = data?.team?.trackId;
   const round = track?.roundId;
-  const showMqttCard = !!(
-    data?.team &&
-    data.team.eventId?.status === "ongoing" &&
-    ((round?.startTime && new Date(round.startTime) <= currentTime) ||
-      round?.isExamManualOpen ||
-      round?.status === "active" ||
-      track?.examAccess?.examOpened) &&
-    track?.environmentId
-  );
   const isExamVisible =
     hasContestStarted &&
     !!(
@@ -673,84 +657,9 @@ export default function TeamArea() {
     }
   };
 
-  const handleCopy = (text: string, fieldName: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(fieldName);
-    setTimeout(() => setCopiedField(null), 2000);
-    toast.success(`Đã sao chép ${fieldName}!`);
-  };
-
-  const handleSyncMqtt = async () => {
-    const team = data?.team;
-    if (!team?._id) return;
-    setSyncingMqtt(true);
-    try {
-      const res = await axios.post(
-        `http://localhost:5000/api/teams/${team._id}/sync-mqtt`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      toast.success(res.data.message || "Đồng bộ MQTT thành công!");
-      await fetchTeamData();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Lỗi khi đồng bộ MQTT.");
-    } finally {
-      setSyncingMqtt(false);
-    }
-  };
-
   useEffect(() => {
     fetchTeamData();
   }, []);
-
-  useEffect(() => {
-    const teamId = data?.team?._id;
-    if (!token || !teamId) return;
-
-    const socketUrl =
-      import.meta.env.VITE_API_URL ||
-      (window.location.hostname !== "localhost" &&
-        window.location.hostname !== "127.0.0.1"
-        ? window.location.origin
-        : "http://localhost:5000");
-    const socket = io(socketUrl, { auth: { token } });
-
-    socket.on("connect", () => {
-      console.log("DEBUG [TeamArea] Connected to socket server");
-    });
-
-    socket.on("judge_active_toggled", (payload: any) => {
-      console.log("DEBUG [TeamArea] judge_active_toggled:", payload);
-      if (payload.teamId === teamId) {
-        setData((prev: any) => {
-          if (!prev || !prev.team) return prev;
-          return {
-            ...prev,
-            team: {
-              ...prev.team,
-              isJudgeActive: payload.isJudgeActive,
-              judgeApiKey: payload.judgeApiKey,
-              judgeTopic: payload.judgeTopic,
-            },
-          };
-        });
-
-        if (payload.isJudgeActive) {
-          toast.info(
-            "Môi trường chấm thi đã được kích hoạt! Hãy sao chép API Key và Topic kết nối.",
-          );
-        } else {
-          toast.warning("Môi trường chấm thi đã bị tắt.");
-        }
-      }
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [token, data?.team?._id]);
 
   if (loading) {
     return (
@@ -1026,8 +935,7 @@ export default function TeamArea() {
             {/* Left: Exam & Materials Card */}
             {isExamVisible && (
               <div
-                className={`${showMqttCard ? "lg:col-span-4" : "lg:col-span-6"
-                  } bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 relative overflow-hidden flex flex-col justify-between`}
+                className={`lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 relative overflow-hidden flex flex-col justify-between`}
               >
                 <div className="flex flex-col justify-between h-full">
                   <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-5">
@@ -1161,304 +1069,9 @@ export default function TeamArea() {
               </div>
             )}
 
-            {/* Middle: MQTT Connection Card (Col 4) */}
-            {showMqttCard && (
-              <div
-                className={`${isExamVisible ? "lg:col-span-4" : "lg:col-span-6"} bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 relative overflow-hidden flex flex-col justify-between h-full`}
-              >
-                <div className="flex flex-col justify-between h-full">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                    <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-mono-tech">
-                      <Cpu size={16} className="text-[#F27024]" />
-                      <span className="text-[#F27024]">[MQTT_CREDENTIALS]</span>
-                    </h2>
-                    <button
-                      onClick={handleSyncMqtt}
-                      disabled={syncingMqtt}
-                      className="text-slate-400 hover:text-[#F27024] disabled:opacity-50 p-1 cursor-pointer transition-colors"
-                      title="Lấy Key"
-                    >
-                      <RefreshCw
-                        size={12}
-                        className={
-                          syncingMqtt ? "animate-spin text-[#F27024]" : ""
-                        }
-                      />
-                    </button>
-                  </div>
-
-                  {!team.mqttUsername || !team.testApiKey ? (
-                    <div className="text-center py-4 space-y-3">
-                      <p className="text-xs text-amber-600 font-sans font-semibold">
-                        Khóa kết nối MQTT chưa được đồng bộ từ Simulator.
-                      </p>
-                      <button
-                        onClick={handleSyncMqtt}
-                        disabled={syncingMqtt}
-                        className="w-full bg-[#F27024] hover:bg-[#d95f1f] disabled:opacity-50 !text-white font-bold text-xs py-2 rounded-xl uppercase tracking-wider transition-colors cursor-pointer shadow-md shadow-orange-500/20"
-                      >
-                        {syncingMqtt ? "Đang đồng bộ..." : "Đồng bộ kết nối"}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5 text-xs sm:text-[13px] font-mono">
-                      {team.isJudgeActive && (
-                        <div className="space-y-2 border border-emerald-500/20 bg-emerald-500/10 p-3 rounded-xl">
-                          <span className="text-[10px] text-emerald-600 font-bold block uppercase tracking-wider">
-                            [MÔI TRƯỜNG CHẤM THI ĐANG BẬT]
-                          </span>
-
-                          {/* JUDGE API Key */}
-                          <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                            <span className="text-[10px] text-emerald-600 font-bold block uppercase tracking-wider">
-                              JUDGE API Key
-                            </span>
-                            <div className="flex justify-between items-center text-emerald-700 font-mono">
-                              <span className="truncate max-w-[85%]">
-                                {team.judgeApiKey || "---"}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleCopy(
-                                    team.judgeApiKey || "",
-                                    "JUDGE API Key",
-                                  )
-                                }
-                                className="text-slate-400 hover:text-emerald-600 cursor-pointer p-1"
-                                title="Sao chép JUDGE API Key"
-                              >
-                                {copiedField === "JUDGE API Key" ? (
-                                  <CheckCircle
-                                    size={14}
-                                    className="text-emerald-500"
-                                  />
-                                ) : (
-                                  <Copy size={14} />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* JUDGE Topic/Path */}
-                          <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                            <span className="text-[10px] text-emerald-600 font-bold block uppercase tracking-wider">
-                              JUDGE Topic/Path
-                            </span>
-                            <div className="flex justify-between items-center text-emerald-700 font-mono">
-                              <span className="truncate max-w-[85%]">
-                                {team.judgeTopic ||
-                                  (team.externalTeamCode
-                                    ? `hackathon/${team.externalTeamCode.toLowerCase()}/judge/telemetry`
-                                    : "---")}
-                              </span>
-                              <button
-                                onClick={() =>
-                                  handleCopy(
-                                    team.judgeTopic ||
-                                      (team.externalTeamCode
-                                        ? `hackathon/${team.externalTeamCode.toLowerCase()}/judge/telemetry`
-                                        : ""),
-                                    "JUDGE Topic/Path",
-                                  )
-                                }
-                                className="text-slate-400 hover:text-emerald-600 cursor-pointer p-1"
-                                title="Sao chép JUDGE Topic/Path"
-                              >
-                                {copiedField === "JUDGE Topic/Path" ? (
-                                  <CheckCircle
-                                    size={14}
-                                    className="text-emerald-500"
-                                  />
-                                ) : (
-                                  <Copy size={14} />
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Host */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          Host
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            mqtt-hackathon.lexatek.vn
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy("mqtt-hackthon.lexatek.vn", "Host")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép Host"
-                          >
-                            {copiedField === "Host" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Port */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          Port
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            443
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy("443", "Port")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép Port"
-                          >
-                            {copiedField === "Port" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* TEST Key */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          TEST Key
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            {team.testApiKey || "---"}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy(team.testApiKey || "", "TEST Key")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép TEST Key"
-                          >
-                            {copiedField === "TEST Key" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* TEST Topic/Path */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          TEST Topic/Path
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            {team.testTopic || "---"}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy(team.testTopic || "", "TEST Topic/Path")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép TEST Topic/Path"
-                          >
-                            {copiedField === "TEST Topic/Path" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Username */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          Username
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            {team.mqttUsername || "---"}
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy(team.mqttUsername || "", "Username")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép Username"
-                          >
-                            {copiedField === "Username" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Password */}
-                      <div className="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                        <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                          Password
-                        </span>
-                        <div className="flex justify-between items-center text-slate-700 font-mono">
-                          <span className="truncate max-w-[85%]">
-                            ••••••••
-                          </span>
-                          <button
-                            onClick={() =>
-                              handleCopy(team.mqttPassword || "", "Password")
-                            }
-                            className="text-slate-400 hover:text-[#F27024] cursor-pointer p-1"
-                            title="Sao chép Password"
-                          >
-                            {copiedField === "Password" ? (
-                              <CheckCircle
-                                size={14}
-                                className="text-emerald-500"
-                              />
-                            ) : (
-                              <Copy size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
             {/* Right: Members Card */}
             <div
-              className={`${isExamVisible && showMqttCard
-                ? "lg:col-span-4"
-                : isExamVisible || showMqttCard
-                  ? "lg:col-span-6"
-                  : "lg:col-span-12"
-                } flex flex-col h-full`}
+              className={`${isExamVisible ? "lg:col-span-6" : "lg:col-span-12"} flex flex-col h-full`}
             >
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 text-left h-full flex flex-col justify-between flex-1">
                 <div>
@@ -1488,7 +1101,7 @@ export default function TeamArea() {
                   )}
                   <div
                     className={
-                      !isExamVisible && !showMqttCard
+                      !isExamVisible
                         ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
                         : "space-y-3.5 max-h-[300px] overflow-y-auto pr-1"
                     }

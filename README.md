@@ -19,11 +19,11 @@ seal-management-system/
 ├── client/                 # Mã nguồn Frontend (React + Vite + TailwindCSS)
 ├── server/                 # Mã nguồn Backend (NodeJS + Express + MongoDB)
 ├── mobile/                 # Mã nguồn ứng dụng Mobile (React Native / Expo)
-├── test-tools/             # Bộ công cụ kiểm thử & giả lập (MQTT Tester, Seeding, Stress)
+├── test-tools/             # Bộ công cụ kiểm thử & giả lập (Seeding, Stress)
 ├── docs/                   # Thư mục tài liệu kỹ thuật & tài nguyên
-│   ├── guides/             # Hướng dẫn phát triển (DEVELOPER_GUIDE, SYSTEM_HARNESS_GUIDE, MQTT_GUIDE)
+│   ├── guides/             # Hướng dẫn phát triển (DEVELOPER_GUIDE, SYSTEM_HARNESS_GUIDE)
 │   ├── database/           # Thiết kế cơ sở dữ liệu (schema.dbml)
-│   ├── ai-prompts/         # Đặc tả kiến trúc AI Agent Prompts & Benchmarks
+│   ├── archive/            # Tài liệu & công cụ cũ đã ngừng dùng (vd. su26-iot: MQTT/Simulator)
 │   ├── templates/          # Biểu mẫu Excel & Rubrics cuộc thi
 │   ├── deployment/         # Hướng dẫn triển khai Production
 │   └── process/            # Quy trình nghiệp vụ & Phân phối đề thi

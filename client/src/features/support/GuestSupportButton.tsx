@@ -3,7 +3,7 @@ import axios from "axios";
 import { LifeBuoy, Send, X } from "lucide-react";
 import { toast } from "sonner";
 
-const categories = [["account", "Tài khoản và đăng nhập"], ["team", "Đội thi và thành viên"], ["github", "GitHub / Repository"], ["mqtt", "MQTT / Thiết bị"], ["submission", "Nộp bài và vòng thi"], ["schedule", "Lịch trình / Seminar"], ["grading", "Chấm điểm và kết quả"], ["appeal", "Khiếu nại"], ["other", "Vấn đề khác"]];
+const categories = [["account", "Tài khoản và đăng nhập"], ["team", "Đội thi và thành viên"], ["github", "GitHub / Repository"], ["submission", "Nộp bài và vòng thi"], ["schedule", "Lịch trình / Seminar"], ["grading", "Chấm điểm và kết quả"], ["appeal", "Khiếu nại"], ["other", "Vấn đề khác"]];
 
 export default function GuestSupportButton() {
   const [open, setOpen] = useState(false);

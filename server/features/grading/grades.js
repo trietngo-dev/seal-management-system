@@ -31,6 +31,7 @@ const aiService = require('../github-ai/aiService');
 const { authenticateToken } = require('../auth/authMiddleware');
 const { addInAppJob, isQueueAvailable } = require('../notifications/notificationQueue');
 const { validateScoreSubmissionPolicy, buildScoreChangeSummary } = require('./scorePolicy');
+const { findActiveRubric } = require('./rubricResolver');
 
 const AUTO_GRANT_WINDOW_MS = 5 * 60 * 1000;
 
@@ -169,7 +170,7 @@ router.post('/suggestion', authenticateToken, async (req, res) => {
       status: { $in: ['completed', 'done', 'approved'] }
     }).sort({ createdAt: -1 }).limit(10);
 
-    let aggregateResult = null;
+    let aggregateResult;
     try {
       aggregateResult = await aiService.analyzeTeamAggregate(
         teamId,
@@ -178,47 +179,38 @@ router.post('/suggestion', authenticateToken, async (req, res) => {
         { roundId, rubricId: activeRubric._id, criteria }
       );
     } catch (aggErr) {
-      console.warn('[AI GRADES] analyzeTeamAggregate encountered an error, falling back:', aggErr.message);
+      console.warn('[AI GRADES] analyzeTeamAggregate failed:', aggErr.message);
+      return res.status(503).json({ message: `Không thể phân tích AI lúc này: ${aggErr.message}` });
     }
 
-    if (aggregateResult) {
-      try {
-        const aggregateAnalysis = new AiAnalysis({
-          repositoryId: repo._id,
-          teamId,
-          roundId,
-          repositorySnapshotId: snapshot._id,
-          analysisType: 'repository_review',
-          provider: aggregateResult._provider || 'Google Gemini',
-          model: aggregateResult._model || 'gemini-3.1-flash-lite',
-          inputSummary: {
-            trigger: 'judge_ai_analysis_button',
-            rubricId: activeRubric._id,
-            rubricVersion: activeRubric.version || 1,
-            agent1AnalysisIds: priorReviews.map(review => review._id)
-          },
-          result: aggregateResult,
-          status: 'completed',
-          completedAt: new Date()
-        });
-        await aggregateAnalysis.save();
-      } catch (saveErr) {
-        console.warn('[AI GRADES] Failed to persist aggregateAnalysis:', saveErr.message);
-      }
-    }
+    const aggregateAnalysis = new AiAnalysis({
+      repositoryId: repo._id,
+      teamId,
+      roundId,
+      repositorySnapshotId: snapshot._id,
+      analysisType: 'repository_review',
+      provider: aggregateResult._provider || 'Google Gemini',
+      model: aggregateResult._model || 'gemini-3.1-flash-lite',
+      inputSummary: {
+        trigger: 'judge_ai_analysis_button',
+        rubricId: activeRubric._id,
+        rubricVersion: activeRubric.version || 1,
+        agent1AnalysisIds: priorReviews.map(review => review._id)
+      },
+      result: aggregateResult,
+      status: 'completed',
+      completedAt: new Date()
+    });
+    await aggregateAnalysis.save();
 
     // 5. Convert Agent 2 qualitative evaluation into score suggestions. The
     // judge remains responsible for editing and submitting the official score.
-    let suggestions = [];
+    let suggestions;
     try {
       suggestions = await aiService.generateScoringSuggestion(snapshot, commits, criteria);
     } catch (sugErr) {
-      console.warn('[AI GRADES] generateScoringSuggestion failed, using criteria fallback:', sugErr.message);
-      suggestions = criteria.map(c => ({
-        criterionCode: c.code,
-        suggestedScore: Math.min(c.maxScore, 4),
-        comment: `[Gợi ý của AI]: Đội thi hoàn thành tiêu chí ${c.name || c.code}.`
-      }));
+      console.warn('[AI GRADES] generateScoringSuggestion failed:', sugErr.message);
+      return res.status(503).json({ message: `Không thể tạo gợi ý điểm: ${sugErr.message}` });
     }
 
     // Map code back to Criterion ID for UI ease
@@ -1710,16 +1702,7 @@ router.get('/export-grading-sheet/:roundId', authenticateToken, async (req, res)
     const event = await Event.findById(round.eventId);
     if (!event) return res.status(404).json({ message: 'Event not found.' });
 
-    // 1. Get rubric for this round
-    const rubric = await Rubric.findOne({ roundId: round._id, isActive: true });
-    if (!rubric) {
-      return res.status(400).json({ message: 'Vòng thi này chưa được cấu hình Rubric chấm điểm.' });
-    }
-
-    // 2. Get criteria for this rubric
-    const criteria = await Criterion.find({ rubricId: rubric._id }).sort({ order: 1 });
-
-    // 3. Determine Judge and Track
+    // 1. Determine Judge and Track
     let targetJudgeId = judgeId;
     if (!targetJudgeId) {
       const roleRecord = await EventRole.findOne({
@@ -1750,7 +1733,14 @@ router.get('/export-grading-sheet/:roundId', authenticateToken, async (req, res)
       }
     }
 
-    // 4. Get Teams
+    // 2. Rubric that applies to this track (track-specific, else round-wide) and its criteria
+    const rubric = await findActiveRubric(round._id, track?._id);
+    if (!rubric) {
+      return res.status(400).json({ message: 'Vòng thi này chưa được cấu hình Rubric chấm điểm.' });
+    }
+    const criteria = await Criterion.find({ rubricId: rubric._id }).sort({ order: 1 });
+
+    // 3. Get Teams
     const teamsQuery = { eventId: round.eventId, status: 'confirmed' };
     if (track) {
       teamsQuery.trackId = track._id;
@@ -2138,7 +2128,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
     }
 
     // 1. Get rubric and criteria for this round
-    let rubric = await Rubric.findOne({ roundId: round._id, isActive: true });
+    let rubric = await findActiveRubric(round._id, track._id);
     if (!rubric) {
       rubric = await Rubric.findOne({ roundId: round._id });
     }
@@ -2156,13 +2146,13 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
       eventId: round.eventId,
       $or: [{ trackId: track._id }, { originalTrackId: track._id }],
       status: 'confirmed'
-    }).sort({ externalTeamCode: 1, code: 1, name: 1 });
+    }).sort({ name: 1 });
 
     if (teams.length === 0) {
       teams = await Team.find({
         eventId: round.eventId,
         trackId: track._id
-      }).sort({ externalTeamCode: 1, code: 1, name: 1 });
+      }).sort({ name: 1 });
     }
 
     // 3. Get all active judges for this event / round / track
@@ -2244,7 +2234,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
         judges.forEach(judge => {
           const row = [
             stt++,
-            team.externalTeamCode || team.code || team.name,
+            team.name,
             team.name,
             judge.email || '',
             judge.fullName || ''
@@ -2276,7 +2266,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
         // If no judges defined yet, create team row with blank judge
         const row = [
           stt++,
-          team.externalTeamCode || team.code || team.name,
+          team.name,
           team.name,
           '',
           ''
@@ -2532,7 +2522,7 @@ router.post('/import-track-scores', authenticateToken, upload.single('file'), as
       }
     }
 
-    let rubric = targetRubricId ? await Rubric.findById(targetRubricId) : await Rubric.findOne({ roundId: round._id, isActive: true });
+    let rubric = targetRubricId ? await Rubric.findById(targetRubricId) : await findActiveRubric(round._id, targetTrackId);
     if (!rubric) rubric = await Rubric.findOne({ roundId: round._id });
     if (!rubric) {
       return res.status(400).json({ message: 'Chưa cấu hình Rubric cho vòng thi này.' });
@@ -2589,8 +2579,6 @@ router.post('/import-track-scores', authenticateToken, upload.single('file'), as
       if (!team && colTeamCode >= 0 && row[colTeamCode]) {
         const codeVal = String(row[colTeamCode]).trim();
         team = allTeams.find(t =>
-          (t.externalTeamCode && t.externalTeamCode.toLowerCase() === codeVal.toLowerCase()) ||
-          (t.code && t.code.toLowerCase() === codeVal.toLowerCase()) ||
           t.name.toLowerCase() === codeVal.toLowerCase()
         );
       }

@@ -28,19 +28,8 @@ import {
   Database,
   AlertTriangle,
   Target,
-  FlaskConical,
-  ShieldCheck
+  FlaskConical
 } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
-import CustomSelect from '../shared/CustomSelect';
 
 export default function JudgeScoring() {
   const { teamId } = useParams();
@@ -69,7 +58,6 @@ export default function JudgeScoring() {
   const [allAiAnalyses, setAllAiAnalyses] = useState<any[]>([]);
   const [expandedCommitId, setExpandedCommitId] = useState<string | null>(null);
   const [expandedSli, setExpandedSli] = useState<boolean>(false); // for SMB scale details
-  const [expandedExamCrosscheck, setExpandedExamCrosscheck] = useState<boolean>(false);
 
   // Grade state
   const [scores, setScores] = useState<any>({});
@@ -107,17 +95,6 @@ export default function JudgeScoring() {
   const [aiLoading, setAiLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Judge environment states
-  const [isJudgeActive, setIsJudgeActive] = useState(false);
-  const [currentScenario, setCurrentScenario] = useState('NORMAL');
-  const [environmentCode, setEnvironmentCode] = useState('');
-  const [togglingActive, setTogglingActive] = useState(false);
-  const [liveDialogOpen, setLiveDialogOpen] = useState(false);
-  const [liveData, setLiveData] = useState<any>(null);
-  const [historyData, setHistoryData] = useState<Record<string, any[]>>({});
-  const [scenariosMap, setScenariosMap] = useState<Record<string, { code: string; name: string }[]>>({});
-  const [changingScenario, setChangingScenario] = useState(false);
-
   const setMessage = (msg: { type: string; text: string }) => {
     if (msg.text) {
       if (msg.type === 'success') {
@@ -141,9 +118,6 @@ export default function JudgeScoring() {
         const teamData = res.data.team || res.data;
         if (teamData) {
           setTeam(teamData);
-          setIsJudgeActive(!!teamData.isJudgeActive);
-          setCurrentScenario(teamData.currentScenario || 'NORMAL');
-          setEnvironmentCode(teamData.environmentCode || '');
           const evId = teamData.eventId?._id || teamData.eventId;
           if (evId) {
             setSelectedEventId(evId);
@@ -152,110 +126,6 @@ export default function JudgeScoring() {
       })
       .catch((err: any) => console.error('Error fetching team details:', err));
   }, [teamId, token]);
-
-  // Fetch judge scenarios
-  useEffect(() => {
-    axios.get(`http://localhost:5000/api/teams/judge/scenarios`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then((res: any) => {
-        setScenariosMap(res.data);
-      })
-      .catch((err: any) => console.error('Error fetching scenarios:', err));
-  }, [token]);
-
-  // Poll live telemetry data (Tần suất phát từ Simulator: 0.5s / 500ms)
-  useEffect(() => {
-    if (!liveDialogOpen) {
-      setLiveData(null);
-      setHistoryData({});
-      return;
-    }
-
-    const maxPoints = 40;
-    let lastIdentifier = '';
-
-    const fetchLive = () => {
-      axios.get(`http://localhost:5000/api/teams/judge/live?teamId=${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-        .then((res: any) => {
-          const data = res.data;
-          if (!data || !Array.isArray(data.devices)) return;
-          setLiveData(data);
-          if (data.environment || data.environmentCode) {
-            setEnvironmentCode((prev) => prev || data.environment || data.environmentCode);
-          }
-
-          const currentId = data.timestamp || (data.epoch ? String(data.epoch) : '');
-          if (currentId && currentId === lastIdentifier) return;
-          if (currentId) lastIdentifier = currentId;
-
-          const dateObj = data.timestamp
-            ? new Date(data.timestamp)
-            : (data.epoch ? new Date(data.epoch * 1000) : new Date());
-          const label = dateObj.toLocaleTimeString('vi-VN', {
-            hour12: false
-          });
-
-          setHistoryData((prev) => {
-            const next = { ...prev };
-            for (const d of data.devices) {
-              const frame: any = { t: label };
-              if (d.metrics) {
-                for (const [k, v] of Object.entries(d.metrics)) {
-                  frame[k] = typeof v === 'boolean' ? (v ? 1 : 0) : v;
-                }
-              }
-              next[d.deviceCode] = [...(next[d.deviceCode] || []), frame].slice(-maxPoints);
-            }
-            return next;
-          });
-        })
-        .catch((err: any) => console.error('Error fetching live telemetry:', err));
-    };
-
-    fetchLive();
-    const interval = setInterval(fetchLive, 500);
-    return () => clearInterval(interval);
-  }, [liveDialogOpen, token]);
-
-  const handleToggleJudgeActive = async () => {
-    if (!team) return;
-    setTogglingActive(true);
-    const newActive = !isJudgeActive;
-    try {
-      await axios.patch(`http://localhost:5000/api/teams/${team._id}/judge`,
-        { active: newActive },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setIsJudgeActive(newActive);
-      toast.success(newActive ? 'Đã kích hoạt môi trường chấm thi!' : 'Đã tắt môi trường chấm thi.');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Không thể thay đổi trạng thái môi trường.');
-    } finally {
-      setTogglingActive(false);
-    }
-  };
-
-  const handleChangeScenario = async (newScenario: string) => {
-    if (!team) return;
-    setChangingScenario(true);
-    try {
-      await axios.patch(`http://localhost:5000/api/teams/${team._id}/judge-scenario`,
-        { scenario: newScenario },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCurrentScenario(newScenario);
-      toast.success('Đã cập nhật kịch bản chấm thi!');
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err.response?.data?.message || 'Không thể đổi kịch bản.');
-    } finally {
-      setChangingScenario(false);
-    }
-  };
 
   // Fetch event details (rounds, tracks)
   useEffect(() => {
@@ -275,17 +145,21 @@ export default function JudgeScoring() {
       .catch((err: any) => console.error('Error fetching event details:', err));
   }, [selectedEventId, queryRoundId]);
 
+  // Rubric depends on the team's track (track-specific rubric, else the round-wide one)
+  const teamTrackId: string | null = team ? (team.trackId?._id || team.trackId || '') : null;
+
   // Fetch rubric/criteria
   useEffect(() => {
-    if (!selectedRoundId) return;
+    if (!selectedRoundId || teamTrackId === null) return;
 
     setRubric(null);
     setCriteria([]);
     setScores({});
     setOverallComment('');
 
-    // Fetch Rubric for round
+    // Fetch Rubric for round and the team's track
     axios.get(`http://localhost:5000/api/rubrics/round/${selectedRoundId}`, {
+      params: { trackId: teamTrackId || undefined },
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res: any) => {
@@ -311,7 +185,7 @@ export default function JudgeScoring() {
         setSelectedCriterionId('summary');
         console.error('Error fetching rubric:', err);
       });
-  }, [selectedRoundId, token]);
+  }, [selectedRoundId, teamTrackId, token]);
 
   // Fetch commits & AI reports for active team
   useEffect(() => {
@@ -431,18 +305,6 @@ export default function JudgeScoring() {
       }
     });
 
-    socket.on("judge_active_toggled", (data: any) => {
-      console.log("Socket Event judge_active_toggled on JudgeScoring:", data);
-      if (data.teamId === teamId) {
-        setIsJudgeActive(data.isJudgeActive);
-        if (data.isJudgeActive) {
-          toast.success("Môi trường chấm thi đã được kích hoạt!");
-        } else {
-          toast.info("Môi trường chấm thi đã bị tắt.");
-        }
-      }
-    });
-
     return () => {
       socket.emit("leave_live_room", { eventId: selectedEventId });
       socket.disconnect();
@@ -491,8 +353,9 @@ export default function JudgeScoring() {
       res.data.forEach((item: any) => {
         if (item.criterionId) {
           updated[item.criterionId] = {
-            scoreValue: item.suggestedScore,
-            comment: `[Gợi ý của AI]: ${item.comment}`
+            // null = AI did not assess this criterion; leave it blank for the judge
+            scoreValue: item.suggestedScore ?? '',
+            comment: item.comment
           };
         }
       });
@@ -596,72 +459,6 @@ export default function JudgeScoring() {
   );
 
   const hardConstraints = teamAggregateReview?.result?.hard_constraints_validation || latestCommitReview?.result?.hard_constraints_validation;
-
-  // Derive environment code and available scenarios with fallbacks for final round
-  const effectiveEnvironmentCode = useMemo(() => {
-    if (environmentCode) return environmentCode;
-    if (liveData?.environment || liveData?.environmentCode) {
-      return liveData.environment || liveData.environmentCode;
-    }
-    if (team?.environmentCode) return team.environmentCode;
-    if (team?.originalTrackId?.environmentId) {
-      // If we have original track info
-      const trackName = team.originalTrackId.name || '';
-      if (trackName.toLowerCase().includes('nông nghiệp') || trackName.toLowerCase().includes('agri') || trackName.toLowerCase().includes('track a')) return 'AGRI';
-      if (trackName.toLowerCase().includes('smart home') || trackName.toLowerCase().includes('nhà thông minh') || trackName.toLowerCase().includes('track b')) return 'SMART_HOME';
-      if (trackName.toLowerCase().includes('y tế') || trackName.toLowerCase().includes('health') || trackName.toLowerCase().includes('track c')) return 'HEALTH';
-    }
-    if (liveData?.devices && Array.isArray(liveData.devices) && liveData.devices.length > 0) {
-      const devCodes = liveData.devices.map((d: any) => d.deviceCode || '');
-      if (devCodes.some((code: string) => code.startsWith('PH_') || code.startsWith('SOIL_') || code.startsWith('PUMP_') || code.startsWith('SUN_'))) {
-        return 'AGRI';
-      }
-      if (devCodes.some((code: string) => code.startsWith('AC_') || code.startsWith('SENSOR_') || code.startsWith('METER_') || code.startsWith('CO2_'))) {
-        return 'SMART_HOME';
-      }
-      if (devCodes.some((code: string) => code.startsWith('SPO2_') || code.startsWith('ECG_') || code.startsWith('TEMP_') || code.startsWith('HR_'))) {
-        return 'HEALTH';
-      }
-    }
-    return '';
-  }, [environmentCode, liveData, team]);
-
-  const availableScenarios = useMemo(() => {
-    if (!scenariosMap || Object.keys(scenariosMap).length === 0) return [];
-    if (effectiveEnvironmentCode && scenariosMap[effectiveEnvironmentCode]?.length > 0) {
-      return scenariosMap[effectiveEnvironmentCode];
-    }
-    if (effectiveEnvironmentCode) {
-      const matchKey = Object.keys(scenariosMap).find(
-        k => k.toLowerCase() === effectiveEnvironmentCode.toLowerCase()
-      );
-      if (matchKey && scenariosMap[matchKey]?.length > 0) {
-        return scenariosMap[matchKey];
-      }
-    }
-    // Fallback: Check if device-based matching yields options
-    if (liveData?.devices?.length > 0) {
-      const devCodes = liveData.devices.map((d: any) => d.deviceCode || '');
-      if (devCodes.some((c: string) => c.startsWith('PH_') || c.startsWith('SOIL_') || c.startsWith('PUMP_') || c.startsWith('SUN_'))) {
-        const k = Object.keys(scenariosMap).find(key => key.includes('AGRI') || key.includes('01'));
-        if (k && scenariosMap[k]?.length > 0) return scenariosMap[k];
-      }
-      if (devCodes.some((c: string) => c.startsWith('AC_') || c.startsWith('SENSOR_') || c.startsWith('METER_') || c.startsWith('CO2_'))) {
-        const k = Object.keys(scenariosMap).find(key => key.includes('SMART') || key.includes('02'));
-        if (k && scenariosMap[k]?.length > 0) return scenariosMap[k];
-      }
-      if (devCodes.some((c: string) => c.startsWith('SPO2_') || c.startsWith('ECG_') || c.startsWith('TEMP_') || c.startsWith('HR_'))) {
-        const k = Object.keys(scenariosMap).find(key => key.includes('HEALTH') || key.includes('03'));
-        if (k && scenariosMap[k]?.length > 0) return scenariosMap[k];
-      }
-    }
-    // If only 1 environment list in map, return it
-    const allKeys = Object.keys(scenariosMap);
-    if (allKeys.length === 1 && scenariosMap[allKeys[0]]?.length > 0) {
-      return scenariosMap[allKeys[0]];
-    }
-    return [];
-  }, [scenariosMap, effectiveEnvironmentCode, liveData]);
 
   const renderStatusIcon = (status: string) => {
     switch (status) {
@@ -773,62 +570,6 @@ export default function JudgeScoring() {
                 Lý do: {hardConstraints.disqualification_reason || "Chưa cập nhật lý do chi tiết."}
               </strong>
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Phân hệ Môi Trường Chấm Thi (Simulator Judge Panel) */}
-      {team.externalTeamCode && (
-        <div className="bg-white border border-slate-200 p-5 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-sm animate-fadeIn">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#F27024]/10 border border-[#F27024]/20 flex items-center justify-center text-[#F27024]">
-              <Activity size={20} className={isJudgeActive ? "animate-pulse" : ""} />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-normal">
-                Môi trường chấm thi (Simulator)
-              </h4>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Kích hoạt luồng dữ liệu đánh giá và các kịch bản lỗi thiết bị của đội thi qua MQTT.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* Toggle Switch */}
-            <div className="flex items-center gap-2 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200">
-              <span className="text-xs text-slate-500 font-bold uppercase tracking-normal">
-                Môi trường:
-              </span>
-              <button
-                type="button"
-                onClick={handleToggleJudgeActive}
-                disabled={togglingActive}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${isJudgeActive ? 'bg-[#F27024]' : 'bg-slate-200'
-                  } ${togglingActive ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isJudgeActive ? 'translate-x-4' : 'translate-x-0'
-                    }`}
-                />
-              </button>
-              <span className={`text-xs font-bold uppercase w-6 ${isJudgeActive ? 'text-[#F27024]' : 'text-slate-400'
-                }`}>
-                {isJudgeActive ? 'ON' : 'OFF'}
-              </span>
-            </div>
-
-            {/* Live data button */}
-            {isJudgeActive && (
-              <button
-                type="button"
-                onClick={() => setLiveDialogOpen(true)}
-                className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95f1f] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all uppercase shadow-sm cursor-pointer"
-              >
-                <Activity size={12} className="animate-pulse" />
-                <span>Xem dữ liệu LIVE</span>
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -1695,45 +1436,6 @@ export default function JudgeScoring() {
                       </div>
                     )}
 
-                    {/* Exam Spec Crosscheck (Collapsible) */}
-                    {teamAggregateReview.result.exam_spec_crosscheck && (
-                      <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
-                        <button
-                          type="button"
-                          onClick={() => setExpandedExamCrosscheck(!expandedExamCrosscheck)}
-                          className="w-full text-left p-4 flex justify-between items-center hover:bg-slate-100/80 transition-colors"
-                        >
-                          <span className="text-xs sm:text-sm text-slate-700 font-bold uppercase tracking-normal flex items-center gap-1.5">
-                            <ShieldCheck size={12} className="text-[#F27024]" /> Đối chiếu 5 Nhóm Đề thi (30 / 25 / 20 / 15 / 10)
-                          </span>
-                          {expandedExamCrosscheck ? <ChevronUp size={16} className="text-slate-550" /> : <ChevronDown size={16} className="text-slate-550" />}
-                        </button>
-
-                        {expandedExamCrosscheck && (
-                          <div className="p-4 border-t border-slate-200 space-y-3 bg-white leading-relaxed text-xs sm:text-sm text-slate-600">
-                            {teamAggregateReview.result.exam_spec_crosscheck.innovation_and_product_value_30 && (
-                              <p><strong className="text-[#F27024] font-bold">Sáng tạo & Giá trị sản phẩm (30đ):</strong> {teamAggregateReview.result.exam_spec_crosscheck.innovation_and_product_value_30}</p>
-                            )}
-                            {teamAggregateReview.result.exam_spec_crosscheck.multi_agent_collaboration_25 && (
-                              <p><strong className="text-[#F27024] font-bold">Chất lượng phối hợp Multi-Agent (25đ):</strong> {teamAggregateReview.result.exam_spec_crosscheck.multi_agent_collaboration_25}</p>
-                            )}
-                            {teamAggregateReview.result.exam_spec_crosscheck.iot_and_external_world_20 && (
-                              <p><strong className="text-[#F27024] font-bold">Tương tác IoT & Thế giới ngoài (20đ):</strong> {teamAggregateReview.result.exam_spec_crosscheck.iot_and_external_world_20}</p>
-                            )}
-                            {teamAggregateReview.result.exam_spec_crosscheck.task_completion_15 && (
-                              <p><strong className="text-[#F27024] font-bold">Khả năng hoàn thành tác vụ (15đ):</strong> {teamAggregateReview.result.exam_spec_crosscheck.task_completion_15}</p>
-                            )}
-                            {teamAggregateReview.result.exam_spec_crosscheck.transparency_safety_and_experience_10 && (
-                              <p><strong className="text-[#F27024] font-bold">Minh bạch, an toàn & UX (10đ):</strong> {teamAggregateReview.result.exam_spec_crosscheck.transparency_safety_and_experience_10}</p>
-                            )}
-                            {teamAggregateReview.result.exam_spec_crosscheck.session_7_5_3_readiness && (
-                              <p><strong className="text-slate-700 font-bold">Độ sẵn sàng phiên 7-5-3:</strong> {teamAggregateReview.result.exam_spec_crosscheck.session_7_5_3_readiness}</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
                     {/* SMB Scale Advisory (Collapsible) */}
                     {teamAggregateReview.result.smb_scale_advisory && (
                       <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
@@ -2047,136 +1749,6 @@ export default function JudgeScoring() {
 
           </div>
 
-        </div>
-      )}
-
-      {/* Live Data Modal */}
-      {liveDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-md p-4 animate-fadeIn">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-5xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto flex flex-col space-y-4">
-
-            {/* Modal Header */}
-            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="text-base font-bold text-slate-800 uppercase tracking-normal flex items-center gap-2 flex-wrap">
-                  <span>SỐ LIỆU LIVE — {team.name} ({team.externalTeamCode || "Chưa sync"})</span>
-                  {effectiveEnvironmentCode && (
-                    <span className="rounded-lg bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-xs font-bold text-[#F27024] font-mono">
-                      ENV: {effectiveEnvironmentCode}
-                    </span>
-                  )}
-                </h3>
-                <p className="text-xs text-slate-500 mt-1 font-sans">
-                  Dữ liệu phát trực tiếp từ server (cập nhật ~1.5s). Thay đổi kịch bản dữ liệu bên dưới để giả lập các sự cố lỗi thiết bị.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setLiveDialogOpen(false)}
-                className="text-slate-400 hover:text-slate-800 transition-colors p-1"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Controls Row */}
-            <div className="flex flex-wrap items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-600">BỘ DATA:</span>
-                <CustomSelect
-                  value={currentScenario}
-                  disabled={changingScenario || availableScenarios.length === 0}
-                  onChange={handleChangeScenario}
-                  options={availableScenarios.map((s) => ({
-                    value: s.code,
-                    label: s.name
-                  }))}
-                  className="w-[210px]"
-                />
-              </div>
-              <div className="text-xs text-slate-500 font-mono flex-1 text-right">
-                {liveData ? `UTC ${liveData.timestamp}` : 'Đang chờ dữ liệu…'}
-              </div>
-            </div>
-
-            {/* Graphs Grid */}
-            {!liveData ? (
-              <div className="py-20 text-center text-xs text-slate-400 font-mono animate-pulse">
-                [ĐANG CHỜ DỮ LIỆU TELEMETRY TỪ SIMULATOR...]
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {liveData.devices.map((d: any) => {
-                  const series = historyData[d.deviceCode] || [];
-                  const keys = d.metrics ? Object.keys(d.metrics) : [];
-                  const isError = d.status === 'error';
-                  const colors = ['#F27024', '#0284c7', '#16a34a', '#dc2626', '#eab308', '#9333ea'];
-
-                  return (
-                    <div
-                      key={d.deviceCode}
-                      className={`rounded-xl border border-slate-200 bg-white p-4 space-y-2 flex flex-col shadow-sm ${isError ? 'border-rose-300 bg-rose-50/20' : ''
-                        }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-700 font-mono">{d.deviceCode}</span>
-                        {isError ? (
-                          <span className="rounded bg-rose-50 border border-rose-200 px-2 py-0.5 text-[10px] font-bold uppercase tracking-normal text-rose-700">
-                            ⚠ LỖI / MẤT TÍN HIỆU
-                          </span>
-                        ) : (
-                          <span className="text-xs text-slate-500 truncate max-w-[70%] font-mono">
-                            {keys.map((k) => `${k}=${String(d.metrics[k])}`).join(' · ')}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="h-44 w-full bg-slate-50 rounded-lg p-2 border border-slate-100">
-                        {isError || keys.length === 0 ? (
-                          <div className="flex h-full items-center justify-center text-xs text-slate-400 font-mono">
-                            — KHÔNG CÓ SỐ LIỆU —
-                          </div>
-                        ) : (
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                              data={series}
-                              margin={{ top: 10, right: 10, bottom: 5, left: -25 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                              <XAxis dataKey="t" tick={{ fontSize: 9, fill: '#475569' }} minTickGap={20} />
-                              <YAxis tick={{ fontSize: 9, fill: '#475569' }} width={35} />
-                              <Tooltip
-                                contentStyle={{
-                                  background: '#ffffff',
-                                  border: '1px solid #e2e8f0',
-                                  borderRadius: 8,
-                                  fontSize: 11,
-                                  color: '#1e293b'
-                                }}
-                              />
-                              {keys.map((k, idx) => (
-                                <Line
-                                  key={k}
-                                  type="monotone"
-                                  dataKey={k}
-                                  stroke={colors[idx % colors.length]}
-                                  strokeWidth={2}
-                                  dot={false}
-                                  isAnimationActive={false}
-                                />
-                              ))}
-                            </LineChart>
-                          </ResponsiveContainer>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
       )}
 
