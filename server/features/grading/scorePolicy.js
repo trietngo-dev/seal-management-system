@@ -1,3 +1,5 @@
+const LOCKED_SCORE_EDITORS = ['system_admin', 'student_assistant'];
+
 function validateScoreSubmissionPolicy(existingScores, actorRole, targetJudgeId) {
   if (!Array.isArray(existingScores) || existingScores.length === 0) {
     return { allowed: true };
@@ -15,15 +17,17 @@ function validateScoreSubmissionPolicy(existingScores, actorRole, targetJudgeId)
     return judgeId && judgeId.toString() === targetJudgeId.toString();
   });
 
-  if (targetJudgeScore) {
+  // A judge may revise their own sheet until the round's scores are locked; the submit
+  // route records every revision as a regrade_score audit with before/after values.
+  if (targetJudgeScore && targetJudgeScore.status === 'locked' && !LOCKED_SCORE_EDITORS.includes(actorRole)) {
     return {
       allowed: false,
-      reason: 'Giám khảo đã gửi kết quả chấm cho đội này. Kết quả hiện đã được khóa.',
+      reason: 'Điểm của giám khảo cho đội này đã bị khóa. Liên hệ Ban tổ chức nếu cần điều chỉnh.',
       existingScoreStatus: targetJudgeScore.status,
     };
   }
 
-  return { allowed: true };
+  return { allowed: true, isRegrade: !!targetJudgeScore };
 }
 
 function buildScoreChangeSummary(previousScore, nextScore, criteriaList = []) {

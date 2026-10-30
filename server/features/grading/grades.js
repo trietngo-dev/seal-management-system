@@ -726,7 +726,8 @@ router.post('/submit', authenticateToken, async (req, res) => {
       }
     }
 
-    const policy = validateScoreSubmissionPolicy(existingScores, userRole?.role || 'judge', targetJudgeId);
+    const policyRole = req.user.isSystemAdmin ? 'system_admin' : (userRole?.role || 'judge');
+    const policy = validateScoreSubmissionPolicy(existingScores, policyRole, targetJudgeId);
     if (!policy.allowed) {
       await ScoreAudit.create({
         teamId,
