@@ -726,7 +726,8 @@ router.post('/submit', authenticateToken, async (req, res) => {
       }
     }
 
-    const policy = validateScoreSubmissionPolicy(existingScores, userRole?.role || 'judge', targetJudgeId);
+    const policyRole = req.user.isSystemAdmin ? 'system_admin' : (userRole?.role || 'judge');
+    const policy = validateScoreSubmissionPolicy(existingScores, policyRole, targetJudgeId);
     if (!policy.allowed) {
       await ScoreAudit.create({
         teamId,
@@ -1146,6 +1147,19 @@ router.post('/lock-round', authenticateToken, async (req, res) => {
  * @desc    Unlock all scores for a round to allow editing again
  * @access  Private (Coordinator or Admin)
  */
+/**
+ * Puts a locked round back into grading: drops its published rankings and prizes,
+ * unlocks every score sheet and marks the round active. Shared by unlock-round and
+ * rollback-round so a reopened round never keeps locked scores judges cannot edit.
+ */
+async function reopenRoundForGrading(round, eventId) {
+  await Ranking.deleteMany({ roundId: round._id });
+  await mongoose.model('Prize').deleteMany({ eventId, roundId: round._id });
+  await Score.updateMany({ roundId: round._id }, { status: 'submitted', $unset: { lockedAt: 1 } });
+  round.status = 'active';
+  await round.save();
+}
+
 router.post('/unlock-round', authenticateToken, async (req, res) => {
   const { eventId, roundId } = req.body;
 
@@ -1173,17 +1187,7 @@ router.post('/unlock-round', authenticateToken, async (req, res) => {
       });
     }
 
-    // 1. Delete generated rankings and prizes for this round
-    await Ranking.deleteMany({ roundId });
-    const Prize = mongoose.model('Prize');
-    await Prize.deleteMany({ eventId, roundId });
-
-    // 2. Unlock all scores (set status back to 'submitted')
-    await Score.updateMany({ roundId }, { status: 'submitted', $unset: { lockedAt: 1 } });
-
-    // 3. Set round status back to 'active'
-    round.status = 'active';
-    await round.save();
+    await reopenRoundForGrading(round, eventId);
 
     // Create EventLog
     const EventLog = mongoose.model('EventLog');
@@ -1655,18 +1659,11 @@ router.post('/rollback-round', authenticateToken, async (req, res) => {
     currentRound.isExamManualOpen = false;
     await currentRound.save();
 
-    previousRound.status = 'active';
-    await previousRound.save();
+    // Rankings were only needed to move teams back; the previous round returns to grading
+    await reopenRoundForGrading(previousRound, eventId);
 
-    // Clean up empty tracks under the current round
-    const Track = mongoose.model('Track');
-    const currentRoundTracks = await Track.find({ roundId: currentRoundId });
-    for (const track of currentRoundTracks) {
-      const teamCount = await Team.countDocuments({ trackId: track._id });
-      if (teamCount === 0) {
-        await Track.findByIdAndDelete(track._id);
-      }
-    }
+    // The current round's tracks are kept even when empty: judges, mentors, rubrics and exam
+    // links are assigned to them, and advance-round reuses the existing track next time.
 
     // Also revert Event status back to ongoing if it was set to completed (e.g. final round rolled back)
     const Event = mongoose.model('Event');
@@ -1676,8 +1673,16 @@ router.post('/rollback-round', authenticateToken, async (req, res) => {
       await eventObj.save();
     }
 
+    await new (mongoose.model('EventLog'))({
+      eventId,
+      actorId: req.user._id,
+      action: 'rollback_round',
+      type: 'grading',
+      details: `Thu hồi vòng "${currentRound.name}", mở lại chấm điểm vòng "${previousRound.name}" (${advancedRankings.length} đội quay về).`
+    }).save();
+
     return res.json({
-      message: `Đã thu hồi thành công vòng đấu. Trạng thái vòng "${previousRound.name}" đã được chuyển về "active" và đưa các đội quay về vòng trước.`,
+      message: `Đã thu hồi thành công vòng đấu. Vòng "${previousRound.name}" đã được mở lại để chấm điểm và các đội đã quay về vòng trước.`,
       previousRoundId: previousRound._id
     });
   } catch (error) {
