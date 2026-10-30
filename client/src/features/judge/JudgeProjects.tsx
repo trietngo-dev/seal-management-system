@@ -248,7 +248,7 @@ export default function JudgeProjects() {
               placeholder="Tìm kiếm dự án, đội..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-full text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] shadow-inner"
+              className="bg-slate-50 border border-slate-200 rounded-full text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] focus:bg-white shadow-inner"
             />
           </div>
 
@@ -298,7 +298,7 @@ export default function JudgeProjects() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500">
+                <tr className="bg-white text-black border-b border-slate-200 text-xs font-bold text-slate-500">
                   <th className="px-6 py-4">Tên đội thi (Team)</th>
                   <th className="px-6 py-4">Trạng thái chấm</th>
                   <th className="px-6 py-4">Điểm</th>
@@ -312,11 +312,10 @@ export default function JudgeProjects() {
                   return (
                     <tr
                       key={team._id}
-                      className={`transition-all ${
-                        team._id === highlightedTeamId
-                          ? "bg-amber-50/50 border-l-4 border-amber-500 shadow-sm animate-pulse"
-                          : "hover:bg-slate-50"
-                      }`}
+                      className={`transition-all ${team._id === highlightedTeamId
+                        ? "bg-amber-50/50 border-l-4 border-amber-500 shadow-sm animate-pulse"
+                        : "hover:bg-slate-50"
+                        }`}
                     >
                       {/* Column 1: Team Info */}
                       <td className="px-6 py-5 whitespace-nowrap">
