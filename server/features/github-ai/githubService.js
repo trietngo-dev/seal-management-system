@@ -236,8 +236,10 @@ async function fetchCommits(repoName, sinceDate, customOrgName) {
 
     return await Promise.all(commitsPromises);
   } catch (error) {
+    // Rethrow so syncRepo marks the repo failed and keeps lastSyncedAt. Returning [] here
+    // looked like "no new commits", moved lastSyncedAt past the unseen commits and lost them.
     console.error(`Error fetching commits for ${repoName}:`, error.message);
-    return [];
+    throw new Error(`GitHub listCommits failed for ${activeOrgName}/${repoName}: ${error.message}`);
   }
 }
 
