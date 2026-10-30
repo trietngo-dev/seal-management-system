@@ -16,7 +16,7 @@ const API = "http://localhost:5000/api/support";
 const headers = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
 const labels: Record<Status, string> = { pending: "Chờ xử lý", processing: "Đang xử lý", waiting_for_candidate: "Chờ thí sinh", resolved: "Đã giải quyết", reopened: "Đã mở lại", closed: "Đã đóng" };
 const styles: Record<Status, string> = { pending: "bg-amber-50 text-amber-700 border-amber-200", processing: "bg-sky-50 text-sky-700 border-sky-200", waiting_for_candidate: "bg-violet-50 text-violet-700 border-violet-200", resolved: "bg-emerald-50 text-emerald-700 border-emerald-200", reopened: "bg-[#F27024]/10 text-[#c94f12] border-[#F27024]/25", closed: "bg-slate-100 text-slate-600 border-slate-200" };
-const categories = [["account", "Tài khoản và đăng nhập"], ["team", "Đội thi và thành viên"], ["github", "GitHub / Repository"], ["mqtt", "MQTT / Thiết bị"], ["submission", "Nộp bài và vòng thi"], ["schedule", "Lịch trình / Seminar"], ["grading", "Chấm điểm và kết quả"], ["appeal", "Khiếu nại"], ["other", "Vấn đề khác"]];
+const categories = [["account", "Tài khoản và đăng nhập"], ["team", "Đội thi và thành viên"], ["github", "GitHub / Repository"], ["submission", "Nộp bài và vòng thi"], ["schedule", "Lịch trình / Seminar"], ["grading", "Chấm điểm và kết quả"], ["appeal", "Khiếu nại"], ["other", "Vấn đề khác"]];
 
 export default function SupportCenter({ coordinator = false }: { coordinator?: boolean }) {
   const [items, setItems] = useState<RequestItem[]>([]);

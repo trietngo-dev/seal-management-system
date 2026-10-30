@@ -14,6 +14,8 @@ interface RoundsTabProps {
   setSelectedTrack: (track: any) => void;
   selectedRubricRoundId: string;
   setSelectedRubricRoundId: (id: string) => void;
+  selectedRubricTrackId: string;
+  setSelectedRubricTrackId: (id: string) => void;
   fetchEventDetails: () => Promise<void>;
   handleAdvanceRound: (roundId: string) => Promise<void>;
   handleLockRound: (roundId: string) => Promise<void>;
@@ -105,6 +107,8 @@ export default function RoundsTab({
   setSelectedTrack,
   selectedRubricRoundId,
   setSelectedRubricRoundId,
+  selectedRubricTrackId,
+  setSelectedRubricTrackId,
   handleAdvanceRound,
   handleLockRound,
   handleDeleteRound,
@@ -280,6 +284,7 @@ export default function RoundsTab({
           },
           body: JSON.stringify({
             eventId: selectedEvent._id,
+            trackId: selectedRubricTrackId || undefined,
             roundId: selectedRubricRoundId,
             rubricData
           })
@@ -827,6 +832,30 @@ export default function RoundsTab({
             className="w-full font-mono"
           />
         </div>
+
+        {/* Rubric scope: one round-wide rubric, or a separate rubric per track */}
+        {selectedRubricRoundId && (() => {
+          const roundTracks = tracks.filter(
+            (t: any) => String(t.roundId?._id || t.roundId) === String(selectedRubricRoundId),
+          );
+          if (roundTracks.length === 0) return null;
+          return (
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+                Phạm vi Rubric
+              </label>
+              <CustomSelect
+                value={roundTracks.some((t: any) => t._id === selectedRubricTrackId) ? selectedRubricTrackId : ""}
+                onChange={(val) => setSelectedRubricTrackId(val)}
+                options={[
+                  { value: "", label: "Chung cho cả vòng (áp dụng cho track chưa có rubric riêng)" },
+                  ...roundTracks.map((t: any) => ({ value: t._id, label: `Riêng cho track: ${t.name}` })),
+                ]}
+                className="w-full font-mono"
+              />
+            </div>
+          );
+        })()}
 
         {(() => {
           const currentSelectedRound = rounds.find((r: any) => r._id === selectedRubricRoundId);

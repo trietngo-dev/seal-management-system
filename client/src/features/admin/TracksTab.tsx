@@ -12,7 +12,6 @@ import {
   ExternalLink,
   Crown,
   BriefcaseBusiness,
-  RefreshCw,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useConform } from "../shared/ModalConform";
@@ -25,14 +24,14 @@ interface TracksTabProps {
   setTrackName: (val: string) => void;
   trackDesc: string;
   setTrackDesc: (val: string) => void;
+  trackAiBrief: string | null;
+  setTrackAiBrief: (val: string | null) => void;
   trackMax: string;
   setTrackMax: (val: string) => void;
   trackAdvanceTopN: string;
   setTrackAdvanceTopN: (val: string) => void;
   trackRoundId: string;
   setTrackRoundId: (val: string) => void;
-  trackEnvironmentId: string;
-  setTrackEnvironmentId: (val: string) => void;
   handleCreateTrack: (e: React.FormEvent) => Promise<void>;
   selectedTrack: any;
   setSelectedTrack: (track: any) => void;
@@ -94,14 +93,14 @@ export default function TracksTab({
   trackName,
   setTrackName,
   setTrackDesc,
+  trackAiBrief,
+  setTrackAiBrief,
   trackMax,
   setTrackMax,
   trackAdvanceTopN,
   setTrackAdvanceTopN,
   trackRoundId,
   setTrackRoundId,
-  trackEnvironmentId,
-  setTrackEnvironmentId,
   handleCreateTrack,
   selectedTrack,
   setSelectedTrack,
@@ -132,39 +131,22 @@ export default function TracksTab({
   const [isChiefJudge, setIsChiefJudge] = useState(false);
   const [isCreateTrackOpen, setIsCreateTrackOpen] = useState(false);
   const isFormVisible = editingTrack ? true : isCreateTrackOpen;
-  const conform = useConform();
-  const [reRegisteringTrackId, setReRegisteringTrackId] = useState<string | null>(null);
 
-  const handleReRegisterTrackMqtt = async (track: any) => {
-    if (!track.environmentId) {
-      toast.error("Bảng đấu chưa được cấu hình Environment ID.");
-      return;
-    }
-    const confirmed = await conform({
-      title: "Đăng ký lại MQTT cho Bảng đấu",
-      message: `Bạn có chắc chắn muốn đăng ký lại MQTT cho tất cả đội trong bảng "${track.name}" với Environment ID (${track.environmentId})? Dữ liệu phát telemetry sẽ được đồng bộ lại theo môi trường này.`,
-      conformText: "Đăng ký lại",
-      cancelText: "Hủy",
-      variant: "warning",
-    });
-    if (!confirmed) return;
-
-    setReRegisteringTrackId(track._id);
+  // The AI brief is excluded from track listings, so fetch it separately when editing.
+  const loadTrackAiBrief = async (trackId: string) => {
+    setTrackAiBrief(null);
     try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `http://localhost:5000/api/teams/track/${track._id}/re-register-mqtt`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await axios.get(
+        `http://localhost:5000/api/events/${selectedEvent._id}/tracks/${trackId}/ai-brief`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
-      toast.success(res.data.message || "Đã đăng ký lại MQTT thành công!");
+      setTrackAiBrief(res.data.aiBrief || "");
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Lỗi khi đăng ký lại MQTT.");
-    } finally {
-      setReRegisteringTrackId(null);
+      // Leave it null so saving the form does not overwrite the stored brief.
+      toast.error(err.response?.data?.message || "Không tải được mô tả đề cho AI.");
     }
   };
-
+  const conform = useConform();
   // Import judges via Excel
   const handleImportJudges = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -380,32 +362,10 @@ export default function TracksTab({
                     {rounds.find((r) => r._id === t.roundId)?.name ||
                       "Chưa gán"}
                   </span>
-                  {t.environmentId && (
-                    <span
-                      className="text-[9px] text-cyan-500 font-mono block truncate max-w-[220px]"
-                      title={t.environmentId}
-                    >
-                      Env: {t.environmentId}
-                    </span>
-                  )}
                 </button>
                 <div className="flex items-center gap-2.5 ml-2 shrink-0">
                   {!readOnly && !isDefaultFinalRoundTrack(t) && (
                     <>
-                      {t.environmentId && (
-                        <button
-                          type="button"
-                          disabled={reRegisteringTrackId === t._id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReRegisterTrackMqtt(t);
-                          }}
-                          className="text-slate-400 hover:text-amber-400 transition-colors p-1 cursor-pointer disabled:opacity-50"
-                          title="Đăng ký lại MQTT cho tất cả đội trong bảng đấu với Env ID hiện tại"
-                        >
-                          <RefreshCw size={14} className={reRegisteringTrackId === t._id ? "animate-spin" : ""} />
-                        </button>
-                      )}
                       <button
                         type="button"
                         onClick={(e) => {
@@ -418,7 +378,7 @@ export default function TracksTab({
                             t.advanceTopN ? t.advanceTopN.toString() : "",
                           );
                           setTrackDesc(t.description || "");
-                          setTrackEnvironmentId(t.environmentId || "");
+                          loadTrackAiBrief(t._id);
                         }}
                         className="text-slate-400 hover:text-cyan-400 transition-colors p-1 cursor-pointer"
                         title="Chỉnh sửa bảng đấu"
@@ -560,14 +520,15 @@ export default function TracksTab({
 
                 <div>
                   <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 font-mono">
-                    Environment ID (UUID) CHO CUỘC THI LIÊN QUAN ĐẾN MQTT (OPTIONAL)
+                    Mô tả đề cho AI chấm (bảo mật, thí sinh không thấy)
                   </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 6c10dc7a-4021-4299-a12b-215278a89c72"
-                    value={trackEnvironmentId}
-                    onChange={(e) => setTrackEnvironmentId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg text-xs font-mono bg-slate-950 border border-slate-850 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500"
+                  <textarea
+                    rows={6}
+                    disabled={trackAiBrief === null}
+                    placeholder={trackAiBrief === null ? "Đang tải..." : "Mục tiêu, pipeline, đầu vào/đầu ra, yêu cầu tối thiểu, ghi chú chấm của track. Để trống nếu chưa có đề chính thức."}
+                    value={trackAiBrief ?? ""}
+                    onChange={(e) => setTrackAiBrief(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg text-xs font-mono bg-slate-950 border border-slate-850 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 disabled:opacity-50"
                   />
                 </div>
 
@@ -588,7 +549,7 @@ export default function TracksTab({
                         setTrackMax("");
                         setTrackAdvanceTopN("");
                         setTrackDesc("");
-                        setTrackEnvironmentId("");
+                        setTrackAiBrief("");
                       }}
                       className="px-4 py-2 border border-slate-700 hover:border-slate-600 hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-xs font-semibold rounded-lg cursor-pointer font-mono transition-all"
                     >

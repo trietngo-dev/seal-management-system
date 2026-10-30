@@ -156,10 +156,11 @@ export default function AdminEvents({
   const [tracks, setTracks] = useState<any[]>([]);
   const [trackName, setTrackName] = useState("");
   const [trackDesc, setTrackDesc] = useState("");
+  // null while the confidential brief of the track being edited is still loading
+  const [trackAiBrief, setTrackAiBrief] = useState<string | null>("");
   const [trackMax, setTrackMax] = useState("5");
   const [trackRoundId, setTrackRoundId] = useState("");
   const [trackAdvanceTopN, setTrackAdvanceTopN] = useState("3");
-  const [trackEnvironmentId, setTrackEnvironmentId] = useState("");
   const [selectedTrack, setSelectedTrack] = useState<any>(null);
   const [editingTrack, setEditingTrack] = useState<any>(null);
 
@@ -339,6 +340,8 @@ export default function AdminEvents({
 
   // Rubric Edit Form States
   const [selectedRubricRoundId, setSelectedRubricRoundId] = useState("");
+  // Rubric scope inside the selected round: "" = round-wide rubric, otherwise a track id
+  const [selectedRubricTrackId, setSelectedRubricTrackId] = useState("");
   const [editingRubric, setEditingRubric] = useState(false);
   const [editRubricName, setEditRubricName] = useState("");
   const [editRubricDesc, setEditRubricDesc] = useState("");
@@ -1664,10 +1667,10 @@ export default function AdminEvents({
         {
           name: trackName,
           description: trackDesc,
+          aiBrief: trackAiBrief ?? undefined,
           maxTeams: newMaxTeamsNum,
           roundId: trackRoundId,
           advanceTopN: parseInt(trackAdvanceTopN) || 3,
-          environmentId: trackEnvironmentId,
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -1675,10 +1678,10 @@ export default function AdminEvents({
       const newTrack = res.data;
       setTrackName("");
       setTrackDesc("");
+      setTrackAiBrief("");
       setTrackRoundId("");
       setTrackMax("");
       setTrackAdvanceTopN("3");
-      setTrackEnvironmentId("");
 
       // Update local tracks state
       const updatedTracks = [...tracks, newTrack];
@@ -1754,10 +1757,10 @@ export default function AdminEvents({
         {
           name: trackName,
           description: trackDesc,
+          aiBrief: trackAiBrief ?? undefined,
           maxTeams: updatedMaxTeamsNum,
           roundId: trackRoundId,
           advanceTopN: parseInt(trackAdvanceTopN) || 3,
-          environmentId: trackEnvironmentId,
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -1765,10 +1768,10 @@ export default function AdminEvents({
       const updatedTrack = res.data;
       setTrackName("");
       setTrackDesc("");
+      setTrackAiBrief("");
       setTrackRoundId("");
       setTrackMax("");
       setTrackAdvanceTopN("3");
-      setTrackEnvironmentId("");
       setEditingTrack(null);
 
       // Update local tracks state
@@ -1820,6 +1823,7 @@ export default function AdminEvents({
       if (editingTrack?._id === trackId) {
         setTrackName("");
         setTrackDesc("");
+        setTrackAiBrief("");
         setTrackRoundId("");
         setTrackMax("");
         setEditingTrack(null);
@@ -1939,10 +1943,18 @@ export default function AdminEvents({
       setCriteria([]);
       return;
     }
+    // Only use the track scope if that track belongs to the round being fetched
+    const scopeTrack = tracks.find((t: any) => t._id === selectedRubricTrackId);
+    const scopeTrackId =
+      scopeTrack && String(scopeTrack.roundId?._id || scopeTrack.roundId) === String(roundToFetch)
+        ? scopeTrack._id
+        : undefined;
     try {
       const res = await axios.get(
         `http://localhost:5000/api/rubrics/round/${roundToFetch}`,
         {
+          // exact: show only this scope's rubric so each one is managed separately
+          params: { trackId: scopeTrackId, exact: "true" },
           headers: { Authorization: `Bearer ${token}` },
         },
       );
@@ -1964,8 +1976,12 @@ export default function AdminEvents({
   };
 
   useEffect(() => {
-    fetchRoundsAndRubric();
+    setSelectedRubricTrackId("");
   }, [selectedRubricRoundId]);
+
+  useEffect(() => {
+    fetchRoundsAndRubric();
+  }, [selectedRubricRoundId, selectedRubricTrackId]);
 
   // Auto-save temporary draft for selected event when user makes unsaved edits
   useEffect(() => {
@@ -2055,7 +2071,7 @@ export default function AdminEvents({
         "http://localhost:5000/api/rubrics",
         {
           eventId: selectedEvent._id,
-          trackId: selectedTrack ? selectedTrack._id : undefined,
+          trackId: selectedRubricTrackId || undefined,
           roundId: selectedRubricRoundId,
           name: rubricName || "Rubric Đánh giá",
         },
@@ -3269,14 +3285,14 @@ export default function AdminEvents({
               setTrackName={setTrackName}
               trackDesc={trackDesc}
               setTrackDesc={setTrackDesc}
+              trackAiBrief={trackAiBrief}
+              setTrackAiBrief={setTrackAiBrief}
               trackMax={trackMax}
               setTrackMax={setTrackMax}
               trackAdvanceTopN={trackAdvanceTopN}
               setTrackAdvanceTopN={setTrackAdvanceTopN}
               trackRoundId={trackRoundId}
               setTrackRoundId={setTrackRoundId}
-              trackEnvironmentId={trackEnvironmentId}
-              setTrackEnvironmentId={setTrackEnvironmentId}
               handleCreateTrack={handleCreateTrack}
               selectedTrack={selectedTrack}
               setSelectedTrack={setSelectedTrack}
@@ -3345,6 +3361,8 @@ export default function AdminEvents({
               setSelectedTrack={setSelectedTrack}
               selectedRubricRoundId={selectedRubricRoundId}
               setSelectedRubricRoundId={setSelectedRubricRoundId}
+              selectedRubricTrackId={selectedRubricTrackId}
+              setSelectedRubricTrackId={setSelectedRubricTrackId}
               roundName={roundName}
               setRoundName={setRoundName}
               roundDeadline={roundDeadline}

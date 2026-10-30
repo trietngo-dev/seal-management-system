@@ -17,7 +17,6 @@ const emailService = require('../notifications/emailService');
 const githubService = require('../github-ai/githubService');
 const { ensureChatRoomForTeam, ensureChatRoomsForMentorTrack } = require('../chat/chatRoomService');
 const { provisionTeamRepository } = require('../github-ai/repoProvisioning');
-const { syncTeamToExternalSimulator } = require('../teams/externalTeamService');
 
 const {
   extractDriveFileId,
@@ -547,7 +546,7 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
   const { eventId } = req.params;
-  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, environmentId } = req.body;
+  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, aiBrief } = req.body;
 
   if (!name || !roundId) {
     return res.status(400).json({ message: 'Tên bảng đấu và vòng thi là bắt buộc.' });
@@ -606,7 +605,7 @@ router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
       advanceTopN: advanceTopN ? parseInt(advanceTopN) : undefined,
       topicName,
       topicLink,
-      environmentId
+      aiBrief: aiBrief || undefined
     });
 
     await newTrack.save();
@@ -635,7 +634,7 @@ router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
  */
 router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
   const { eventId, trackId } = req.params;
-  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, environmentId } = req.body;
+  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, aiBrief } = req.body;
 
   try {
     const event = await Event.findById(eventId);
@@ -643,7 +642,7 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy sự kiện.' });
     }
 
-    const track = await Track.findOne({ _id: trackId, eventId });
+    const track = await Track.findOne({ _id: trackId, eventId }).select('+aiBrief');
     if (!track) {
       return res.status(404).json({ message: 'Không tìm thấy bảng đấu.' });
     }
@@ -756,11 +755,12 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
       logDetails.push(`Link đề tài: "${track.topicLink || 'Trống'}" -> "${topicLink}"`);
       track.topicLink = topicLink;
     }
-
-    if (environmentId !== undefined && environmentId !== track.environmentId) {
-      logDetails.push(`Environment ID: "${track.environmentId || 'Trống'}" -> "${environmentId}"`);
-      track.environmentId = environmentId;
+    if (aiBrief !== undefined && aiBrief !== (track.aiBrief || '')) {
+      // The brief is confidential exam content, so only record that it changed.
+      logDetails.push('Đã cập nhật mô tả đề cho AI');
+      track.aiBrief = aiBrief;
     }
+
 
     await track.save();
 
@@ -780,6 +780,27 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Update Track Error:', error.message);
     res.status(500).json({ message: 'Lỗi hệ thống khi cập nhật bảng đấu.' });
+  }
+});
+
+/**
+ * @route   GET /api/events/:eventId/tracks/:trackId/ai-brief
+ * @desc    Read the confidential AI brief of a track (excluded from every other track query)
+ * @access  Private (System Admin)
+ */
+router.get('/:eventId/tracks/:trackId/ai-brief', authenticateToken, async (req, res) => {
+  if (!req.user.isSystemAdmin) {
+    return res.status(403).json({ message: 'Quyền truy cập bị từ chối.' });
+  }
+  try {
+    const track = await Track.findOne({ _id: req.params.trackId, eventId: req.params.eventId }).select('+aiBrief');
+    if (!track) {
+      return res.status(404).json({ message: 'Không tìm thấy bảng đấu.' });
+    }
+    res.json({ aiBrief: track.aiBrief || '' });
+  } catch (error) {
+    console.error('Get Track AI Brief Error:', error.message);
+    res.status(500).json({ message: 'Lỗi hệ thống khi tải mô tả đề cho AI.' });
   }
 });
 
@@ -1338,10 +1359,6 @@ router.post('/:eventId/distribute-teams', authenticateToken, async (req, res) =>
 
       team.trackId = track._id;
       await team.save();
-
-      // Teams confirmed before distribution had no track yet, so they still need their
-      // simulator (MQTT) credentials; the repo usually exists already and only needs its trackId.
-      await syncTeamToExternalSimulator(team);
 
       provisionTeamRepository(team, { trackId: track._id })
         .then(({ created }) => {

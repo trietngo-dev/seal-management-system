@@ -229,7 +229,10 @@ export default function AdminGradesView({ user, roles = [] }: AdminGradesViewPro
         ),
         axios.get(
           `http://localhost:5000/api/rubrics/round/${roundId}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            params: { trackId: selectedTeamObj?.trackId?._id || selectedTeamObj?.trackId || undefined },
+            headers: { Authorization: `Bearer ${token}` }
+          }
         ).catch(err => {
           console.warn('No active rubric found for this round:', err);
           return { data: { rubric: null, criteria: [] } };

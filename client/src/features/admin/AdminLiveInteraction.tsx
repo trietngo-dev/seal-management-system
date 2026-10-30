@@ -162,8 +162,13 @@ export default function AdminLiveInteraction() {
       return;
     }
     fetchLiveRankings();
-    fetchRubric();
   }, [selectedRoundId]);
+
+  // Rubric follows the selected team's track (track-specific rubric, else the round-wide one)
+  const selectedTeamTrackId = selectedTeam?.trackId?._id;
+  useEffect(() => {
+    if (selectedRoundId) fetchRubric();
+  }, [selectedRoundId, selectedTeamTrackId]);
 
   // Fetch score override details when selected team or judge changes
   useEffect(() => {
@@ -269,6 +274,7 @@ export default function AdminLiveInteraction() {
       const res = await axios.get(
         `http://localhost:5000/api/rubrics/round/${selectedRoundId}`,
         {
+          params: { trackId: selectedTeamTrackId || undefined },
           headers: { Authorization: `Bearer ${token}` },
         },
       );

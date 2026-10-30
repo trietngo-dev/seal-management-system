@@ -93,9 +93,10 @@ export default function JudgeTeamActivity() {
       }
 
       const rubricRes = await axios.get(`http://localhost:5000/api/rubrics/round/${roundId}`, {
+        params: { trackId: team?.trackId?._id || team?.trackId || undefined },
         headers: { Authorization: `Bearer ${token}` }
       });
-      const rubricId = rubricRes.data?._id;
+      const rubricId = rubricRes.data?.rubric?._id;
       if (!rubricId) {
         throw new Error('Chưa tìm thấy Rubric active được gán cho vòng thi này.');
       }

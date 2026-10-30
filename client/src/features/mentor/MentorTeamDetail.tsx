@@ -46,6 +46,7 @@ export default function MentorTeamDetail() {
             : payload.team.trackId.roundId;
           try {
             const rubricRes = await axios.get(`http://localhost:5000/api/rubrics/round/${roundId}`, {
+              params: { trackId: payload.team.trackId._id || undefined },
               headers: { Authorization: `Bearer ${token}` }
             });
             setRubrics(rubricRes.data);

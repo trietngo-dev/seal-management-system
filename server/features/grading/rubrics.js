@@ -29,6 +29,7 @@ const Track = mongoose.model("Track");
 const EventRole = mongoose.model("EventRole");
 const { authenticateToken } = require("../auth/authMiddleware");
 const { isEventStaff } = require("../teams/teamAccess");
+const { rubricScopeFilter, findActiveRubric } = require("./rubricResolver");
 
 function toNumber(value, fallback) {
   if (value === undefined || value === null || value === "") return fallback;
@@ -181,11 +182,13 @@ router.post("/", authenticateToken, async (req, res) => {
         .json({ message: "Unauthorized. Coordinator role required." });
     }
 
-    const existingActive = await Rubric.findOne({ roundId, isActive: true });
+    const existingActive = await Rubric.findOne({ ...rubricScopeFilter(roundId, validTrackId), isActive: true });
     if (existingActive) {
       return res
         .status(400)
-        .json({ message: "An active rubric already exists for this round." });
+        .json({ message: validTrackId
+          ? "Bảng đấu này đã có rubric active trong vòng thi."
+          : "Vòng thi đã có rubric chung đang active." });
     }
 
     const rubricTotalWeight = toNumber(totalWeight, 100);
@@ -245,10 +248,12 @@ router.post("/", authenticateToken, async (req, res) => {
  */
 router.get("/round/:roundId", authenticateToken, async (req, res) => {
   try {
-    const rubric = await Rubric.findOne({
-      roundId: req.params.roundId,
-      isActive: true,
-    });
+    // trackId: rubric applying to that track (its own, else the round-wide one).
+    // exact=true: only that scope, used by the admin editor to manage each rubric separately.
+    const { trackId, exact } = req.query;
+    const rubric = exact === "true"
+      ? await Rubric.findOne({ ...rubricScopeFilter(req.params.roundId, trackId), isActive: true })
+      : await findActiveRubric(req.params.roundId, trackId);
     if (!rubric) {
       return res
         .status(404)
@@ -664,9 +669,9 @@ router.post('/clone', authenticateToken, async (req, res) => {
     }
 
     // Check if rubric already exists for this target round
-    const existing = await Rubric.findOne({ roundId, isActive: true });
+    const existing = await Rubric.findOne({ ...rubricScopeFilter(roundId, trackId), isActive: true });
     if (existing) {
-      return res.status(400).json({ message: 'An active rubric already exists for this round.' });
+      return res.status(400).json({ message: 'An active rubric already exists for this round/track.' });
     }
 
     // Find source rubric
@@ -905,9 +910,9 @@ router.post('/import', authenticateToken, async (req, res) => {
     }
 
     // Check if rubric already exists for this target round
-    const existing = await Rubric.findOne({ roundId, isActive: true });
+    const existing = await Rubric.findOne({ ...rubricScopeFilter(roundId, trackId), isActive: true });
     if (existing) {
-      return res.status(400).json({ message: 'An active rubric already exists for this round.' });
+      return res.status(400).json({ message: 'An active rubric already exists for this round/track.' });
     }
 
     // Create new rubric

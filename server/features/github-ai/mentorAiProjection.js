@@ -42,17 +42,13 @@ function projectTechnicalResult(result = {}) {
       evolutionSummary: result.historical_synthesis?.evolution_summary || overall.historical_synthesis || ''
     },
     technology: pick(result.technology_inventory, [
-      'llm_models_and_apis', 'agent_frameworks', 'mqtt_and_iot', 'external_tools_and_apis',
+      'llm_models_and_apis', 'agent_frameworks', 'data_sources_and_pipelines', 'external_tools_and_apis',
       'frameworks_and_runtimes', 'storage_and_infrastructure'
     ]),
     architecture: {
       multiAgent: pick(result.multi_agent_architecture, [
         'agent_count_observed', 'agents_and_roles', 'handoff_mechanism', 'shared_context',
         'multi_agent_task_evidence', 'replan_and_conflict_handling', 'is_multi_agent_substantive'
-      ]),
-      iot: pick(result.iot_integration, [
-        'mqtt_connection_and_topic', 'payload_handling', 'devices_observed', 'freshness_and_time_window',
-        'decision_influence', 'reconnect_and_invalid_data_handling'
       ]),
       toolsAndVerification: pick(result.tools_and_verification, [
         'read_tools', 'state_changing_tools', 'verification_mechanism', 'idempotency_and_retry'
