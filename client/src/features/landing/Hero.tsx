@@ -23,20 +23,6 @@ export default function Hero({ user }: HeroProps) {
     : "/login";
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Custom states for shield sequence loop (FPT Orange Theme)
-  const [progress, setProgress] = useState(0);
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const current = videoRef.current.currentTime;
-      const duration = videoRef.current.duration;
-      if (duration > 0) {
-        setProgress(current / duration);
-      }
-    }
-  };
 
   // Parallax mouse interaction values using Framer Motion springs
   const mouseX = useMotionValue(0);
@@ -119,7 +105,7 @@ export default function Hero({ user }: HeroProps) {
   return (
     <section
       ref={containerRef}
-      className="relative min-h-screen bg-[#FDFCFB] text-[#1E1E24] flex flex-col font-sans overflow-hidden"
+      className="relative min-h-screen bg-canvas text-ink flex flex-col font-sans overflow-hidden"
     >
       {/* 1. Subtle Technical Grid Background (Warm Mode) */}
       <div
@@ -135,20 +121,23 @@ export default function Hero({ user }: HeroProps) {
       />
 
       {/* Decorative background radial glows for depth */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-[#F26A21]/6 to-transparent blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-100px] left-[-100px] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-indigo-500/3 to-transparent blur-[140px] pointer-events-none z-0" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-linear-to-br from-primary/5 to-transparent blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-100px] left-[-100px] w-[600px] h-[600px] rounded-full bg-linear-to-tr from-indigo-500/3 to-transparent blur-[140px] pointer-events-none z-0" />
 
       {/* 2. Transparent Navbar over Warm Background */}
       <header className="relative z-30 w-full px-6 md:px-10 py-5 bg-transparent">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo brand - Strict FPT identity */}
-          <Link to="/" className="flex items-center gap-1.5 group select-none">
-            <span className="font-display font-extrabold text-lg tracking-wider uppercase text-[#1E1E24]">
-              SEAL
-            </span>
-            <span className="font-display font-bold text-xs ml-0.5 px-2.5 py-1.5 bg-[#F26A21] text-white uppercase tracking-wider">
-              HACKATHON
-            </span>
+          <Link
+            to="/"
+            className="flex items-center group select-none rounded-xl bg-white/90 px-3 py-1.5 shadow-xs"
+          >
+            <img
+              src="/seal_hackathon_logo.png"
+              alt="SEAL Hackathon - Software Engineering Agile League"
+              className="h-8 sm:h-9 w-auto object-contain"
+              draggable={false}
+            />
           </Link>
 
           {/* Center Links with hover underlines */}
@@ -156,45 +145,45 @@ export default function Hero({ user }: HeroProps) {
             <a
               href="#schedule"
               onClick={handleScrollToSchedule}
-              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-[#7A7A85] hover:text-[#1E1E24] transition-colors duration-250"
+              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-ink-muted hover:text-ink transition-colors duration-250"
             >
               <CalendarDays
                 size={15}
-                className="group-hover:text-[#F26A21] transition-colors duration-250"
+                className="group-hover:text-primary transition-colors duration-250"
               />
               <span>Xem lịch trình</span>
-              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-[#F26A21] transition-all duration-300 group-hover:w-full" />
+              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-primary transition-all duration-300 group-hover:w-full" />
             </a>
 
             <Link
               to={user ? "/team-area" : "/login?redirect=/team-area"}
-              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-[#7A7A85] hover:text-[#1E1E24] transition-colors duration-250"
+              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-ink-muted hover:text-ink transition-colors duration-250"
             >
               <UserPlus
                 size={15}
-                className="group-hover:text-[#F26A21] transition-colors duration-250"
+                className="group-hover:text-primary transition-colors duration-250"
               />
               <span>Đăng ký thi</span>
-              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-[#F26A21] transition-all duration-300 group-hover:w-full" />
+              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-primary transition-all duration-300 group-hover:w-full" />
             </Link>
 
             <Link
               to="/album"
-              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-[#7A7A85] hover:text-[#1E1E24] transition-colors duration-250"
+              className="group relative flex items-center gap-2 font-sans text-sm font-medium text-ink-muted hover:text-ink transition-colors duration-250"
             >
               <Images
                 size={15}
-                className="group-hover:text-[#F26A21] transition-colors duration-250"
+                className="group-hover:text-primary transition-colors duration-250"
               />
               <span>Album ảnh</span>
-              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-[#F26A21] transition-all duration-300 group-hover:w-full" />
+              <span className="absolute bottom-[-4px] left-0 w-0 h-[1.5px] bg-primary transition-all duration-300 group-hover:w-full" />
             </Link>
           </nav>
 
           {/* Right Action Button - FPT Orange style */}
           <Link
             to={user ? dashboardLink : "/login"}
-            className="rounded-full px-5 py-2 flex items-center gap-2 font-sans font-bold uppercase tracking-[0.05em] text-[14px] text-[#F26A21] border border-[#F26A21]/30 bg-transparent hover:bg-[#F26A21]/5 hover:border-[#F26A21] hover:shadow-[0_4px_20px_rgba(242,106,33,0.06)] transition-all duration-300 active:scale-[0.97]"
+            className="rounded-full px-5 py-2 flex items-center gap-2 font-sans font-bold uppercase tracking-wider text-[14px] text-primary border border-primary/40 bg-transparent hover:bg-primary-soft hover:border-primary hover:shadow-[0_4px_20px_rgba(242,112,36,0.08)] transition-all duration-300 active:scale-[0.97]"
           >
             <LogIn size={13} />
             <span>{user ? "Dashboard" : "Đăng nhập"}</span>
@@ -217,7 +206,7 @@ export default function Hero({ user }: HeroProps) {
         >
           {/* Top Event Badge - Glassmorphic design */}
           <motion.div variants={itemVariants}>
-            <div className="rounded-full px-4 py-2 inline-flex items-center gap-2 border border-[#E9E7E4] bg-white/70 backdrop-blur-sm shadow-[0_4px_20px_rgba(30,30,36,0.02)]">
+            <div className="rounded-full px-4 py-2 inline-flex items-center gap-2 border border-line bg-white/70 backdrop-blur-xs shadow-[0_4px_20px_rgba(30,30,36,0.02)]">
               <motion.span
                 animate={{ opacity: [0.5, 1, 0.5] }}
                 transition={{
@@ -225,9 +214,9 @@ export default function Hero({ user }: HeroProps) {
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="w-2 h-2 rounded-full bg-[#F26A21] shadow-[0_0_6px_rgba(242,106,33,0.5)]"
+                className="w-2 h-2 rounded-full bg-primary shadow-[0_0_6px_rgba(242,112,36,0.5)]"
               />
-              <span className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-[#7A7A85]">
+              <span className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-ink-muted">
                 SEAL HACKATHON 2026
               </span>
             </div>
@@ -236,21 +225,21 @@ export default function Hero({ user }: HeroProps) {
           {/* Headline - Strict Archivo Black Editorial Style */}
           <motion.h1
             variants={itemVariants}
-            className="font-display font-black text-[#1E1E24] tracking-[-0.035em] leading-[0.92]"
+            className="font-display font-black text-ink tracking-[-0.035em] leading-[0.92]"
             style={{
               fontSize: "clamp(2.9rem, 8vw, 5.4rem)",
             }}
           >
-            <span className="block text-[#1E1E24]">Lập trình</span>
-            <span className="block italic bg-gradient-to-r from-[#F26A21] to-[#FF9F5A] bg-clip-text text-transparent pb-2">
-              tương lai.
+            <span className="block text-ink">Lập Trình</span>
+            <span className="block italic text-primary pb-2">
+              Tương Lai.
             </span>
           </motion.h1>
 
           {/* Description */}
           <motion.p
             variants={itemVariants}
-            className="font-sans text-[16px] leading-[1.65] text-[#7A7A85] font-medium"
+            className="font-sans text-[16px] leading-[1.65] text-ink-muted font-medium"
             style={{ maxWidth: "32rem" }}
           >
             Sân chơi học thuật và trải nghiệm công nghệ dành cho sinh viên ngành
@@ -265,7 +254,7 @@ export default function Hero({ user }: HeroProps) {
           >
             <Link
               to={dashboardLink}
-              className="group px-6 py-3 bg-gradient-to-r from-[#F26A21] to-[#FF9F5A] hover:opacity-95 text-white rounded-xl font-sans font-bold uppercase tracking-[0.05em] text-[14px] text-center shadow-[0_12px_32px_rgba(242,106,33,0.18)] hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2"
+              className="group px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-xl font-sans font-bold uppercase tracking-wider text-[14px] text-center shadow-lg shadow-orange-500/25 hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 flex items-center justify-center gap-2"
             >
               <span>THAM GIA NGAY</span>
               <ArrowRight
@@ -277,44 +266,11 @@ export default function Hero({ user }: HeroProps) {
             <a
               href="#schedule"
               onClick={handleScrollToSchedule}
-              className="px-6 py-3 bg-white/60 backdrop-blur-sm hover:bg-white text-[#1E1E24] rounded-xl font-sans font-bold uppercase tracking-[0.05em] text-[14px] text-center border border-[#E9E7E4] hover:border-[#F26A21] hover:text-[#F26A21] transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
+              className="px-6 py-3 bg-white/60 backdrop-blur-xs hover:bg-secondary-soft text-secondary hover:text-secondary-hover rounded-xl font-sans font-bold uppercase tracking-wider text-[14px] text-center border border-secondary/30 hover:border-secondary transition-all duration-300 flex items-center justify-center gap-2 shadow-xs"
             >
               <CalendarDays size={14} />
               <span>XEM LỊCH TRÌNH</span>
             </a>
-          </motion.div>
-
-          {/* Metrics Row */}
-          <motion.div
-            variants={itemVariants}
-            className="pt-8 mt-10 border-t border-[#E9E7E4] max-w-xl"
-          >
-            <div className="grid grid-cols-3 gap-8">
-              <div>
-                <p className="font-display font-black text-[34px] tracking-[-0.02em] text-[#1E1E24]">
-                  500+
-                </p>
-                <p className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-[#7A7A85] mt-1">
-                  Thí sinh
-                </p>
-              </div>
-              <div>
-                <p className="font-display font-black text-[34px] tracking-[-0.02em] text-[#1E1E24]">
-                  48H
-                </p>
-                <p className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-[#7A7A85] mt-1">
-                  Coding
-                </p>
-              </div>
-              <div>
-                <p className="font-display font-black text-[34px] tracking-[-0.02em] text-[#1E1E24]">
-                  100M
-                </p>
-                <p className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-[#7A7A85] mt-1">
-                  Giải thưởng
-                </p>
-              </div>
-            </div>
           </motion.div>
         </motion.div>
 
@@ -338,52 +294,26 @@ export default function Hero({ user }: HeroProps) {
             {/* Soft radial glow behind shield inside the card */}
             <div className="absolute inset-0 z-0 pointer-events-none rounded-full blur-[80px] opacity-25 bg-[radial-gradient(circle_at_50%_50%,rgba(242,106,33,0.2)_0%,transparent_60%)]" />
 
-            {/* Shield Rotating Video Loop (WebM transparent with CSS drop shadow) */}
-            <video
-              ref={videoRef}
-              autoPlay
-              loop
-              muted
-              playsInline
-              poster="/shield_seal.png"
-              onTimeUpdate={handleTimeUpdate}
+            {/* SEAL Shield Badge (transparent PNG with CSS drop shadow) */}
+            <img
+              src="/seal_shield_badge.png"
+              alt="SEAL Shield"
+              draggable={false}
               style={{
                 filter: "drop-shadow(0px 16px 36px rgba(0, 0, 0, 0.09))",
               }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 scale-[1.15] sm:scale-[1.35] md:scale-[1.55] lg:scale-[1.7] w-full h-full object-contain z-10"
-            >
-              <source src="/shield_rotation.webm" type="video/webm" />
-            </video>
+              className="relative w-full h-full object-contain z-10"
+            />
           </motion.div>
         </motion.div>
       </main>
 
-      {/* 4. Bottom-Right Shield Status Indicator (Desktop only) */}
-      <div className="hidden lg:flex absolute bottom-8 right-8 z-30 flex-col items-end gap-2">
-        <div className="rounded-full px-5 py-3 flex items-center gap-3 border border-[#E9E7E4] bg-white/90 backdrop-blur-md shadow-sm">
-          <motion.span
-            animate={{ scale: [1, 1.25, 1] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            className="w-2 h-2 rounded-full bg-[#F26A21] shadow-[0_0_8px_rgba(242,106,33,0.5)]"
-          />
-          <span className="font-mono text-[0.7rem] tracking-[0.22em] font-bold uppercase text-[#F26A21]">
-            SYSTEM ACTIVATED
-          </span>
-          <div className="w-24 h-1 bg-[#E9E7E4] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#F26A21] rounded-full transition-all duration-100 ease-out"
-              style={{ width: `${progress * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Bottom Center Scroll Indicator */}
+      {/* 4. Bottom Center Scroll Indicator */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none">
-        <span className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-[#7A7A85]">
-          SCROLL TO EXPLORE
+        <span className="font-mono text-[0.7rem] tracking-[0.22em] font-semibold uppercase text-ink-muted">
+          CUỘN ĐỂ XEM CHI TIẾT
         </span>
-        <div className="w-[1px] h-8 bg-[#E9E7E4] relative overflow-hidden">
+        <div className="w-px h-8 bg-line relative overflow-hidden">
           <motion.div
             animate={{
               y: ["-100%", "100%"],
@@ -394,7 +324,7 @@ export default function Hero({ user }: HeroProps) {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute top-0 left-0 w-full h-1/2 bg-[#F26A21]"
+            className="absolute top-0 left-0 w-full h-1/2 bg-primary"
           />
         </div>
       </div>
