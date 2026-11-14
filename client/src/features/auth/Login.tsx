@@ -1109,6 +1109,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
 
         <div className="grid grid-cols-1">
+          <span className="relative block text-center px-3 text-[12px] uppercase tracking-wider text-black bg-white font-mono mb-2">
+            Đăng nhập dành cho thí sinh
+          </span>
           <button
             type="button"
             onClick={() => handleOAuthClick('google')}
@@ -1123,22 +1126,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             Google
           </button>
         </div>
-
-        <div className="mt-6 pt-4 border-t border-slate-200 text-center">
-          <p className="text-xs text-on-surface-variant font-sans">
-            {isRegister ? 'Đã kích hoạt khóa truy cập?' : 'Chưa có tài khoản?'}
-            <button
-              onClick={() => {
-                setIsRegister(!isRegister);
-                setError('');
-              }}
-              className="text-primary hover:text-primary-hover underline font-mono text-xs ml-1.5 transition-colors duration-150 cursor-pointer"
-            >
-              {isRegister ? 'Đăng nhập ngay' : 'Đăng ký tài khoản mới'}
-            </button>
-          </p>
-        </div>
-
       </div>
     </div>
   );
