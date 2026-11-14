@@ -527,7 +527,7 @@ export default function Leaderboard({
                   {activeTrackId && (
                     <button
                       onClick={() => setIsImportModalOpen(true)}
-                      className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95d16] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                      className="flex items-center gap-1.5 bg-primary hover:bg-[#d95d16] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs active:scale-[0.98] cursor-pointer"
                       title="Import điểm cho toàn bộ đội trong bảng đấu"
                     >
                       <Upload size={12} className="text-white" />
@@ -565,7 +565,7 @@ export default function Leaderboard({
                   <button
                     onClick={handleSendCertEmails}
                     disabled={sendingEmailCert}
-                    className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95f1f] text-white border border-[#F27024]/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                    className="flex items-center gap-1.5 bg-primary hover:bg-[#d95f1f] text-white border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     <Check size={12} className="text-white" />
                     <span>
@@ -757,7 +757,7 @@ export default function Leaderboard({
                                 <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
                                   <Trophy
                                     size={12}
-                                    className="text-[#F27024] shrink-0"
+                                    className="text-primary shrink-0"
                                   />
                                   {teamAward.title}
                                 </span>

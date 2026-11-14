@@ -416,7 +416,7 @@ function AppContent({
       )}
 
       {isProfileOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/65 backdrop-blur-md p-4 animate-fade-in animate-duration-150">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/65 backdrop-blur-md p-4 animate-fade-in animate-duration-150">
           <div
             className={`relative w-full max-w-md p-6 rounded-2xl shadow-2xl transition-all duration-300 font-sans ${
               usesLightShell
@@ -428,8 +428,8 @@ function AppContent({
             <div
               className={`absolute top-0 left-0 w-full h-[2px] rounded-t-2xl ${
                 usesLightShell
-                  ? "bg-gradient-to-r from-transparent via-[#F27024]/50 to-transparent"
-                  : "bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"
+                  ? "bg-linear-to-r from-transparent via-[#F27024]/50 to-transparent"
+                  : "bg-linear-to-r from-transparent via-cyan-500/50 to-transparent"
               }`}
             ></div>
 
@@ -444,14 +444,14 @@ function AppContent({
                   <Settings2
                     size={18}
                     className={
-                      usesLightShell ? "text-[#F27024]" : "text-cyan-400"
+                      usesLightShell ? "text-primary" : "text-cyan-400"
                     }
                   />
                 ) : (
                   <UserCog
                     size={18}
                     className={
-                      usesLightShell ? "text-[#F27024]" : "text-cyan-400"
+                      usesLightShell ? "text-primary" : "text-cyan-400"
                     }
                   />
                 )}
@@ -493,13 +493,13 @@ function AppContent({
                     setFormData({ ...formData, fullName: e.target.value })
                   }
                   placeholder="Họ và tên"
-                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                     !isEditing
                       ? usesLightShell
                         ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                         : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                       : usesLightShell
-                        ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                        ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                         : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                   }`}
                 />
@@ -525,13 +525,13 @@ function AppContent({
                       ? "Nhập mã số sinh viên (ví dụ: SE180186)"
                       : "Chưa cập nhật"
                   }
-                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                     !isEditing
                       ? usesLightShell
                         ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                         : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                       : usesLightShell
-                        ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                        ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                         : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                   }`}
                 />
@@ -555,13 +555,13 @@ function AppContent({
                   placeholder={
                     isEditing ? "Nhập tên trường đại học" : "Chưa cập nhật"
                   }
-                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                     !isEditing
                       ? usesLightShell
                         ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                         : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                       : usesLightShell
-                        ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                        ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                         : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                   }`}
                 />
@@ -587,13 +587,13 @@ function AppContent({
                       ? "Nhập tên tài khoản GitHub (ví dụ: octocat)"
                       : "Chưa cập nhật"
                   }
-                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                  className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                     !isEditing
                       ? usesLightShell
                         ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                         : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                       : usesLightShell
-                        ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                        ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                         : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                   }`}
                 />
@@ -617,13 +617,13 @@ function AppContent({
                       setFormData({ ...formData, height: e.target.value })
                     }
                     placeholder={isEditing ? "Ví dụ: 170" : "Chưa cập nhật"}
-                    className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                    className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                       !isEditing
                         ? usesLightShell
                           ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                           : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                         : usesLightShell
-                          ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                          ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                           : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                     }`}
                   />
@@ -646,13 +646,13 @@ function AppContent({
                       setFormData({ ...formData, weight: e.target.value })
                     }
                     placeholder={isEditing ? "Ví dụ: 60" : "Chưa cập nhật"}
-                    className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-none transition-all ${
+                    className={`w-full px-3 py-2 rounded-xl text-sm border focus:outline-hidden transition-all ${
                       !isEditing
                         ? usesLightShell
                           ? "bg-slate-100/85 border-slate-250 text-slate-500 cursor-not-allowed"
                           : "bg-slate-900/50 border-slate-850 text-slate-500 cursor-not-allowed"
                         : usesLightShell
-                          ? "bg-white border-slate-300 text-slate-800 focus:border-[#F27024] focus:ring-2 focus:ring-[#F27024]/20"
+                          ? "bg-white border-slate-300 text-slate-800 focus:border-primary focus:ring-2 focus:ring-[#F27024]/20"
                           : "bg-slate-900 border-slate-800 text-slate-200 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
                     }`}
                   />
@@ -684,7 +684,7 @@ function AppContent({
                       }}
                       className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer ${
                         usesLightShell
-                          ? "bg-[#F27024] hover:bg-[#e05e1b] text-white shadow-lg shadow-[#F27024]/20"
+                          ? "bg-primary hover:bg-[#e05e1b] text-white shadow-lg shadow-[#F27024]/20"
                           : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
                       }`}
                     >
@@ -727,7 +727,7 @@ function AppContent({
                       disabled={isSaving}
                       className={`px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer ${
                         usesLightShell
-                          ? "bg-[#F27024] hover:bg-[#e05e1b] text-white shadow-lg shadow-[#F27024]/20"
+                          ? "bg-primary hover:bg-[#e05e1b] text-white shadow-lg shadow-[#F27024]/20"
                           : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/30 hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]"
                       }`}
                     >
@@ -988,7 +988,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#060a0f] flex items-center justify-center p-4 font-mono text-slate-200">
         <div className="max-w-md w-full glass border border-rose-500/30 p-8 rounded-2xl text-center relative overflow-hidden shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 to-amber-500 animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-rose-500 to-amber-500 animate-pulse"></div>
 
           <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/30 rounded-full flex items-center justify-center mx-auto mb-6 text-rose-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]">
             <svg
@@ -1029,7 +1029,7 @@ export default function App() {
 
           <button
             onClick={() => window.location.reload()}
-            className="w-full py-2.5 px-4 rounded bg-rose-950/40 border border-rose-500/50 hover:bg-rose-500 hover:text-white transition-all duration-300 font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.1)] active:scale-95 text-rose-300"
+            className="w-full py-2.5 px-4 rounded-sm bg-rose-950/40 border border-rose-500/50 hover:bg-rose-500 hover:text-white transition-all duration-300 font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.1)] active:scale-95 text-rose-300"
           >
             Tải lại trang
           </button>
@@ -1046,8 +1046,8 @@ export default function App() {
 
         {/* Spinner & Text */}
         <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-[#F27024]/20 border-t-[#F27024] rounded-full animate-spin"></div>
-          <p className="text-[#F27024] text-sm font-bold tracking-wider uppercase animate-pulse">
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-primary text-sm font-bold tracking-wider uppercase animate-pulse">
             Đang tải Nền tảng SEAL...
           </p>
         </div>

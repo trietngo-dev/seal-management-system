@@ -325,8 +325,8 @@ export default function TracksTab({
               <div
                 key={t._id}
                 className={`w-full p-3 rounded-xl border text-xs flex justify-between items-center transition-all ${selectedTrack?._id === t._id
-                  ? "bg-orange-500/10 border-orange-500/50 text-slate-900 dark:text-orange-300 font-bold shadow-xs"
-                  : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:border-orange-500/40 text-slate-900 dark:text-slate-300 shadow-xs"
+                  ? "bg-orange-500/10 border-orange-500/50 text-slate-900 dark:text-orange-300 font-bold shadow-2xs"
+                  : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:border-orange-500/40 text-slate-900 dark:text-slate-300 shadow-2xs"
                   }`}
               >
                 <button
@@ -572,7 +572,7 @@ export default function TracksTab({
               <BookOpen size={16} className="text-orange-500" />
               <span>Đề bài & Tài liệu</span>
               {selectedTrack && (
-                <span className="ml-auto text-xs font-bold text-orange-500 border border-orange-500/30 bg-orange-500/10 px-3 py-1 rounded font-mono uppercase tracking-wider">
+                <span className="ml-auto text-xs font-bold text-orange-500 border border-orange-500/30 bg-orange-500/10 px-3 py-1 rounded-sm font-mono uppercase tracking-wider">
                   {formatTrackName(selectedTrack.name)}
                 </span>
               )}
@@ -630,14 +630,14 @@ export default function TracksTab({
                         placeholder="VD: Đề Bảng AI & IoT - Vòng Sơ loại"
                         value={driveFileName}
                         onChange={(e) => setDriveFileName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+                        className="w-full px-3 py-2 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-600 focus:outline-hidden focus:border-cyan-500"
                       />
                       <input
                         type="text"
                         placeholder="https://drive.google.com/drive/folders/..."
                         value={driveFileUrl}
                         onChange={(e) => setDriveFileUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-500"
+                        className="w-full px-3 py-2 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 placeholder:text-slate-600 focus:outline-hidden focus:border-cyan-500"
                       />
                       <p className="text-[9px] text-amber-400 font-sans">
                         Đặt Drive là <strong>"Anyone with the link"</strong> rồi
@@ -723,18 +723,18 @@ export default function TracksTab({
                       </div>
                       <div className="flex flex-wrap gap-1.5 items-center">
                         <span
-                          className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${role.role === "judge" ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"}`}
+                          className={`px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider ${role.role === "judge" ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30" : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"}`}
                         >
                           {role.role === "judge" ? "Giám khảo" : "Mentor"}
                         </span>
                         {role.role === "judge" && role.isChiefJudge && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
                             <Crown className="w-3 h-3 text-amber-400" />
                             Chủ tịch
                           </span>
                         )}
                         {role.role === "mentor" && mentoredTeam && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                          <span className="px-2 py-0.5 rounded-sm text-[9px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
                             Đội: {mentoredTeam.name}
                           </span>
                         )}
@@ -743,7 +743,7 @@ export default function TracksTab({
                     {SHOW_TRACK_PERSONNEL_ACTIONS && handleRemoveRole && !readOnly && (
                       <button
                         onClick={() => handleRemoveRole(role._id)}
-                        className="text-rose-500 hover:text-rose-400 font-bold text-[9px] uppercase font-mono border border-rose-500/10 hover:border-rose-500/30 px-2 py-0.5 rounded bg-rose-500/5 cursor-pointer animate-all"
+                        className="text-rose-500 hover:text-rose-400 font-bold text-[9px] uppercase font-mono border border-rose-500/10 hover:border-rose-500/30 px-2 py-0.5 rounded-sm bg-rose-500/5 cursor-pointer animate-all"
                       >
                         Xóa
                       </button>
@@ -809,7 +809,7 @@ export default function TracksTab({
                         type="checkbox"
                         checked={isChiefJudge}
                         onChange={(e) => setIsChiefJudge(e.target.checked)}
-                        className="accent-cyan-500 rounded border-slate-800"
+                        className="accent-cyan-500 rounded-sm border-slate-800"
                       />
                       Chủ tịch Hội đồng
                     </label>
@@ -831,7 +831,7 @@ export default function TracksTab({
                       onBlur={() =>
                         setTimeout(() => setShowSuggestions(false), 200)
                       }
-                      className="w-full px-3 py-2.5 rounded-xl text-xs font-mono bg-slate-950 border border-slate-850 text-slate-200 focus:outline-none focus:border-cyan-500"
+                      className="w-full px-3 py-2.5 rounded-xl text-xs font-mono bg-slate-950 border border-slate-850 text-slate-200 focus:outline-hidden focus:border-cyan-500"
                     />
                     {showSuggestions &&
                       (loadingSuggestions || filteredUsers.length > 0) && (

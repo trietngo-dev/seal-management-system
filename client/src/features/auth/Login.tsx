@@ -702,7 +702,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       <div className="login-light-shell min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 text-slate-900">
         <style dangerouslySetInnerHTML={{ __html: loginLightThemeStyles }} />
         <div className="glass-panel w-full max-w-md p-8 rounded-[6px] relative overflow-hidden text-center">
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F27024] to-transparent opacity-80 animate-pulse"></div>
+          <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024] to-transparent opacity-80 animate-pulse"></div>
 
           <div className="w-24 h-24 mb-6 mx-auto relative">
             <img
@@ -751,7 +751,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     return (
       <div className="login-light-shell min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 font-sans text-slate-900">
         <style dangerouslySetInnerHTML={{ __html: loginLightThemeStyles }} />
-        <div className="w-full max-w-[450px] bg-white rounded-[6px] p-10 border border-[#F27024]/20 shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col items-center">
+        <div className="w-full max-w-[450px] bg-white rounded-[6px] p-10 border border-primary/20 shadow-[0_20px_60px_rgba(15,23,42,0.08)] flex flex-col items-center">
 
           {/* Google Logo */}
           <div className="mb-4">
@@ -784,16 +784,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                     key={acc.email}
                     onClick={() => handleMockGoogleLogin(acc.email, acc.name)}
                     disabled={loading}
-                    className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-[#F27024]/5 transition-colors text-left ${index > 0 ? 'border-t border-gray-100' : ''
+                    className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-primary/5 transition-colors text-left ${index > 0 ? 'border-t border-gray-100' : ''
                       }`}
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#F27024]/10 text-[#F27024] flex items-center justify-center font-semibold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm">
                       {acc.name[0]}
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium text-gray-800 flex items-center gap-1.5">
                         {acc.name}
-                        <span className="text-[10px] bg-gray-100 text-gray-500 font-mono px-1.5 py-0.5 rounded">
+                        <span className="text-[10px] bg-gray-100 text-gray-500 font-mono px-1.5 py-0.5 rounded-sm">
                           {acc.role}
                         </span>
                       </div>
@@ -805,7 +805,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <button
                   onClick={() => setCustomEmailMode(true)}
                   disabled={loading}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-[#F27024]/5 transition-colors text-left border-t border-gray-100"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-primary/5 transition-colors text-left border-t border-gray-100"
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -826,7 +826,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   handleOAuthClick('google');
                 }}
                 disabled={loading}
-                className="text-xs text-[#F27024] hover:text-[#d95f1f] hover:underline text-center font-medium py-2 self-center transition-all cursor-pointer"
+                className="text-xs text-primary hover:text-[#d95f1f] hover:underline text-center font-medium py-2 self-center transition-all cursor-pointer"
               >
                 Thử đăng nhập Google OAuth thật (có thể lỗi redirect_uri trên IP local)
               </button>
@@ -849,7 +849,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   placeholder="nhap-email-cua-ban@gmail.com"
                   value={mockGoogleEmail}
                   onChange={(e) => setMockGoogleEmail(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:border-[#F27024] focus:outline-none transition-colors"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:outline-hidden transition-colors"
                 />
               </div>
 
@@ -860,7 +860,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   placeholder="Nguyễn Văn A"
                   value={mockGoogleName}
                   onChange={(e) => setMockGoogleName(e.target.value)}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:border-[#F27024] focus:outline-none transition-colors"
+                  className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:outline-hidden transition-colors"
                 />
               </div>
 
@@ -875,7 +875,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <button
                   type="submit"
                   disabled={loading || !mockGoogleEmail}
-                  className="flex-1 py-2.5 bg-[#F27024] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#d95f1f] active:scale-95 transition-all cursor-pointer"
+                  className="flex-1 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#d95f1f] active:scale-95 transition-all cursor-pointer"
                 >
                   {loading ? 'Đang xử lý...' : 'Tiếp tục'}
                 </button>
@@ -895,12 +895,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       <div className="glass-panel w-full max-w-md p-8 rounded-[6px] relative overflow-hidden z-10">
 
         {/* Top Rule */}
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F27024] to-transparent opacity-80"></div>
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#F27024] to-transparent opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024] to-transparent opacity-80"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#F27024] to-transparent opacity-30"></div>
 
         {/* Header Section */}
         <div className="text-center mb-6 flex flex-col items-center">
-          <h1 className="font-mono text-3xl font-bold text-[#F27024] mb-2 tracking-tight uppercase">
+          <h1 className="font-mono text-3xl font-bold text-primary mb-2 tracking-tight uppercase">
             {isRegister ? 'Đăng ký Tài khoản' : 'Đăng nhập'}
           </h1>
           <p className="text-on-surface-variant text-xs font-sans">
@@ -909,7 +909,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
 
         {errorMessage && (
-          <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-[6px] text-rose-700 text-xs font-mono flex items-center justify-between shadow-sm animate-in fade-in zoom-in-95">
+          <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-[6px] text-rose-700 text-xs font-mono flex items-center justify-between shadow-xs animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-2.5">
               <span className="leading-relaxed">{errorMessage}</span>
             </div>
@@ -930,7 +930,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <>
               <div>
                 <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="fullName">Họ và Tên</label>
-                <div className="relative cyber-input-wrapper rounded overflow-hidden">
+                <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                   <div className="relative terminal-prompt">
                     <input
                       type="text"
@@ -939,7 +939,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                       placeholder="Nhập họ và tên đầy đủ của bạn"
                       value={fullName}
                       onChange={e => setFullName(e.target.value)}
-                      className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                      className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                     />
                     <div className="scanline"></div>
                   </div>
@@ -949,7 +949,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="studentId">Mã số Sinh viên</label>
-                  <div className="relative cyber-input-wrapper rounded overflow-hidden">
+                  <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                     <div className="relative terminal-prompt">
                       <input
                         type="text"
@@ -957,7 +957,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         placeholder="Ví dụ: SE180xxx"
                         value={studentId}
                         onChange={e => setStudentId(e.target.value)}
-                        className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                        className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                       />
                       <div className="scanline"></div>
                     </div>
@@ -969,19 +969,19 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   <UniversityCombobox
                     value={university}
                     onChange={setUniversity}
-                    inputClassName="cyber-input rounded py-2 px-3 font-mono text-xs focus:ring-0"
+                    inputClassName="cyber-input rounded-sm py-2 px-3 font-mono text-xs focus:ring-0"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="githubUsername">Tên tài khoản GitHub</label>
-                <div className="relative cyber-input-wrapper rounded overflow-hidden">
+                <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                   <div className="relative terminal-prompt">
                     <GithubUserAutocomplete
                       value={githubUsername}
                       onChange={setGithubUsername}
-                      className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                      className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                       placeholder="Nhập tên tài khoản github"
                     />
                     <div className="scanline"></div>
@@ -992,7 +992,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="height">Chiều cao (cm) <span className="text-rose-500">*</span></label>
-                  <div className="relative cyber-input-wrapper rounded overflow-hidden">
+                  <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                     <div className="relative terminal-prompt">
                       <input
                         type="number"
@@ -1001,7 +1001,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         placeholder="Ví dụ: 170"
                         value={height}
                         onChange={e => setHeight(e.target.value)}
-                        className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                        className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                       />
                       <div className="scanline"></div>
                     </div>
@@ -1010,7 +1010,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
                 <div>
                   <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="weight">Cân nặng (kg) <span className="text-rose-500">*</span></label>
-                  <div className="relative cyber-input-wrapper rounded overflow-hidden">
+                  <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                     <div className="relative terminal-prompt">
                       <input
                         type="number"
@@ -1019,7 +1019,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                         placeholder="Ví dụ: 60"
                         value={weight}
                         onChange={e => setWeight(e.target.value)}
-                        className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                        className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                       />
                       <div className="scanline"></div>
                     </div>
@@ -1031,7 +1031,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
           <div>
             <label className="block font-mono text-xs text-primary-container opacity-80 mb-1" htmlFor="email">Địa chỉ Email</label>
-            <div className="relative cyber-input-wrapper rounded overflow-hidden">
+            <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
               <div className="relative terminal-prompt">
                 <input
                   type="email"
@@ -1040,7 +1040,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   placeholder="Nhập địa chỉ email của bạn"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
+                  className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-4 font-mono text-xs focus:ring-0"
                 />
                 <div className="scanline"></div>
               </div>
@@ -1054,7 +1054,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <Link to="/forgot-password" className="font-mono text-[10px] text-primary-container hover:underline hover:text-[#d95f1f] transition-colors">Quên mật khẩu?</Link>
               )}
             </div>
-            <div className="relative cyber-input-wrapper rounded overflow-hidden">
+            <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
               <div className="relative terminal-prompt flex items-center">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -1063,7 +1063,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   placeholder="Nhập mật khẩu bảo mật của bạn"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="cyber-input relative z-10 w-full rounded py-2 pl-11 pr-10 font-mono text-xs focus:ring-0"
+                  className="cyber-input relative z-10 w-full rounded-sm py-2 pl-11 pr-10 font-mono text-xs focus:ring-0"
                 />
                 <button
                   type="button"
@@ -1132,7 +1132,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 setIsRegister(!isRegister);
                 setError('');
               }}
-              className="text-[#F27024] hover:text-[#d95f1f] underline font-mono text-xs ml-1.5 transition-colors duration-150 cursor-pointer"
+              className="text-primary hover:text-primary-hover underline font-mono text-xs ml-1.5 transition-colors duration-150 cursor-pointer"
             >
               {isRegister ? 'Đăng nhập ngay' : 'Đăng ký tài khoản mới'}
             </button>

@@ -101,7 +101,7 @@ export default function GithubUserAutocomplete({
         />
         {loading && (
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
-            <div className={`animate-spin rounded-full h-4 w-4 border-2 border-t-transparent ${isLight ? 'border-[#F27024]' : 'border-cyan-400'}`}></div>
+            <div className={`animate-spin rounded-full h-4 w-4 border-2 border-t-transparent ${isLight ? 'border-primary' : 'border-cyan-400'}`}></div>
           </div>
         )}
       </div>
@@ -125,7 +125,7 @@ export default function GithubUserAutocomplete({
                 onClick={() => handleSelect(u)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2 text-left rounded-xl transition-all border border-transparent cursor-pointer ${
                   isLight
-                    ? 'hover:bg-orange-50 hover:text-[#F27024] hover:border-orange-200/60'
+                    ? 'hover:bg-orange-50 hover:text-primary hover:border-orange-200/60'
                     : 'hover:text-white hover:bg-cyan-500/10 hover:border-cyan-500/30'
                 }`}
               >

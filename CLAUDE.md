@@ -15,7 +15,8 @@
   - Use modular route files in `/routes` and service classes in `/services`.
   - Handle asynchronous tasks like GitHub repository creation and AI commit analysis using node-cron.
 - **Frontend (ReactJS/TypeScript/TailwindCSS v4)**:
-  - Use TailwindCSS v4 for styling.
+  - Use TailwindCSS v4 for styling (via `@tailwindcss/vite`; there is no `tailwind.config.js`).
+  - Theme tokens live in the `@theme` block of `client/src/index.css`. Use `primary` (orange) for main actions and `secondary` (navy) for secondary actions; orange buttons, links and active nav items use `primary` with `hover:*-primary-hover` (same orange as the "Hỗ trợ" support button).
   - Use React Router for navigation.
   - Keep components modular, typing all props and states.
   - Implement dynamic Glassmorphism layouts.

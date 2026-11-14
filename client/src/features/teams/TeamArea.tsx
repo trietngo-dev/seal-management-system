@@ -120,20 +120,20 @@ function SeminarWidget({ seminar }: SeminarWidgetProps) {
         </div>
         <div className="space-y-2 min-w-0 text-left">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] text-cyan-400 font-bold border border-cyan-500/30 px-2 py-0.5 rounded bg-cyan-950/20 tracking-widest uppercase">
+            <span className="text-[10px] text-cyan-400 font-bold border border-cyan-500/30 px-2 py-0.5 rounded-sm bg-cyan-950/20 tracking-widest uppercase">
               [SEMINAR_HƯỚNG_DẪN]
             </span>
             {isOngoing ? (
-              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-450 uppercase tracking-wider animate-pulse">
+              <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-450 uppercase tracking-wider animate-pulse">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 Đang diễn ra
               </span>
             ) : isUpcoming ? (
-              <span className="text-[9px] font-bold px-2.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 uppercase tracking-wider">
+              <span className="text-[9px] font-bold px-2.5 py-0.5 rounded-sm bg-slate-900 border border-slate-800 text-slate-400 uppercase tracking-wider">
                 Sắp diễn ra
               </span>
             ) : (
-              <span className="text-[9px] font-bold px-2.5 py-0.5 rounded bg-slate-950 border border-slate-900 text-slate-650 uppercase tracking-wider">
+              <span className="text-[9px] font-bold px-2.5 py-0.5 rounded-sm bg-slate-950 border border-slate-900 text-slate-650 uppercase tracking-wider">
                 Đã kết thúc
               </span>
             )}
@@ -682,7 +682,7 @@ export default function TeamArea() {
           <p className="text-rose-500 font-semibold mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="bg-[#F27024] hover:bg-[#e05e1b] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            className="bg-primary hover:bg-[#e05e1b] text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
           >
             Tải lại
           </button>
@@ -711,7 +711,7 @@ export default function TeamArea() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 space-y-8 font-mono">
         {/* Top Banner team details */}
-        <div className="bg-white p-8 rounded-3xl relative overflow-hidden border border-slate-200 shadow-sm transition-all text-slate-800">
+        <div className="bg-white p-8 rounded-3xl relative overflow-hidden border border-slate-200 shadow-xs transition-all text-slate-800">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             {/* Main Info (Col 5): Team name & Status */}
             <div className="lg:col-span-5 space-y-4">
@@ -764,8 +764,8 @@ export default function TeamArea() {
                 <span className="text-[9px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
                   BẢNG ĐẤU
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#F27024] bg-[#F27024]/10 border border-[#F27024]/20 px-3 py-1 rounded-full mt-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#F27024]"></span>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full mt-1">
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
                   {team?.trackId?.name || "Chờ phân bảng"}
                 </span>
               </div>
@@ -793,7 +793,7 @@ export default function TeamArea() {
           if (isRegistration) {
             const hasContestStart = team?.eventId?.contestStart;
             return (
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm text-slate-800">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs text-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
                   <div>
@@ -802,7 +802,7 @@ export default function TeamArea() {
                     </span>
                     <p className="text-xs sm:text-sm font-bold text-slate-800">
                       Chưa mở{" "}
-                      <span className="text-[#F27024] font-extrabold uppercase font-mono">
+                      <span className="text-primary font-extrabold uppercase font-mono">
                         (Đang mở đăng ký đội thi)
                       </span>
                     </p>
@@ -811,7 +811,7 @@ export default function TeamArea() {
                 {/* Timer / Info section */}
                 {hasContestStart && (
                   <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
-                    <Clock size={14} className="text-[#F27024]" />
+                    <Clock size={14} className="text-primary" />
                     <div className="text-xs font-mono">
                       <span className="text-slate-400 uppercase tracking-wider text-[9px] block">
                         Thời gian mở cuộc thi
@@ -831,16 +831,16 @@ export default function TeamArea() {
           if (!team?.currentEventRound) return null;
 
           return (
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm text-slate-800">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs text-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-[#F27024]"></div>
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
                 <div>
                   <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
                     Trạng thái giải đấu
                   </span>
                   <p className="text-xs sm:text-sm font-bold text-slate-800">
                     Vòng thi hiện tại:{" "}
-                    <span className="text-[#F27024] font-extrabold uppercase font-mono">
+                    <span className="text-primary font-extrabold uppercase font-mono">
                       {team.currentEventRound}
                     </span>
                   </p>
@@ -849,7 +849,7 @@ export default function TeamArea() {
               {/* Timer section */}
               {countdown && (
                 <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
-                  <Clock size={14} className="text-[#F27024]" />
+                  <Clock size={14} className="text-primary" />
                   <div className="text-xs font-mono">
                     <span className="text-slate-400 uppercase tracking-wider text-[9px] block">
                       Thời gian làm bài
@@ -867,14 +867,14 @@ export default function TeamArea() {
         {/* Prominent Team Area Announcement (Location / Preliminary Round Notice) */}
         {team?.eventId?.locationAnnouncement &&
           team.eventId.locationAnnouncement.trim().length > 0 && (
-            <div className="relative overflow-hidden bg-gradient-to-r from-orange-500/[0.08] via-amber-500/[0.04] to-slate-50/80 p-5 sm:p-6 rounded-2xl border-2 border-[#F27024]/30 shadow-sm transition-all hover:border-[#F27024]/50">
+            <div className="relative overflow-hidden bg-linear-to-r from-orange-500/8 via-amber-500/4 to-slate-50/80 p-5 sm:p-6 rounded-2xl border-2 border-primary/30 shadow-xs transition-all hover:border-primary/50">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-[#F27024]/15 text-[#F27024] rounded-xl border border-[#F27024]/30 shrink-0 shadow-inner">
+                <div className="p-3 bg-primary/15 text-primary rounded-xl border border-primary/30 shrink-0 shadow-inner">
                   <Megaphone size={22} className="animate-pulse" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-[#F27024] text-white shadow-sm shadow-orange-500/20">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-primary text-white shadow-xs shadow-orange-500/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                       Thông báo từ BTC
                     </span>
@@ -882,7 +882,7 @@ export default function TeamArea() {
                       Khu vực thi &amp; Địa điểm
                     </span>
                   </div>
-                  <div className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans font-medium whitespace-pre-line break-words">
+                  <div className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans font-medium whitespace-pre-line wrap-break-word">
                     {team.eventId.locationAnnouncement}
                   </div>
                 </div>
@@ -901,9 +901,9 @@ export default function TeamArea() {
 
         {/* Chat Section */}
         {team && team.eventId?.status === "ongoing" && !team.isEliminated && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-800">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs mb-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-800">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-[#F27024]/10 text-[#F27024] rounded-xl border border-[#F27024]/20">
+              <div className="p-3 bg-primary/10 text-primary rounded-xl border border-primary/20">
                 <MessageSquare size={20} />
               </div>
               <div>
@@ -922,7 +922,7 @@ export default function TeamArea() {
                   }),
                 );
               }}
-              className="px-5 py-2.5 bg-[#F27024] hover:bg-[#d95f1f] !text-white text-xs font-bold uppercase rounded-xl transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer font-sans"
+              className="px-5 py-2.5 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase rounded-xl transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer font-sans"
             >
               Nhắn tin ngay
             </button>
@@ -935,18 +935,18 @@ export default function TeamArea() {
             {/* Left: Exam & Materials Card */}
             {isExamVisible && (
               <div
-                className={`lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 relative overflow-hidden flex flex-col justify-between`}
+                className={`lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs text-slate-800 relative overflow-hidden flex flex-col justify-between`}
               >
                 <div className="flex flex-col justify-between h-full">
                   <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-5">
                     <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-mono-tech">
-                      <BookOpen size={18} className="text-[#F27024]" />
-                      <span className="text-[#F27024]">
+                      <BookOpen size={18} className="text-primary" />
+                      <span className="text-primary">
                         [ĐỀ_BÀI_&amp;_TÀI_LIỆU_THI]
                       </span>
                     </h2>
                     {round && (
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono uppercase tracking-wider">
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-600 font-mono uppercase tracking-wider">
                         Vòng: {round.name}
                       </span>
                     )}
@@ -968,7 +968,7 @@ export default function TeamArea() {
                           )}
                         </p>
                       </div>
-                      <div className="text-2xl sm:text-3xl font-black text-[#F27024] font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
+                      <div className="text-2xl sm:text-3xl font-black text-primary font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
                         {getRemainingTimeText(team.eventId.contestStart)}
                       </div>
                     </div>
@@ -988,7 +988,7 @@ export default function TeamArea() {
                           {new Date(round.startTime).toLocaleString("vi-VN")}
                         </p>
                       </div>
-                      <div className="text-2xl sm:text-3xl font-black text-[#F27024] font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
+                      <div className="text-2xl sm:text-3xl font-black text-primary font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
                         {getRemainingTimeText(round.startTime)}
                       </div>
                     </div>
@@ -1013,7 +1013,7 @@ export default function TeamArea() {
                           >
                             <BookOpen
                               size={18}
-                              className="text-[#F27024] shrink-0"
+                              className="text-primary shrink-0"
                             />
                             {team.trackId.examAccess.examDriveFileName ||
                               `Đề thi & Tài liệu hướng dẫn — Bảng ${effectiveTrackName}`}
@@ -1031,7 +1031,7 @@ export default function TeamArea() {
                             href={team.trackId.examAccess.examDriveFileUrl || "#"}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-full flex items-center justify-center gap-2 bg-[#F27024] hover:bg-[#d95f1f] !text-white text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
+                            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
                           >
                             <BookOpen size={14} />
                             Mở đề thi
@@ -1073,17 +1073,17 @@ export default function TeamArea() {
             <div
               className={`${isExamVisible ? "lg:col-span-6" : "lg:col-span-12"} flex flex-col h-full`}
             >
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-slate-800 text-left h-full flex flex-col justify-between flex-1">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs text-slate-800 text-left h-full flex flex-col justify-between flex-1">
                 <div>
                   <h2 className="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between font-mono-tech border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
-                      <Users size={18} className="text-[#F27024]" />
-                      <span className="text-[#F27024]">THÀNH VIÊN NHÓM</span>
+                      <Users size={18} className="text-primary" />
+                      <span className="text-primary">THÀNH VIÊN NHÓM</span>
                     </div>
                     {isLeader && !hasContestStarted && (
                       <button
                         onClick={handleOpenEditModal}
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#F27024] hover:bg-[#F27024]/10 px-2.5 py-1 rounded border border-[#F27024]/20 transition-all cursor-pointer font-sans uppercase tracking-wider"
+                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1 rounded-sm border border-primary/20 transition-all cursor-pointer font-sans uppercase tracking-wider"
                       >
                         <Edit3 size={10} />
                         Sửa thông tin
@@ -1145,16 +1145,16 @@ export default function TeamArea() {
                         <div className="shrink-0 flex items-center gap-1">
                           {m.confirmStatus === "confirmed" ? (
                             m.role === "leader" ? (
-                              <span className="flex items-center gap-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded text-[9px] font-extrabold uppercase">
+                              <span className="flex items-center gap-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-sm text-[9px] font-extrabold uppercase">
                                 Leader
                               </span>
                             ) : (
-                              <span className="flex items-center gap-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-0.5 rounded text-[9px] font-extrabold uppercase">
+                              <span className="flex items-center gap-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-0.5 rounded-sm text-[9px] font-extrabold uppercase">
                                 Member
                               </span>
                             )
                           ) : (
-                            <span className="flex items-center gap-0.5 bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded text-[9px] font-bold">
+                            <span className="flex items-center gap-0.5 bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-sm text-[9px] font-bold">
                               <Clock size={8} /> {m.role === "leader" ? "Leader (Chờ duyệt)" : "Chờ duyệt"}
                             </span>
                           )}
@@ -1167,7 +1167,7 @@ export default function TeamArea() {
 
               {/* Zalo Card */}
               {team.eventId?.zaloUrl && (
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm text-slate-800 relative overflow-hidden text-left">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs text-slate-800 relative overflow-hidden text-left">
                   <div className="flex items-start gap-3.5">
                     <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-600 shrink-0">
                       <MessageSquare size={20} />
@@ -1186,7 +1186,7 @@ export default function TeamArea() {
                         href={team.eventId.zaloUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 !text-white font-bold text-[10px] uppercase rounded-xl transition-all shadow-md shadow-blue-600/10 tracking-wider font-mono cursor-pointer border border-blue-400/20"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white! font-bold text-[10px] uppercase rounded-xl transition-all shadow-md shadow-blue-600/10 tracking-wider font-mono cursor-pointer border border-blue-400/20"
                       >
                         <span>Tham gia ngay</span>
                         <ExternalLink size={12} />
@@ -1205,10 +1205,10 @@ export default function TeamArea() {
             {repository ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Repository Info Column */}
-                <div className="lg:col-span-3 bg-white p-5 rounded-2xl space-y-4 border border-slate-200 shadow-sm text-slate-800 text-left">
+                <div className="lg:col-span-3 bg-white p-5 rounded-2xl space-y-4 border border-slate-200 shadow-xs text-slate-800 text-left">
                   <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5 font-mono-tech border-b border-slate-100 pb-3">
-                    <Github size={16} className="text-[#F27024]" />
-                    <span className="text-[#F27024]">[GITHUB_REPOSITORY]</span>
+                    <Github size={16} className="text-primary" />
+                    <span className="text-primary">[GITHUB_REPOSITORY]</span>
                   </h3>
 
                   <div className="space-y-4 font-mono text-xs">
@@ -1229,7 +1229,7 @@ export default function TeamArea() {
                           href={repository.repoUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full flex items-center justify-center gap-2 bg-[#F27024] hover:bg-[#d95f1f] !text-white text-xs font-bold uppercase py-2 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase py-2 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
                         >
                           <ExternalLink size={12} />
                           Mở GitHub Repo
@@ -1293,7 +1293,7 @@ export default function TeamArea() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm text-slate-800 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs text-slate-800 text-center flex flex-col items-center justify-center min-h-[300px]">
                 <Github size={48} className="text-slate-400 mb-3" />
                 <p className="font-semibold text-lg text-slate-800">
                   Chưa thiết lập GitHub Repository
@@ -1308,8 +1308,8 @@ export default function TeamArea() {
         )}
 
         {team?.isEliminated && (
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-slate-800 text-center space-y-6 max-w-2xl mx-auto mt-4">
-            <div className="w-16 h-16 rounded-full bg-[#F27024]/10 border border-[#F27024]/20 text-[#F27024] flex items-center justify-center mx-auto">
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs text-slate-800 text-center space-y-6 max-w-2xl mx-auto mt-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
               <Trophy size={28} />
             </div>
 
@@ -1329,7 +1329,7 @@ export default function TeamArea() {
                 <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
                   Thứ hạng (Bảng)
                 </span>
-                <p className="text-2xl font-black text-[#F27024] font-mono">
+                <p className="text-2xl font-black text-primary font-mono">
                   {team.achievedResult?.rank
                     ? `Top ${team.achievedResult.rank}`
                     : "---"}
@@ -1381,11 +1381,11 @@ export default function TeamArea() {
                     >
                       <div className="absolute top-3 right-4 flex items-center gap-2">
                         {member.role === "leader" ? (
-                          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded text-[8px] font-extrabold uppercase font-mono tracking-wider">
+                          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-sm text-[8px] font-extrabold uppercase font-mono tracking-wider">
                             Trưởng nhóm
                           </span>
                         ) : (
-                          <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-0.5 rounded text-[8px] font-extrabold uppercase font-mono tracking-wider">
+                          <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-0.5 rounded-sm text-[8px] font-extrabold uppercase font-mono tracking-wider">
                             Thành viên
                           </span>
                         )}
@@ -1398,7 +1398,7 @@ export default function TeamArea() {
                               );
                               setEditMembers(updated);
                             }}
-                            className="text-rose-500 hover:text-rose-400 text-[8px] font-bold cursor-pointer font-mono border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 rounded"
+                            className="text-rose-500 hover:text-rose-400 text-[8px] font-bold cursor-pointer font-mono border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 rounded-sm"
                           >
                             XÓA
                           </button>
@@ -1408,7 +1408,7 @@ export default function TeamArea() {
                             <button
                               type="button"
                               onClick={() => handleTransferLeaderParticipant(member.userId, member.fullName)}
-                              className="text-amber-500 hover:text-amber-400 text-[8px] font-bold cursor-pointer font-mono border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 rounded"
+                              className="text-amber-500 hover:text-amber-400 text-[8px] font-bold cursor-pointer font-mono border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 rounded-sm"
                               title="Chuyển vai trò Trưởng nhóm"
                             >
                               CHUYỂN TRƯỞNG NHÓM
@@ -1416,7 +1416,7 @@ export default function TeamArea() {
                             <button
                               type="button"
                               onClick={() => handleDeleteMemberParticipant(member.userId, member.fullName)}
-                              className="text-rose-500 hover:text-rose-400 text-[8px] font-bold cursor-pointer font-mono border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 rounded"
+                              className="text-rose-500 hover:text-rose-400 text-[8px] font-bold cursor-pointer font-mono border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 rounded-sm"
                               title="Xóa thành viên khỏi đội"
                             >
                               XÓA
@@ -1510,7 +1510,7 @@ export default function TeamArea() {
                                     }
                                   }
                                 }}
-                                className="w-full bg-slate-955 border border-slate-800 text-slate-200 pl-3.5 pr-20 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                                className="w-full bg-slate-955 border border-slate-800 text-slate-200 pl-3.5 pr-20 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                               />
                               {member.checkingStatus === "checking" && (
                                 <span className="absolute right-3.5 text-[10px] text-cyan-400 font-mono animate-pulse select-none">
@@ -1547,7 +1547,7 @@ export default function TeamArea() {
                               updated[index].fullName = e.target.value;
                               setEditMembers(updated);
                             }}
-                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
 
@@ -1565,7 +1565,7 @@ export default function TeamArea() {
                               setEditMembers(updated);
                             }}
                             placeholder="nhập github-username"
-                            className="bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            className="bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
 
@@ -1582,7 +1582,7 @@ export default function TeamArea() {
                               updated[index].studentId = e.target.value;
                               setEditMembers(updated);
                             }}
-                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
 
@@ -1600,7 +1600,7 @@ export default function TeamArea() {
                             }}
                             placeholder="Nhập hoặc chọn trường..."
                             className="w-full"
-                            inputClassName="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            inputClassName="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
 
@@ -1619,7 +1619,7 @@ export default function TeamArea() {
                               setEditMembers(updated);
                             }}
                             placeholder="Ví dụ: 170"
-                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
 
@@ -1638,7 +1638,7 @@ export default function TeamArea() {
                               setEditMembers(updated);
                             }}
                             placeholder="Ví dụ: 60"
-                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-cyan-500/50 transition-all font-mono"
+                            className="w-full bg-slate-955 border border-slate-800 text-slate-200 px-3.5 py-2.5 rounded-xl focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono"
                           />
                         </div>
                       </div>
@@ -1738,7 +1738,7 @@ export default function TeamArea() {
                   value={deleteConfirmTeamName}
                   onChange={(e) => setDeleteConfirmTeamName(e.target.value)}
                   placeholder={team?.name}
-                  className={`w-full bg-slate-955 border px-3.5 py-2.5 rounded-xl focus:outline-none transition-all font-mono text-xs ${deleteConfirmTeamName &&
+                  className={`w-full bg-slate-955 border px-3.5 py-2.5 rounded-xl focus:outline-hidden transition-all font-mono text-xs ${deleteConfirmTeamName &&
                     deleteConfirmTeamName.trim().toLowerCase() !==
                     team?.name?.toLowerCase()
                     ? "border-rose-500/40 text-rose-400 focus:border-rose-500/70"

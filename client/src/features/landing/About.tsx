@@ -102,13 +102,13 @@ export default function About() {
         return {
           label: "Cuộc thi đang diễn ra! Kết thúc sau:",
           timeText: formatRemainingTime(contestEnd - now),
-          colorClass: "text-[#F27024] bg-[#F27024]/10 border-[#F27024]/20 font-mono"
+          colorClass: "text-primary bg-primary/10 border-primary/20 font-mono"
         };
       } else {
         return {
           label: "Cuộc thi đang diễn ra",
           timeText: null,
-          colorClass: "text-[#F27024] bg-[#F27024]/10 border-[#F27024]/20 font-mono"
+          colorClass: "text-primary bg-primary/10 border-primary/20 font-mono"
         };
       }
     }
@@ -119,13 +119,13 @@ export default function About() {
         return {
           label: "Cuộc thi sẽ bắt đầu sau:",
           timeText: formatRemainingTime(contestStart - now),
-          colorClass: "text-[#F27024] bg-[#F27024]/10 border-[#F27024]/20 font-mono"
+          colorClass: "text-primary bg-primary/10 border-primary/20 font-mono"
         };
       } else {
         return {
           label: "Đang chuẩn bị cuộc thi",
           timeText: null,
-          colorClass: "text-[#F27024] bg-[#F27024]/10 border-[#F27024]/20 font-mono"
+          colorClass: "text-primary bg-primary/10 border-primary/20 font-mono"
         };
       }
     }
@@ -143,7 +143,7 @@ export default function About() {
         return {
           label: "Đăng ký đội thi sẽ đóng sau:",
           timeText: formatRemainingTime(regClose - now),
-          colorClass: "text-[#F27024] bg-[#F27024]/10 border-[#F27024]/20 font-mono"
+          colorClass: "text-primary bg-primary/10 border-primary/20 font-mono"
         };
       }
     }
@@ -180,7 +180,7 @@ export default function About() {
 
         {/* Header */}
         <div className="about-header max-w-3xl mb-16 space-y-4">
-          <span className="font-mono text-xs text-[#F27024] uppercase tracking-widest block font-semibold">
+          <span className="font-mono text-xs text-primary uppercase tracking-widest block font-semibold">
             Tổng quan Hệ Thống
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 uppercase tracking-tight font-sans">
@@ -192,8 +192,8 @@ export default function About() {
         <div className="hackathon-grid grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
 
           {/* Card 1: SDLC & Professional Working */}
-          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-[#F27024]/40 hover:shadow-md transition-all duration-350 opacity-0">
-            <div className="w-12 h-12 rounded-none border border-[#F27024]/20 flex items-center justify-center mb-6 bg-[#F27024]/10 text-[#F27024]">
+          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-primary/40 hover:shadow-md transition-all duration-350 opacity-0">
+            <div className="w-12 h-12 rounded-none border border-primary/20 flex items-center justify-center mb-6 bg-primary/10 text-primary">
               <Terminal size={22} />
             </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3 font-sans">SDLC & Professional Working</h3>
@@ -203,8 +203,8 @@ export default function About() {
           </div>
 
           {/* Card 2: Emerging Technologies */}
-          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-[#F27024]/40 hover:shadow-md transition-all duration-350 opacity-0">
-            <div className="w-12 h-12 rounded-none border border-[#F27024]/20 flex items-center justify-center mb-6 bg-[#F27024]/10 text-[#F27024]">
+          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-primary/40 hover:shadow-md transition-all duration-350 opacity-0">
+            <div className="w-12 h-12 rounded-none border border-primary/20 flex items-center justify-center mb-6 bg-primary/10 text-primary">
               <Cpu size={22} />
             </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3 font-sans">Emerging Technologies</h3>
@@ -214,8 +214,8 @@ export default function About() {
           </div>
 
           {/* Card 3: Product & User Experience */}
-          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-[#F27024]/40 hover:shadow-md transition-all duration-350 opacity-0">
-            <div className="w-12 h-12 rounded-none border border-[#F27024]/20 flex items-center justify-center mb-6 bg-[#F27024]/10 text-[#F27024]">
+          <div className="hackathon-card border border-slate-200 p-8 flex flex-col bg-slate-50 rounded-none hover:border-primary/40 hover:shadow-md transition-all duration-350 opacity-0">
+            <div className="w-12 h-12 rounded-none border border-primary/20 flex items-center justify-center mb-6 bg-primary/10 text-primary">
               <Layers size={22} />
             </div>
             <h3 className="text-lg font-bold text-slate-900 mb-3 font-sans">Product & User Experience</h3>

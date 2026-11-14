@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-white border-t border-slate-200 w-full z-20 relative py-8">
       <div className="flex flex-col md:flex-row justify-between items-center w-full px-6 gap-6 max-w-7xl mx-auto">
         <div className="flex flex-col gap-1 items-center md:items-start">
-          <span className="font-mono text-sm font-bold text-[#F27024]">SEAL_HACKATHON</span>
+          <span className="font-mono text-sm font-bold text-primary">SEAL_HACKATHON</span>
           <p className="font-mono text-[10px] text-slate-500">
             &copy; 2026 SEAL_HACKATHON. ALL_RIGHTS_RESERVED.
           </p>

@@ -169,10 +169,10 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-700 flex font-sans selection:bg-[#F27024]/30">
+    <div className="min-h-screen bg-slate-50 text-slate-700 flex font-sans selection:bg-primary/30">
       {/* SideNavBar */}
       <aside
-        className={`fixed left-0 top-0 h-full bg-white border-r border-slate-200 flex flex-col z-20 shadow-sm transition-all duration-300 ${
+        className={`fixed left-0 top-0 h-full bg-white border-r border-slate-200 flex flex-col z-20 shadow-xs transition-all duration-300 ${
           isSidebarCollapsed ? "w-[72px]" : "w-[280px]"
         }`}
       >
@@ -182,7 +182,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
             isSidebarCollapsed ? "px-3 justify-center" : "px-6 gap-3"
           }`}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F27024] to-[#f9823a] text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-[#F27024] to-[#f9823a] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
             {user?.fullName?.charAt(0) || "E"}
           </div>
           {!isSidebarCollapsed && (
@@ -190,7 +190,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
               <h4 className="text-sm font-bold text-slate-800 truncate">
                 {user?.fullName || "Expert Name"}
               </h4>
-              <p className="text-xs text-[#F27024] font-semibold mt-0.5 tracking-normal">
+              <p className="text-xs text-primary font-semibold mt-0.5 tracking-normal">
                 {isJudge && isMentor
                   ? "Giám khảo & Mentor"
                   : isJudge
@@ -221,16 +221,16 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
                     : "gap-3 px-4 py-3"
                 } ${
                   active
-                    ? "bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-200"
                 }`}
               >
                 {active && (
-                  <div className="absolute left-0 top-0 h-full w-[3.5px] bg-[#F27024] shadow-[0_0_8px_rgba(242,112,36,0.4)]"></div>
+                  <div className="absolute left-0 top-0 h-full w-[3.5px] bg-primary shadow-[0_0_8px_rgba(242,112,36,0.4)]"></div>
                 )}
                 <Icon
                   size={18}
-                  className={`shrink-0 ${active ? "text-[#F27024]" : "text-slate-500"}`}
+                  className={`shrink-0 ${active ? "text-primary" : "text-slate-500"}`}
                 />
                 {!isSidebarCollapsed && <span>{item.label}</span>}
               </Link>
@@ -277,15 +277,15 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
         }`}
       >
         {/* Background Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.015)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.015)_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none"></div>
 
         {/* TopAppBar */}
-        <header className="h-16 w-full px-8 bg-white border-b border-slate-200 flex justify-between items-center z-10 sticky top-0 shadow-sm">
+        <header className="h-16 w-full px-8 bg-white border-b border-slate-200 flex justify-between items-center z-10 sticky top-0 shadow-xs">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
               title={isSidebarCollapsed ? "Mở rộng menu" : "Thu gọn menu"}
-              className="p-2 text-slate-500 hover:text-[#F27024] hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center border border-slate-200 cursor-pointer"
+              className="p-2 text-slate-500 hover:text-primary hover:bg-slate-100 rounded-lg transition-colors flex items-center justify-center border border-slate-200 cursor-pointer"
             >
               {isSidebarCollapsed ? (
                 <PanelLeftOpen size={18} />
@@ -302,7 +302,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="text-slate-500 hover:text-[#F27024] transition-colors relative p-2 rounded-full hover:bg-[#F27024]/10"
+                className="text-slate-500 hover:text-primary transition-colors relative p-2 rounded-full hover:bg-primary/10"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
@@ -324,7 +324,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-[#F27024] hover:text-[#d95f1f]"
+                          className="text-primary hover:text-[#d95f1f]"
                         >
                           Đánh dấu đã đọc
                         </button>
@@ -354,7 +354,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
                           }}
                           className={`group relative p-3 border-b border-slate-100 cursor-pointer transition-colors flex justify-between items-start ${
                             notif.status === "pending" || !notif.isRead
-                              ? "bg-[#F27024]/5 hover:bg-[#F27024]/10"
+                              ? "bg-primary/5 hover:bg-primary/10"
                               : "hover:bg-slate-50"
                           }`}
                         >
@@ -362,7 +362,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
                             <p
                               className={`text-xs font-semibold ${
                                 notif.status === "pending" || !notif.isRead
-                                  ? "text-[#F27024]"
+                                  ? "text-primary"
                                   : "text-slate-700"
                               }`}
                             >
@@ -378,7 +378,7 @@ export default function ExpertLayout({ user, roles = [], onLogout }: ExpertLayou
                           <button
                             type="button"
                             onClick={(e) => deleteNotification(notif._id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 rounded transition-all shrink-0"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 rounded-sm transition-all shrink-0"
                             title="Xóa thông báo"
                           >
                             <Trash2 size={13} />

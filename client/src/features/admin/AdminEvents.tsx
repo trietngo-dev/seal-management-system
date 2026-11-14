@@ -2614,11 +2614,11 @@ export default function AdminEvents({
     <div className={`max-w-7xl mx-auto px-4 pb-8 ${isAssistant ? "pt-2 space-y-4" : "pt-4 space-y-6"}`}>
       {/* EVENT HEADER PANEL (if selected) */}
       {selectedEvent && (
-        <div className="glass p-6 rounded-2xl relative bg-gradient-to-r from-cyan-950/20 to-slate-900/20 z-30">
+        <div className="glass p-6 rounded-2xl relative bg-linear-to-r from-cyan-950/20 to-slate-900/20 z-30">
           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-2xl pointer-events-none"></div>
           <div className="flex justify-between items-start flex-col md:flex-row gap-4">
             <div className="relative" ref={eventTitleRef}>
-              <span className="text-[10px] bg-orange-500/10 text-orange-500 border border-orange-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+              <span className="text-[10px] bg-orange-500/10 text-orange-500 border border-orange-500/20 px-2 py-0.5 rounded-sm font-mono font-bold uppercase tracking-wider">
                 [DETAIL_BOARD]
               </span>
               <h1
@@ -2858,7 +2858,7 @@ export default function AdminEvents({
           ) : (
             <div className="w-full space-y-3">
               {/* Level 1: Category Group Bar */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-100 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-xs">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-100 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-2xs">
                 {CATEGORY_GROUPS.map((group) => {
                   const GroupIcon = group.icon;
                   const isActiveGroup = group.id === currentGroup.id;
@@ -2883,7 +2883,7 @@ export default function AdminEvents({
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer text-left select-none min-h-[68px] ${
                         isActiveGroup
                           ? "shadow-md font-bold"
-                          : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-[#F27024]/50"
+                          : "bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 hover:border-primary/50"
                       }`}
                     >
                       {/* Icon container: Unselected = Icon white in black box */}
@@ -2893,7 +2893,7 @@ export default function AdminEvents({
                             ? { backgroundColor: "rgba(255, 255, 255, 0.25)", color: "#ffffff" }
                             : { backgroundColor: "#0f172a", color: "#ffffff" }
                         }
-                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-xs"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-2xs"
                       >
                         <GroupIcon size={16} style={{ color: "#ffffff" }} />
                       </div>
@@ -2906,7 +2906,7 @@ export default function AdminEvents({
                           }
                           className={`font-mono text-xs sm:text-[13px] font-extrabold uppercase tracking-wider block leading-tight ${
                             isActiveGroup
-                              ? "!text-white"
+                              ? "text-white!"
                               : "text-slate-900 dark:text-slate-100"
                           }`}
                         >
@@ -2920,7 +2920,7 @@ export default function AdminEvents({
                           }
                           className={`text-[10px] font-sans block mt-0.5 leading-normal ${
                             isActiveGroup
-                              ? "!text-white/90"
+                              ? "text-white/90!"
                               : "text-slate-500 dark:text-slate-400"
                           }`}
                         >
@@ -2955,16 +2955,16 @@ export default function AdminEvents({
                       className={`font-mono text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-xl transition-all cursor-pointer flex items-center gap-2 select-none ${
                         isTabActive
                           ? isOperationsLive
-                            ? "bg-[#F27024] !text-white shadow-md font-extrabold"
-                            : "bg-[#F27024] dark:bg-cyan-500 !text-white shadow-md font-bold"
+                            ? "bg-primary text-white! shadow-md font-extrabold"
+                            : "bg-primary dark:bg-cyan-500 text-white! shadow-md font-bold"
                           : isOperationsLive
                           ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20"
-                          : "bg-white dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-[#F27024]/40 hover:text-[#F27024]"
+                          : "bg-white dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:border-primary/40 hover:text-primary"
                       }`}
                     >
                       <TabIcon
                         size={14}
-                        className={isTabActive ? "!text-white" : ""}
+                        className={isTabActive ? "text-white!" : ""}
                       />
                       <span>{tab.label}</span>
                       {isOperationsLive && (
@@ -3647,7 +3647,7 @@ export default function AdminEvents({
                       onChange={(e) =>
                         setEditCommitSyncInterval(e.target.value)
                       }
-                      className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                       placeholder="Nhập số phút..."
                       disabled={readOnly}
                     />
@@ -3829,7 +3829,7 @@ export default function AdminEvents({
                     <button
                       onClick={() => setPortalSubTab("timeline")}
                       className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${portalSubTab === "timeline"
-                        ? "bg-[#F27024] text-white shadow-md shadow-[#F27024]/20"
+                        ? "bg-primary text-white shadow-md shadow-[#F27024]/20"
                         : "bg-slate-900/60 text-slate-400 hover:text-white border border-slate-800"
                         }`}
                     >
@@ -3884,12 +3884,12 @@ export default function AdminEvents({
                     {/* Card 2: Custom Timeline */}
                     <div
                       onClick={() => setPortalSubTab("timeline")}
-                      className="glass p-8 rounded-2xl border border-slate-800 hover:border-[#F27024]/50 hover:shadow-[0_0_30px_rgba(242,112,36,0.15)] transition-all duration-300 cursor-pointer group text-center flex flex-col items-center justify-center min-h-[220px]"
+                      className="glass p-8 rounded-2xl border border-slate-800 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(242,112,36,0.15)] transition-all duration-300 cursor-pointer group text-center flex flex-col items-center justify-center min-h-[220px]"
                     >
-                      <div className="w-16 h-16 bg-[#F27024]/5 text-[#F27024] border border-[#F27024]/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <div className="w-16 h-16 bg-primary/5 text-primary border border-primary/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                         <Calendar size={32} />
                       </div>
-                      <h4 className="text-md font-bold text-white mb-2 font-mono group-hover:text-[#F27024] transition-colors">
+                      <h4 className="text-md font-bold text-white mb-2 font-mono group-hover:text-primary transition-colors">
                         Lịch trình cuộc thi
                       </h4>
                       <p className="text-slate-400 text-xs leading-relaxed max-w-xs">
@@ -3966,7 +3966,7 @@ export default function AdminEvents({
                             required
                             value={editMainGoal}
                             onChange={(e) => setEditMainGoal(e.target.value)}
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Mục tiêu chính của cuộc thi..."
                             disabled={readOnly}
                           />
@@ -3984,7 +3984,7 @@ export default function AdminEvents({
                               onChange={(e) =>
                                 setEditDurationText(e.target.value)
                               }
-                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                               placeholder="48 GIỜ"
                               disabled={readOnly}
                             />
@@ -4000,7 +4000,7 @@ export default function AdminEvents({
                               onChange={(e) =>
                                 setEditMemberLimitText(e.target.value)
                               }
-                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                               placeholder="2-4 OPERATORS"
                               disabled={readOnly}
                             />
@@ -4016,7 +4016,7 @@ export default function AdminEvents({
                               onChange={(e) =>
                                 setEditPrizePoolText(e.target.value)
                               }
-                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                               placeholder="$50,000 USD"
                               disabled={readOnly}
                             />
@@ -4034,7 +4034,7 @@ export default function AdminEvents({
                             onChange={(e) =>
                               setEditPhase1Description(e.target.value)
                             }
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Mô tả giai đoạn đăng ký..."
                             disabled={readOnly}
                           />
@@ -4051,7 +4051,7 @@ export default function AdminEvents({
                             onChange={(e) =>
                               setEditPhase2Description(e.target.value)
                             }
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Mô tả giai đoạn thi đấu..."
                             disabled={readOnly}
                           />
@@ -4068,7 +4068,7 @@ export default function AdminEvents({
                             onChange={(e) =>
                               setEditPhase3Description(e.target.value)
                             }
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Mô tả giai đoạn tổng kết..."
                             disabled={readOnly}
                           />
@@ -4089,7 +4089,7 @@ export default function AdminEvents({
                             onChange={(e) =>
                               setEditLocationAnnouncement(e.target.value)
                             }
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500/80 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-emerald-500/80 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Nội dung thông báo nổi bật... (Để trống nếu muốn ẩn ở trang thí sinh)"
                             disabled={readOnly}
                           />
@@ -4140,7 +4140,7 @@ export default function AdminEvents({
                                     };
                                     setEditRules(updated);
                                   }}
-                                  className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                                  className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                                   disabled={readOnly}
                                 />
                                 <textarea
@@ -4156,7 +4156,7 @@ export default function AdminEvents({
                                     };
                                     setEditRules(updated);
                                   }}
-                                  className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                                  className="w-full bg-slate-900/80 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                                   disabled={readOnly}
                                 />
                               </div>
@@ -4208,7 +4208,7 @@ export default function AdminEvents({
                   <div className="flex justify-between items-center mb-6">
                     <div>
                       <h3 className="text-md font-bold text-white flex items-center gap-1.5 font-mono">
-                        <Calendar size={16} className="text-[#F27024]" />
+                        <Calendar size={16} className="text-primary" />
                         <span>Lịch trình cuộc thi: {selectedEvent.name}</span>
                       </h3>
                       <p className="text-slate-400 text-xs mt-1">
@@ -4258,7 +4258,7 @@ export default function AdminEvents({
                                       };
                                       setEditCustomTimeline(updated);
                                     }}
-                                    className="w-full bg-slate-900/80 border border-slate-700 hover:border-[#F27024]/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#F27024]/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="w-full bg-slate-900/80 border border-slate-700 hover:border-primary/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-primary/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                                     disabled={readOnly}
                                   />
                                 </div>
@@ -4278,7 +4278,7 @@ export default function AdminEvents({
                                       };
                                       setEditCustomTimeline(updated);
                                     }}
-                                    className="w-full bg-slate-900/80 border border-slate-700 hover:border-[#F27024]/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#F27024]/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="w-full bg-slate-900/80 border border-slate-700 hover:border-primary/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-hidden focus:border-primary/80 transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
                                     disabled={readOnly}
                                   />
                                 </div>
@@ -4317,7 +4317,7 @@ export default function AdminEvents({
                                 setNewMilestoneTime(e.target.value)
                               }
                               placeholder="Ví dụ: 20h00 - 21h30 ngày 13/8/2026 (online)"
-                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono"
+                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono"
                             />
                           </div>
                           <div>
@@ -4331,14 +4331,14 @@ export default function AdminEvents({
                                 setNewMilestoneTitle(e.target.value)
                               }
                               placeholder="Ví dụ: Workshop training..."
-                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500/80 transition-all font-mono"
+                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500/80 transition-all font-mono"
                             />
                           </div>
                         </div>
                         <button
                           type="button"
                           onClick={handleAddMilestone}
-                          className="px-4 py-2 bg-[#F27024]/10 hover:bg-[#F27024] text-[#F27024] hover:text-white border border-[#F27024]/20 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                          className="px-4 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
                         >
                           Thêm vào danh sách
                         </button>
@@ -4436,7 +4436,7 @@ export default function AdminEvents({
                                   }}
                                   placeholder="Ví dụ: 01 GIẢI NHẤT"
                                   disabled={readOnly}
-                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-hidden focus:border-amber-500 font-mono"
                                 />
                               </div>
 
@@ -4455,7 +4455,7 @@ export default function AdminEvents({
                                   }}
                                   placeholder="Ví dụ: 7.000.000 đồng"
                                   disabled={readOnly}
-                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-500 font-mono"
+                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-amber-300 font-bold focus:outline-hidden focus:border-amber-500 font-mono"
                                 />
                               </div>
 
@@ -4473,7 +4473,7 @@ export default function AdminEvents({
                                   }}
                                   placeholder="Ví dụ: Giấy chứng nhận + hoa"
                                   disabled={readOnly}
-                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-amber-500 font-mono"
+                                  className="w-full bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-hidden focus:border-amber-500 font-mono"
                                 />
                               </div>
                             </div>
@@ -4574,7 +4574,7 @@ export default function AdminEvents({
                                 }}
                                 placeholder="Tiêu đề hạng mục phụ"
                                 disabled={readOnly}
-                                className="bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-xs text-cyan-300 font-bold focus:outline-none focus:border-cyan-500 font-mono w-full mr-2"
+                                className="bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-3 py-1.5 text-xs text-cyan-300 font-bold focus:outline-hidden focus:border-cyan-500 font-mono w-full mr-2"
                               />
                               {!readOnly && (
                                 <button
@@ -4603,7 +4603,7 @@ export default function AdminEvents({
                               }}
                               placeholder="Nội dung chi tiết..."
                               disabled={readOnly}
-                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 font-mono"
+                              className="w-full bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-lg px-3 py-2 text-xs text-slate-300 focus:outline-hidden focus:border-cyan-500 font-mono"
                             />
                           </div>
                         ))}
@@ -4667,7 +4667,7 @@ export default function AdminEvents({
                             onChange={(e) =>
                               setEditLocationAnnouncement(e.target.value)
                             }
-                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-emerald-500/80 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl p-4 text-xs text-white focus:outline-hidden focus:border-emerald-500/80 transition-all font-mono leading-relaxed disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="Nhập nội dung thông báo... (Để trống nếu muốn ẩn hoàn toàn khu vực thông báo này ở trang thí sinh)"
                             disabled={readOnly}
                           />
@@ -4717,14 +4717,14 @@ export default function AdminEvents({
                             <span className="text-[10px] text-slate-500 font-mono block">
                               Mô phỏng giao diện trang Khu vực đội thi:
                             </span>
-                            <div className="relative overflow-hidden bg-gradient-to-r from-orange-500/[0.08] via-amber-500/[0.04] to-slate-900/60 p-5 rounded-2xl border-2 border-[#F27024]/30 shadow-sm">
+                            <div className="relative overflow-hidden bg-linear-to-r from-orange-500/8 via-amber-500/4 to-slate-900/60 p-5 rounded-2xl border-2 border-primary/30 shadow-xs">
                               <div className="flex items-start gap-4">
-                                <div className="p-3 bg-[#F27024]/15 text-[#F27024] rounded-xl border border-[#F27024]/30 shrink-0 shadow-inner">
+                                <div className="p-3 bg-primary/15 text-primary rounded-xl border border-primary/30 shrink-0 shadow-inner">
                                   <Megaphone size={22} className="animate-pulse" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-[#F27024] text-white shadow-sm shadow-orange-500/20">
+                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-primary text-white shadow-xs shadow-orange-500/20">
                                       <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                                       Thông báo từ BTC
                                     </span>
@@ -4732,7 +4732,7 @@ export default function AdminEvents({
                                       Khu vực thi &amp; Địa điểm
                                     </span>
                                   </div>
-                                  <div className="text-xs text-slate-200 leading-relaxed font-sans font-medium whitespace-pre-line break-words">
+                                  <div className="text-xs text-slate-200 leading-relaxed font-sans font-medium whitespace-pre-line wrap-break-word">
                                     {editLocationAnnouncement}
                                   </div>
                                 </div>
@@ -4832,7 +4832,7 @@ export default function AdminEvents({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-md transition-all duration-300">
           <div className="relative w-full max-w-lg border border-slate-800/80 bg-slate-950 p-6 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] space-y-6 font-sans text-slate-200 animate-in fade-in zoom-in-95 duration-200">
             {/* Top decorative line */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-cyan-500/50 to-transparent"></div>
 
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">

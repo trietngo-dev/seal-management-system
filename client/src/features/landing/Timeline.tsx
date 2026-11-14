@@ -70,16 +70,16 @@ export default function Timeline() {
     const isActive = currentPhase === phaseNum;
     return {
       title: isActive
-        ? "text-lg font-bold text-[#F27024] text-orange-glow font-sans transition-all duration-300"
+        ? "text-lg font-bold text-primary text-orange-glow font-sans transition-all duration-300"
         : "text-lg font-bold text-slate-400 font-sans transition-all duration-300",
       date: isActive
-        ? "font-mono text-sm text-[#F27024]/85 font-bold mt-1.5 transition-all duration-300"
+        ? "font-mono text-sm text-primary/85 font-bold mt-1.5 transition-all duration-300"
         : "font-mono text-sm text-slate-500 font-bold mt-1.5 transition-all duration-300",
       desc: isActive
         ? "text-slate-700 text-sm font-sans leading-relaxed transition-all duration-300"
         : "text-slate-400 text-sm font-sans leading-relaxed transition-all duration-300",
       node: isActive
-        ? "timeline-node z-10 w-6 h-6 rounded-full bg-[#F27024] glow-orange ring-4 ring-white border-4 border-slate-50 shadow-[0_0_15px_#F27024] shrink-0 hidden md:block opacity-0"
+        ? "timeline-node z-10 w-6 h-6 rounded-full bg-primary glow-orange ring-4 ring-white border-4 border-slate-50 shadow-[0_0_15px_#F27024] shrink-0 hidden md:block opacity-0"
         : "timeline-node z-10 w-6 h-6 rounded-full bg-slate-300 ring-4 ring-white border-4 border-slate-50 shrink-0 hidden md:block opacity-0"
     };
   };
@@ -87,9 +87,9 @@ export default function Timeline() {
   const getCustomTimelineClasses = () => {
     return {
       title: "text-lg font-bold text-slate-900 font-sans transition-all duration-300",
-      date: "font-mono text-sm text-[#F27024]/85 font-bold mt-1.5 transition-all duration-300",
+      date: "font-mono text-sm text-primary/85 font-bold mt-1.5 transition-all duration-300",
       desc: "text-slate-700 text-sm font-sans leading-relaxed transition-all duration-300",
-      node: "timeline-node z-10 w-6 h-6 rounded-full bg-[#F27024] glow-orange ring-4 ring-white border-4 border-slate-50 shadow-[0_0_15px_#F27024] shrink-0 hidden md:block opacity-0"
+      node: "timeline-node z-10 w-6 h-6 rounded-full bg-primary glow-orange ring-4 ring-white border-4 border-slate-50 shadow-[0_0_15px_#F27024] shrink-0 hidden md:block opacity-0"
     };
   };
 
@@ -225,14 +225,14 @@ export default function Timeline() {
           <h2 className="timeline-title text-2xl sm:text-3xl font-extrabold text-slate-900 uppercase tracking-widest font-sans opacity-0">
             Lịch trình Cuộc thi {activeEvent ? `- ${activeEvent.name}` : ''}
           </h2>
-          <p className="timeline-subtitle font-mono text-xs  text-[#F27024] font-semibold mt-2 opacity-0">
+          <p className="timeline-subtitle font-mono text-xs  text-primary font-semibold mt-2 opacity-0">
             CÁC GIAI ĐOẠN DIỄN RA CUỘC THI
           </p>
         </div>
 
         <div className="relative max-w-4xl mx-auto py-6 timeline-body">
           {/* Vertical Line */}
-          <div className="timeline-line absolute left-1/2 top-0 bottom-0 w-px bg-[#F27024]/30 -translate-x-1/2 hidden md:block origin-top"></div>
+          <div className="timeline-line absolute left-1/2 top-0 bottom-0 w-px bg-primary/30 -translate-x-1/2 hidden md:block origin-top"></div>
 
           <div className="space-y-16 relative">
             {hasCustomTimeline ? (
@@ -259,7 +259,7 @@ export default function Timeline() {
                       </>
                     ) : (
                       <>
-                        <div className="md:w-1/2 md:text-right w-full order-1 md:order-none timeline-left opacity-0">
+                        <div className="md:w-1/2 md:text-right w-full order-1 md:order-0 timeline-left opacity-0">
                           {item.description ? (
                             <p className={classes.desc}>{item.description}</p>
                           ) : (
@@ -267,7 +267,7 @@ export default function Timeline() {
                           )}
                         </div>
                         <div className={classes.node}></div>
-                        <div className="md:w-1/2 w-full order-none timeline-right opacity-0">
+                        <div className="md:w-1/2 w-full order-0 timeline-right opacity-0">
                           <h3 className={classes.title}>{item.title}</h3>
                           <p className={classes.date}>{item.time}</p>
                         </div>
@@ -298,13 +298,13 @@ export default function Timeline() {
 
                 {/* Phase 2 */}
                 <div className="flex flex-col md:flex-row items-center gap-6 relative timeline-row py-6">
-                  <div className="md:w-1/2 md:text-right w-full order-1 md:order-none timeline-left opacity-0">
+                  <div className="md:w-1/2 md:text-right w-full order-1 md:order-0 timeline-left opacity-0">
                     <p className={getPhaseClasses(2).desc}>
                       {activeEvent?.phase2Description || "Giai đoạn lập trình cường độ cao. Các đội thực hiện giải quyết yêu cầu dự án, liên tục push commit để AI tự động phân tích và đánh giá chất lượng mã nguồn."}
                     </p>
                   </div>
                   <div className={getPhaseClasses(2).node}></div>
-                  <div className="md:w-1/2 w-full order-none timeline-right opacity-0">
+                  <div className="md:w-1/2 w-full order-0 timeline-right opacity-0">
                     <h3 className={getPhaseClasses(2).title}>Bắt đầu thi đấu</h3>
                     {phase2Date !== "Chưa có thông báo" && (
                       <p className={getPhaseClasses(2).date}>

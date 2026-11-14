@@ -492,7 +492,7 @@ export default function JudgeScoring() {
     if (status === 'WARNING') classes = "bg-amber-50 text-amber-700 border border-amber-200";
 
     return (
-      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${classes}`}>
+      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider ${classes}`}>
         {status || 'UNKNOWN'}
       </span>
     );
@@ -532,7 +532,7 @@ export default function JudgeScoring() {
         }
       `}</style>
       {isHighlighted && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between animate-pulse shadow-sm">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center justify-between animate-pulse shadow-xs">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
               <Sparkles size={18} />
@@ -553,11 +553,11 @@ export default function JudgeScoring() {
       )}
 
       {/* Sub-header/Breadcrumb Row */}
-      <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm">
+      <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-xs">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/expert/projects')}
-            className="text-[#F27024] hover:text-[#d95f1f] text-sm font-bold flex items-center gap-1.5 transition-colors"
+            className="text-primary hover:text-[#d95f1f] text-sm font-bold flex items-center gap-1.5 transition-colors"
           >
             <ArrowLeft size={16} />
             <span>Danh sách dự án</span>
@@ -572,7 +572,7 @@ export default function JudgeScoring() {
               Đã chấm điểm
             </span>
           ) : (
-            <span className="bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 px-3 py-1 rounded-full text-xs font-bold">
+            <span className="bg-primary/10 text-primary border border-primary/20 px-3 py-1 rounded-full text-xs font-bold">
               Chờ chấm điểm
             </span>
           )}
@@ -581,7 +581,7 @@ export default function JudgeScoring() {
 
       {/* Banner bị loại cảnh báo khẩn cấp */}
       {hardConstraints?.is_disqualified && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm animate-pulse">
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 flex items-start gap-4 shadow-xs animate-pulse">
           <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 shrink-0 border border-rose-200">
             <ShieldAlert size={26} />
           </div>
@@ -604,27 +604,27 @@ export default function JudgeScoring() {
         <button
           onClick={() => setActiveMainTab('scoring')}
           className={`flex items-center gap-2 px-5 py-3 text-sm font-bold relative transition-all ${activeMainTab === 'scoring'
-            ? 'text-[#F27024]'
+            ? 'text-primary'
             : 'text-slate-500 hover:text-slate-800'
             }`}
         >
           <Save size={14} />
           <span>Bảng Chấm Điểm</span>
           {activeMainTab === 'scoring' && (
-            <div className="absolute bottom-[-5px] left-0 w-full h-[3px] bg-[#F27024] rounded-t"></div>
+            <div className="absolute bottom-[-5px] left-0 w-full h-[3px] bg-primary rounded-t"></div>
           )}
         </button>
         <button
           onClick={() => setActiveMainTab('ai_analysis')}
           className={`flex items-center gap-2 px-5 py-3 text-sm font-bold relative transition-all ${activeMainTab === 'ai_analysis'
-            ? 'text-[#F27024]'
+            ? 'text-primary'
             : 'text-slate-500 hover:text-slate-800'
             }`}
         >
           <Sparkles size={14} />
           <span>Báo Cáo Phân Tích AI</span>
           {activeMainTab === 'ai_analysis' && (
-            <div className="absolute bottom-[-5px] left-0 w-full h-[3px] bg-[#F27024] rounded-t"></div>
+            <div className="absolute bottom-[-5px] left-0 w-full h-[3px] bg-primary rounded-t"></div>
           )}
         </button>
       </div>
@@ -635,12 +635,12 @@ export default function JudgeScoring() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
 
           {/* Main Area (12/12): Scoring Master-Detail Container */}
-          <div className="xl:col-span-12 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col space-y-6">
+          <div className="xl:col-span-12 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col space-y-6">
 
             {/* Scoring Header */}
             <div className="flex justify-between items-center border-b border-slate-100 pb-4">
               <div>
-                <span className="text-[10px] text-[#F27024] font-bold uppercase bg-[#F27024]/10 border border-[#F27024]/20 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] text-primary font-bold uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md">
                   Chấm điểm theo Rubric
                 </span>
                 <h3 className="text-xl font-bold mt-1.5 flex items-center">
@@ -654,10 +654,10 @@ export default function JudgeScoring() {
               <div className="flex items-center gap-4">
                 {/* Dynamic Average Score Badge */}
                 {rubric && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 h-12 flex items-center gap-3 shadow-sm">
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 h-12 flex items-center gap-3 shadow-xs">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-normal">Điểm Trung Bình:</span>
                     <div className="flex items-baseline gap-0.5">
-                      <span className="text-2xl font-black text-[#F27024] font-mono tracking-tight">{averageCalc.averageScore}</span>
+                      <span className="text-2xl font-black text-primary font-mono tracking-tight">{averageCalc.averageScore}</span>
                       <span className="text-xs text-slate-450 font-bold font-mono">/{averageCalc.averageMax}đ</span>
                     </div>
                   </div>
@@ -682,7 +682,7 @@ export default function JudgeScoring() {
                           type="button"
                           onClick={() => setSelectedCriterionId(c._id)}
                           className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between ${selectedCriterionId === c._id
-                            ? 'bg-[#F27024]/10 border-[#F27024]/30 text-[#F27024]'
+                            ? 'bg-primary/10 border-primary/30 text-primary'
                             : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
                             }`}
                         >
@@ -706,7 +706,7 @@ export default function JudgeScoring() {
                       type="button"
                       onClick={() => setSelectedCriterionId('summary')}
                       className={`w-full text-left p-3 rounded-xl border text-xs transition-all flex items-center justify-between ${selectedCriterionId === 'summary'
-                        ? 'bg-[#F27024]/10 border-[#F27024]/30 text-[#F27024]'
+                        ? 'bg-primary/10 border-primary/30 text-primary'
                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
                         }`}
                     >
@@ -714,7 +714,7 @@ export default function JudgeScoring() {
                         <span className="font-bold">Tổng kết & Gửi</span>
                         <span className="text-[10px] text-slate-500">Nhập nhận xét tổng quan</span>
                       </div>
-                      <Save size={14} className={selectedCriterionId === 'summary' ? 'text-[#F27024]' : 'text-slate-400'} />
+                      <Save size={14} className={selectedCriterionId === 'summary' ? 'text-primary' : 'text-slate-400'} />
                     </button>
                   </div>
                 </div>
@@ -727,7 +727,7 @@ export default function JudgeScoring() {
                       <div className="space-y-4">
                         <div>
                           <h4 className="text-sm font-bold text-slate-800 uppercase tracking-normal flex items-center gap-1.5">
-                            <CheckCircle size={16} className="text-[#F27024]" />
+                            <CheckCircle size={16} className="text-primary" />
                             <span>Tổng kết điểm đánh giá</span>
                           </h4>
                           <p className="text-xs text-slate-500 mt-1">Xem lại tóm tắt bảng điểm và nộp kết quả chính thức của bạn.</p>
@@ -743,7 +743,7 @@ export default function JudgeScoring() {
                               return (
                                 <div key={c._id} className="flex justify-between items-center text-xs border-b border-slate-200/50 pb-1.5 last:border-0 last:pb-0">
                                   <span className="text-slate-700 font-sans">[{c.code}] {c.name}</span>
-                                  <span className="font-bold text-[#F27024] font-mono">
+                                  <span className="font-bold text-primary font-mono">
                                     {hasScore ? `${val} / ${c.maxScore}đ` : <span className="text-rose-600 font-normal italic">[Chưa nhập]</span>}
                                   </span>
                                 </div>
@@ -763,7 +763,7 @@ export default function JudgeScoring() {
                             onChange={e => setOverallComment(e.target.value)}
                             disabled={isRoundLocked}
                             style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
-                            className="judge-scoring-textarea !bg-white bg-white border border-slate-300 rounded-xl !text-slate-900 text-slate-900 text-xs sm:text-[13px] px-3 py-2.5 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] focus:!bg-white disabled:opacity-50 font-sans shadow-sm placeholder-slate-400"
+                            className="judge-scoring-textarea bg-white! bg-white border border-slate-300 rounded-xl text-slate-900! text-slate-900 text-xs sm:text-[13px] px-3 py-2.5 w-full focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 focus:border-primary focus:bg-white! disabled:opacity-50 font-sans shadow-xs placeholder-slate-400"
                           ></textarea>
                         </div>
                       </div>
@@ -774,7 +774,7 @@ export default function JudgeScoring() {
                             type="button"
                             onClick={() => handleSubmitScores()}
                             disabled={saving}
-                            className="w-full bg-[#F27024] hover:bg-[#d95f1f] text-white font-bold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 uppercase shadow-sm cursor-pointer"
+                            className="w-full bg-primary hover:bg-[#d95f1f] text-white font-bold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 uppercase shadow-xs cursor-pointer"
                           >
                             <Save size={14} />
                             <span>{saving ? 'Đang lưu điểm...' : 'Nộp điểm chính thức'}</span>
@@ -803,7 +803,7 @@ export default function JudgeScoring() {
                             {/* Title & Description */}
                             <div className="space-y-1">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-[#F27024] bg-[#F27024]/10 border border-[#F27024]/20 px-1.5 py-0.5 rounded">[{c.code}]</span>
+                                <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-sm">[{c.code}]</span>
                                 <span className="text-sm font-bold text-slate-800 uppercase">{c.name}</span>
                               </div>
                               <p className="text-xs text-slate-500 leading-relaxed font-sans">{c.description || 'Không có mô tả chi tiết.'}</p>
@@ -823,9 +823,9 @@ export default function JudgeScoring() {
                                   onChange={e => handleScoreChange(c._id, 'scoreValue', e.target.value)}
                                   disabled={isRoundLocked}
                                   style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
-                                  className="!bg-white bg-white border-2 border-[#F27024]/40 rounded-xl !text-slate-900 text-slate-900 text-center text-lg px-4 py-2 w-32 focus:ring-4 focus:ring-[#F27024]/20 focus:border-[#F27024] focus:outline-none disabled:opacity-50 font-black placeholder-slate-400 font-mono shadow-sm"
+                                  className="bg-white! bg-white border-2 border-primary/40 rounded-xl text-slate-900! text-slate-900 text-center text-lg px-4 py-2 w-32 focus:ring-4 focus:ring-[#F27024]/20 focus:border-primary focus:outline-hidden disabled:opacity-50 font-black placeholder-slate-400 font-mono shadow-xs"
                                 />
-                                <span className="text-lg text-[#F27024] font-black font-mono">/ {c.maxScore}đ</span>
+                                <span className="text-lg text-primary font-black font-mono">/ {c.maxScore}đ</span>
                               </div>
                             </div>
 
@@ -847,15 +847,15 @@ export default function JudgeScoring() {
                                           }
                                         }}
                                         className={`px-3 py-2 rounded-xl border transition-all duration-300 flex flex-col justify-between cursor-pointer text-left ${isMatched
-                                          ? 'bg-[#F27024]/10 border-[#F27024]/30 text-[#F27024]'
+                                          ? 'bg-primary/10 border-primary/30 text-primary'
                                           : 'bg-white border-slate-200 hover:border-slate-350 text-slate-600'
                                           }`}
                                       >
                                         <div className="flex flex-col gap-0.5 text-xs font-bold">
-                                          <span className={isMatched ? 'text-[#F27024]' : 'text-slate-800'}>{lvl.label}</span>
+                                          <span className={isMatched ? 'text-primary' : 'text-slate-800'}>{lvl.label}</span>
                                         </div>
                                         {lvl.description && (
-                                          <p className={`text-[11px] mt-1 leading-relaxed font-sans ${isMatched ? 'text-[#F27024]/90' : 'text-slate-500'}`}>{lvl.description}</p>
+                                          <p className={`text-[11px] mt-1 leading-relaxed font-sans ${isMatched ? 'text-primary/90' : 'text-slate-500'}`}>{lvl.description}</p>
                                         )}
                                       </div>
                                     );
@@ -874,7 +874,7 @@ export default function JudgeScoring() {
                                 disabled={isRoundLocked}
                                 rows={4}
                                 style={{ backgroundColor: '#ffffff', color: '#0f172a' }}
-                                className="judge-scoring-textarea !bg-white bg-white border border-slate-300 rounded-xl !text-slate-900 text-slate-900 text-xs sm:text-[13px] px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] focus:!bg-white disabled:opacity-50 shadow-sm placeholder-slate-400 font-sans leading-relaxed resize-y"
+                                className="judge-scoring-textarea bg-white! bg-white border border-slate-300 rounded-xl text-slate-900! text-slate-900 text-xs sm:text-[13px] px-3 py-2 w-full focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 focus:border-primary focus:bg-white! disabled:opacity-50 shadow-xs placeholder-slate-400 font-sans leading-relaxed resize-y"
                               />
                             </div>
                           </div>
@@ -891,7 +891,7 @@ export default function JudgeScoring() {
                                   setSelectedCriterionId('summary');
                                 }
                               }}
-                              className="bg-slate-50 hover:bg-slate-100 text-[#F27024] border border-[#F27024]/20 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 uppercase tracking-normal"
+                              className="bg-slate-50 hover:bg-slate-100 text-primary border border-primary/20 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1 uppercase tracking-normal"
                             >
                               <span>Tiêu chí tiếp theo</span>
                               <ChevronRight size={14} />
@@ -905,7 +905,7 @@ export default function JudgeScoring() {
 
               </div>
             ) : (
-              <div className="bg-slate-50 p-12 text-center text-slate-500 flex flex-col items-center justify-center min-h-[350px] border border-slate-200 shadow-sm rounded-2xl">
+              <div className="bg-slate-50 p-12 text-center text-slate-500 flex flex-col items-center justify-center min-h-[350px] border border-slate-200 shadow-xs rounded-2xl">
                 <Lock size={40} className="text-slate-400 mb-3" />
                 <p className="font-semibold text-sm text-slate-700">Bảng Rubric chưa sẵn sàng</p>
                 <p className="text-xs text-slate-500 max-w-sm mt-1 leading-relaxed">
@@ -925,14 +925,14 @@ export default function JudgeScoring() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             {/* Tech Stack Card */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[220px]">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between min-h-[220px]">
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <span className="text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5">
-                    <Server size={14} className="text-[#F27024]" />
+                    <Server size={14} className="text-primary" />
                     <span>Tech Stack</span>
                   </span>
-                  <span className="bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                     Gemini AI
                   </span>
                 </div>
@@ -980,14 +980,14 @@ export default function JudgeScoring() {
             </div>
 
             {/* RAG Maturity Card */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[220px]">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between min-h-[220px]">
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <span className="text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5">
-                    <Database size={14} className="text-[#F27024]" />
+                    <Database size={14} className="text-primary" />
                     <span>RAG Maturity</span>
                   </span>
-                  <span className="bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                     Gemini AI
                   </span>
                 </div>
@@ -996,7 +996,7 @@ export default function JudgeScoring() {
                   <div className="space-y-3 text-xs sm:text-sm leading-relaxed">
                     <div className="flex items-center gap-2">
                       <span className="text-slate-600 font-bold font-sans">Mức độ hoàn thiện:</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase shadow-sm ${latestCommitReview.result.rag_maturity.level === 'Agentic-RAG'
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase shadow-xs ${latestCommitReview.result.rag_maturity.level === 'Agentic-RAG'
                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : latestCommitReview.result.rag_maturity.level === 'Advanced'
                           ? 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -1029,14 +1029,14 @@ export default function JudgeScoring() {
             </div>
 
             {/* Agent Intelligence Card */}
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between min-h-[220px]">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between min-h-[220px]">
               <div className="space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <span className="text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5">
-                    <Cpu size={14} className="text-[#F27024]" />
+                    <Cpu size={14} className="text-primary" />
                     <span>Agent Intelligence</span>
                   </span>
-                  <span className="bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
+                  <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                     Gemini AI
                   </span>
                 </div>
@@ -1045,7 +1045,7 @@ export default function JudgeScoring() {
                   <div className="space-y-2 text-xs sm:text-sm leading-relaxed">
                     <p className="text-slate-600 font-sans">
                       <strong className="text-slate-800">Động cơ suy luận (Reasoning):</strong>{' '}
-                      <span className="font-mono text-[#F27024] font-bold">{latestCommitReview.result.agent_intelligence.reasoning_pattern}</span>
+                      <span className="font-mono text-primary font-bold">{latestCommitReview.result.agent_intelligence.reasoning_pattern}</span>
                     </p>
                     <p className="text-slate-600 font-sans">
                       <strong className="text-slate-800">File cấu hình Agent:</strong>{' '}
@@ -1084,11 +1084,11 @@ export default function JudgeScoring() {
 
               {/* Card 0: Hard Constraints Validation Card */}
               {hardConstraints && (
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
                   <div className="border-b border-slate-100 pb-4 flex justify-between items-center">
                     <div>
                       <h3 className="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
-                        <Activity size={16} className="text-[#F27024]" />
+                        <Activity size={16} className="text-primary" />
                         <span>Kiểm định Ràng buộc cứng (Hard Constraints)</span>
                       </h3>
                       <p className="text-xs text-slate-500 mt-1">Đánh giá tự động tính hợp lệ của giải pháp từ n8n Pipeline</p>
@@ -1160,11 +1160,11 @@ export default function JudgeScoring() {
               )}
 
               {/* Card 1: Team Aggregate Review (repository_review) */}
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
                 <div className="border-b border-slate-100 pb-4 flex flex-wrap justify-between items-center gap-3">
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
-                      <Activity size={16} className="text-[#F27024]" />
+                      <Activity size={16} className="text-primary" />
                       <span>Tổng hợp phân tích & Đánh giá</span>
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">Phân tích sâu toàn bộ lịch sử commits và cấu trúc mã nguồn đối chiếu với rubric.</p>
@@ -1174,7 +1174,7 @@ export default function JudgeScoring() {
                       type="button"
                       onClick={handleGetAiSuggestion}
                       disabled={aiLoading}
-                      className="flex items-center gap-1.5 bg-[#F27024]/10 hover:bg-[#F27024]/20 text-[#F27024] border border-[#F27024]/30 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                      className="flex items-center gap-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-50"
                     >
                       <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
                       <span>{aiLoading ? 'AI đang phân tích...' : (teamAggregateReview ? 'Phân tích lại' : 'Chạy Phân Tích AI ')}</span>
@@ -1186,10 +1186,10 @@ export default function JudgeScoring() {
                   <div className="space-y-6 text-xs sm:text-sm leading-relaxed">
                     {/* System Identity Banner */}
                     {teamAggregateReview.result.team_system_identity && (
-                      <div className="bg-[#F27024]/5 border border-[#F27024]/20 p-4 rounded-xl space-y-2 shadow-sm">
+                      <div className="bg-primary/5 border border-primary/20 p-4 rounded-xl space-y-2 shadow-xs">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-[#F27024] font-bold uppercase tracking-normal">Nhận diện Hệ thống & Track</span>
-                          <span className="text-[11px] bg-[#F27024]/10 text-[#F27024] font-bold px-2.5 py-0.5 rounded border border-[#F27024]/20">
+                          <span className="text-xs text-primary font-bold uppercase tracking-normal">Nhận diện Hệ thống & Track</span>
+                          <span className="text-[11px] bg-primary/10 text-primary font-bold px-2.5 py-0.5 rounded-sm border border-primary/20">
                             {teamAggregateReview.result.team_system_identity.detected_track || 'Track Auto-detect'}
                           </span>
                         </div>
@@ -1205,7 +1205,7 @@ export default function JudgeScoring() {
                           <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
                             <strong className="text-slate-700 text-[11px]">Đối tượng phục vụ:</strong>
                             {teamAggregateReview.result.team_system_identity.target_personas.map((p: string, idx: number) => (
-                              <span key={idx} className="bg-white text-slate-700 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium">
+                              <span key={idx} className="bg-white text-slate-700 border border-slate-200 px-2 py-0.5 rounded-sm text-[11px] font-medium">
                                 {p}
                               </span>
                             ))}
@@ -1221,7 +1221,7 @@ export default function JudgeScoring() {
 
                     {/* Disqualification Risks */}
                     {Array.isArray(teamAggregateReview.result.disqualification_risks) && teamAggregateReview.result.disqualification_risks.length > 0 && (
-                      <div className="bg-rose-50 border border-rose-250 p-4 rounded-xl space-y-2 shadow-sm">
+                      <div className="bg-rose-50 border border-rose-250 p-4 rounded-xl space-y-2 shadow-xs">
                         <span className="text-xs text-rose-700 font-bold uppercase tracking-normal flex items-center gap-1.5">
                           <AlertTriangle size={14} className="text-rose-600" /> Cảnh báo Rủi ro Loại (Disqualification Risks)
                         </span>
@@ -1240,16 +1240,16 @@ export default function JudgeScoring() {
                     {/* Historical Synthesis */}
                     <div className="space-y-2.5">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <BookOpen size={12} className="text-white" /> Tóm tắt lịch sử phát triển
                         </span>
                         {typeof teamAggregateReview.result.historical_synthesis === 'object' && teamAggregateReview.result.historical_synthesis?.architectural_style && (
-                          <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded font-mono">
+                          <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded-sm font-mono">
                             {teamAggregateReview.result.historical_synthesis.architectural_style}
                           </span>
                         )}
                       </div>
-                      <p className="text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed font-sans shadow-sm text-xs sm:text-sm">
+                      <p className="text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 leading-relaxed font-sans shadow-xs text-xs sm:text-sm">
                         {typeof teamAggregateReview.result.historical_synthesis === 'object' && teamAggregateReview.result.historical_synthesis !== null
                           ? teamAggregateReview.result.historical_synthesis.evolution_summary || teamAggregateReview.result.historical_synthesis.current_focus || 'Đã tổng hợp lịch sử phát triển.'
                           : typeof teamAggregateReview.result.overall_picture?.historical_synthesis === 'string'
@@ -1262,7 +1262,7 @@ export default function JudgeScoring() {
                           <span className="text-[11px] font-bold text-slate-700 block">Tính năng cốt lõi đã thêm:</span>
                           <div className="flex flex-wrap gap-1.5">
                             {teamAggregateReview.result.historical_synthesis.major_capabilities_added.map((cap: string, cIdx: number) => (
-                              <span key={cIdx} className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded text-[11px]">
+                              <span key={cIdx} className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-sm text-[11px]">
                                 ✓ {cap}
                               </span>
                             ))}
@@ -1275,7 +1275,7 @@ export default function JudgeScoring() {
                           <span className="text-[11px] font-bold text-rose-700 block">Khoảng trống & Rào cản còn thiếu:</span>
                           <div className="flex flex-wrap gap-1.5">
                             {teamAggregateReview.result.historical_synthesis.regressions_or_unresolved_gaps.map((gap: string, gIdx: number) => (
-                              <span key={gIdx} className="bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded text-[11px]">
+                              <span key={gIdx} className="bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded-sm text-[11px]">
                                 ✕ {gap}
                               </span>
                             ))}
@@ -1287,7 +1287,7 @@ export default function JudgeScoring() {
                     {/* Minimum Acceptance Check */}
                     {Array.isArray(teamAggregateReview.result.minimum_acceptance) && teamAggregateReview.result.minimum_acceptance.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <CheckCircle2 size={13} className="text-white" /> Kiểm tra Nghiệm thu Tối thiểu ({teamAggregateReview.result.minimum_acceptance.filter((m: any) => m.status === 'pass' || m.status === 'implemented').length}/{teamAggregateReview.result.minimum_acceptance.length} Đạt)
                         </span>
                         <div className="grid grid-cols-1 gap-2">
@@ -1316,18 +1316,18 @@ export default function JudgeScoring() {
                     {/* Assessment (Advantages, Disadvantages, Potential Errors) */}
                     {teamAggregateReview.result.assessment && (
                       <div className="space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <Activity size={13} className="text-white" /> Đánh giá Điểm mạnh, Điểm yếu & Lỗi tiềm ẩn (Agent 2)
                         </span>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1.5 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-slate-700 shadow-sm">
+                          <div className="space-y-1.5 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 text-slate-700 shadow-xs">
                             <span className="text-xs text-emerald-700 font-bold uppercase tracking-normal flex items-center gap-1">
                               <CheckCircle2 size={13} className="text-emerald-600" /> Ưu điểm giải pháp (Strengths):
                             </span>
                             <p className="text-xs sm:text-sm leading-relaxed">{teamAggregateReview.result.assessment.advantages || 'Không có ghi nhận.'}</p>
                           </div>
-                          <div className="space-y-1.5 bg-rose-50/50 p-4 rounded-xl border border-rose-100 text-slate-700 shadow-sm">
+                          <div className="space-y-1.5 bg-rose-50/50 p-4 rounded-xl border border-rose-100 text-slate-700 shadow-xs">
                             <span className="text-xs text-rose-700 font-bold uppercase tracking-normal flex items-center gap-1">
                               <XCircle size={13} className="text-rose-600" /> Hạn chế cốt lõi (Weaknesses):
                             </span>
@@ -1336,7 +1336,7 @@ export default function JudgeScoring() {
                         </div>
 
                         {teamAggregateReview.result.assessment.potential_errors && (
-                          <div className="space-y-1.5 bg-amber-50/60 p-4 rounded-xl border border-amber-200/80 text-slate-700 shadow-sm">
+                          <div className="space-y-1.5 bg-amber-50/60 p-4 rounded-xl border border-amber-200/80 text-slate-700 shadow-xs">
                             <span className="text-xs text-amber-800 font-bold uppercase tracking-normal flex items-center gap-1.5">
                               <AlertTriangle size={13} className="text-amber-600 shrink-0" />
                               Các lỗi & Rủi ro có thể phát sinh trong repo (Potential Errors / Failure Modes):
@@ -1378,17 +1378,17 @@ export default function JudgeScoring() {
                     {/* Qualitative criteria review */}
                     {teamAggregateReview.result.criteria_comments && (
                       <div className="space-y-3">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <Code size={12} className="text-white" /> Đánh giá theo tiêu chí Rubric (R1/R2)
                         </span>
                         <div className="space-y-3">
                           {Object.entries(teamAggregateReview.result.criteria_comments).map(([key, value]: [string, any], idx: number) => {
                             const displayName = key.replace(/_/g, ' ').toUpperCase();
                             return (
-                              <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm">
+                              <div key={idx} className="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-xs">
                                 <div className="flex justify-between items-center">
                                   <span className="font-bold text-slate-850 text-xs sm:text-sm">[{key}] {displayName}</span>
-                                  <span className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase shadow-sm ${value.grade === 'Xuất sắc' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                  <span className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase shadow-xs ${value.grade === 'Xuất sắc' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                                     value.grade === 'Tốt' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
                                       value.grade === 'Khá' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
                                         value.grade === 'Trung bình' ? 'bg-slate-100 text-slate-600 border border-slate-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
@@ -1397,7 +1397,7 @@ export default function JudgeScoring() {
                                   </span>
                                 </div>
                                 {value.comment && (
-                                  <p className="text-slate-600 leading-relaxed font-sans text-xs sm:text-sm pl-3 border-l-2 border-[#F27024]/40 mt-2">
+                                  <p className="text-slate-600 leading-relaxed font-sans text-xs sm:text-sm pl-3 border-l-2 border-primary/40 mt-2">
                                     {value.comment}
                                   </p>
                                 )}
@@ -1411,7 +1411,7 @@ export default function JudgeScoring() {
                     {/* Improvement Priorities */}
                     {Array.isArray(teamAggregateReview.result.improvement_priorities) && teamAggregateReview.result.improvement_priorities.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <Target size={13} className="text-white" /> Danh sách Ưu tiên Cải thiện (P0 / P1 / P2)
                         </span>
                         <div className="space-y-2">
@@ -1436,14 +1436,14 @@ export default function JudgeScoring() {
                     {/* Suggested Test Cases */}
                     {Array.isArray(teamAggregateReview.result.suggested_test_cases) && teamAggregateReview.result.suggested_test_cases.length > 0 && (
                       <div className="space-y-2">
-                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                        <span className="text-xs font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                           <FlaskConical size={13} className="text-white" /> Kịch bản Kiểm thử gợi ý cho Giám khảo (Test Cases)
                         </span>
                         <div className="grid grid-cols-1 gap-2">
                           {teamAggregateReview.result.suggested_test_cases.map((tc: any, i: number) => {
                             const isObj = typeof tc === 'object' && tc !== null;
                             return (
-                              <div key={i} className="bg-slate-50 p-3.5 rounded-xl border border-slate-150 text-xs space-y-1.5 shadow-sm">
+                              <div key={i} className="bg-slate-50 p-3.5 rounded-xl border border-slate-150 text-xs space-y-1.5 shadow-xs">
                                 <p className="font-bold text-slate-800 text-xs">{isObj ? tc.test_case_name : `Test Case #${i + 1}`}</p>
                                 {isObj ? (
                                   <div className="text-sm text-slate-600 space-y-1 leading-relaxed">
@@ -1469,7 +1469,7 @@ export default function JudgeScoring() {
                           onClick={() => setExpandedSli(!expandedSli)}
                           className="w-full text-left p-4 flex justify-between items-center hover:bg-slate-100/80 transition-colors"
                         >
-                          <span className="text-xs sm:text-sm font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-[#F27024] text-white px-3 py-1.5 rounded-lg shadow-sm">
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-normal inline-flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg shadow-xs">
                             <Terminal size={12} className="text-white" /> Tư vấn quy mô SMB (SMB Scale Advisory)
                           </span>
                           {expandedSli ? <ChevronUp size={16} className="text-slate-550" /> : <ChevronDown size={16} className="text-slate-550" />}
@@ -1478,25 +1478,25 @@ export default function JudgeScoring() {
                         {expandedSli && (
                           <div className="p-4 border-t border-slate-200 space-y-3.5 bg-white leading-relaxed text-xs sm:text-sm text-slate-600">
                             {teamAggregateReview.result.smb_scale_advisory.system_identity_recap && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Hệ thống:</strong> {teamAggregateReview.result.smb_scale_advisory.system_identity_recap}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Hệ thống:</strong> {teamAggregateReview.result.smb_scale_advisory.system_identity_recap}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.summary && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Tóm tắt:</strong> {teamAggregateReview.result.smb_scale_advisory.summary}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Tóm tắt:</strong> {teamAggregateReview.result.smb_scale_advisory.summary}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.tech_and_architecture && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Kiến trúc khuyên dùng:</strong> {teamAggregateReview.result.smb_scale_advisory.tech_and_architecture}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Kiến trúc khuyên dùng:</strong> {teamAggregateReview.result.smb_scale_advisory.tech_and_architecture}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.cost_for_smb && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Ước lượng chi phí API/Hosting:</strong> {teamAggregateReview.result.smb_scale_advisory.cost_for_smb}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Ước lượng chi phí API/Hosting:</strong> {teamAggregateReview.result.smb_scale_advisory.cost_for_smb}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.throughput_and_reliability && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Độ tin cậy & Băng thông:</strong> {teamAggregateReview.result.smb_scale_advisory.throughput_and_reliability}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Độ tin cậy & Băng thông:</strong> {teamAggregateReview.result.smb_scale_advisory.throughput_and_reliability}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.observability_and_operations && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Giám sát & Vận hành (Observability):</strong> {teamAggregateReview.result.smb_scale_advisory.observability_and_operations}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Giám sát & Vận hành (Observability):</strong> {teamAggregateReview.result.smb_scale_advisory.observability_and_operations}</p>
                             )}
                             {teamAggregateReview.result.smb_scale_advisory.data_and_integrations && (
-                              <p className="text-slate-600"><strong className="text-[#F27024] font-bold">Liên kết & Tích hợp:</strong> {teamAggregateReview.result.smb_scale_advisory.data_and_integrations}</p>
+                              <p className="text-slate-600"><strong className="text-primary font-bold">Liên kết & Tích hợp:</strong> {teamAggregateReview.result.smb_scale_advisory.data_and_integrations}</p>
                             )}
                           </div>
                         )}
@@ -1505,9 +1505,9 @@ export default function JudgeScoring() {
 
                     {/* Final Summary Callout */}
                     {teamAggregateReview.result.final_summary && (
-                      <div className="bg-amber-50/60 border border-amber-250 p-4 rounded-xl space-y-1.5 shadow-sm">
-                        <span className="text-xs font-bold text-[#F27024] uppercase tracking-normal flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-[#F27024]" /> Tổng kết Đánh giá Toàn diện từ AI
+                      <div className="bg-amber-50/60 border border-amber-250 p-4 rounded-xl space-y-1.5 shadow-xs">
+                        <span className="text-xs font-bold text-primary uppercase tracking-normal flex items-center gap-1.5">
+                          <Sparkles size={13} className="text-primary" /> Tổng kết Đánh giá Toàn diện từ AI
                         </span>
                         <p className="text-slate-700 text-xs sm:text-sm leading-relaxed font-medium">
                           {typeof teamAggregateReview.result.final_summary === 'object'
@@ -1528,7 +1528,7 @@ export default function JudgeScoring() {
                         type="button"
                         onClick={handleGetAiSuggestion}
                         disabled={aiLoading}
-                        className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-1.5 bg-primary hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                       >
                         <Sparkles size={13} className={aiLoading ? 'animate-spin' : ''} />
                         <span>{aiLoading ? 'AI đang phân tích toàn diện...' : 'Chạy AI phân tích source code'}</span>
@@ -1539,10 +1539,10 @@ export default function JudgeScoring() {
               </div>
 
               {/* Card 2: Per-push reviews timeline */}
-              <div className="bg-white border border-slate-200 shadow-sm p-6 rounded-2xl space-y-4">
+              <div className="bg-white border border-slate-200 shadow-xs p-6 rounded-2xl space-y-4">
                 <div className="border-b border-slate-100 pb-2">
                   <h3 className="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
-                    <Activity size={16} className="text-[#F27024]" />
+                    <Activity size={16} className="text-primary" />
                     <span>Lịch sử phân tích Per-push (Từng đợt Commit/Push)</span>
                   </h3>
                 </div>
@@ -1557,7 +1557,7 @@ export default function JudgeScoring() {
                     const githubIssueUrl = resObj.github_issue_url;
 
                     return (
-                      <div key={r._id || idx} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 transition-all shadow-sm">
+                      <div key={r._id || idx} className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden hover:border-slate-300 transition-all shadow-xs">
 
                         {/* Collapsed Header */}
                         <div
@@ -1566,20 +1566,20 @@ export default function JudgeScoring() {
                         >
                           <div className="space-y-1 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-xs text-[#F27024] font-mono font-bold bg-[#F27024]/10 border border-[#F27024]/20 px-2 py-0.5 rounded">
+                              <span className="text-xs text-primary font-mono font-bold bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-sm">
                                 {commitInfo.commitSha ? commitInfo.commitSha.substring(0, 7) : 'push-sync'}
                               </span>
                               <p className="text-xs sm:text-sm font-bold text-slate-800 line-clamp-1">{commitInfo.message || resObj.overall_picture?.push_summary}</p>
                             </div>
                             <div className="flex gap-3 text-xs text-slate-500 font-sans mt-1">
-                              <span>Tác giả: <strong className="text-[#F27024] font-semibold">@{commitInfo.authorGithubUsername || commitInfo.authorName || 'unknown'}</strong></span>
+                              <span>Tác giả: <strong className="text-primary font-semibold">@{commitInfo.authorGithubUsername || commitInfo.authorName || 'unknown'}</strong></span>
                               <span>Ngày: {commitInfo.committedAt ? new Date(commitInfo.committedAt).toLocaleString('vi-VN') : new Date(r.createdAt).toLocaleString('vi-VN')}</span>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
                             {isSignificant && (
-                              <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded text-xs font-bold uppercase shadow-sm">
+                              <span className="bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded-sm text-xs font-bold uppercase shadow-xs">
                                 Thay đổi quan trọng
                               </span>
                             )}
@@ -1589,7 +1589,7 @@ export default function JudgeScoring() {
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={e => e.stopPropagation()}
-                                className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-250 px-2.5 py-0.5 rounded text-xs font-bold uppercase flex items-center gap-1 transition-all"
+                                className="bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-250 px-2.5 py-0.5 rounded-sm text-xs font-bold uppercase flex items-center gap-1 transition-all"
                               >
                                 <span>Issue tự động</span>
                                 <ExternalLink size={10} />
@@ -1605,14 +1605,14 @@ export default function JudgeScoring() {
                             {resObj.overall_picture?.push_summary && (
                               <div className="space-y-1.5">
                                 <span className="text-xs text-slate-500 font-bold uppercase tracking-normal">Tóm tắt thay đổi đợt push:</span>
-                                <p className="text-xs sm:text-sm pl-3 border-l-2 border-[#F27024]/40 text-slate-700">{resObj.overall_picture.push_summary}</p>
+                                <p className="text-xs sm:text-sm pl-3 border-l-2 border-primary/40 text-slate-700">{resObj.overall_picture.push_summary}</p>
                               </div>
                             )}
 
                             {resObj.overall_picture?.current_focus && (
                               <div className="space-y-1.5">
                                 <span className="text-xs text-slate-500 font-bold uppercase tracking-normal">Tiêu điểm lập trình:</span>
-                                <p className="text-xs sm:text-sm pl-3 border-l-2 border-[#F27024]/40 text-slate-700">{resObj.overall_picture.current_focus}</p>
+                                <p className="text-xs sm:text-sm pl-3 border-l-2 border-primary/40 text-slate-700">{resObj.overall_picture.current_focus}</p>
                               </div>
                             )}
 
@@ -1680,15 +1680,15 @@ export default function JudgeScoring() {
             <div className="xl:col-span-4 space-y-6">
 
               {/* Q&A Suggested questions */}
-              <div className="bg-amber-50 p-5 rounded-2xl border border-amber-250 border-l-4 border-l-[#F27024] shadow-sm space-y-3">
+              <div className="bg-amber-50 p-5 rounded-2xl border border-amber-250 border-l-4 border-l-primary shadow-xs space-y-3">
                 <span className="text-sm font-bold text-slate-800 uppercase tracking-normal flex items-center gap-1.5 border-b border-amber-100 pb-2">
-                  <ShieldAlert size={16} className="text-[#F27024]" />
+                  <ShieldAlert size={16} className="text-primary" />
                   <span>Gợi ý câu hỏi phản biện</span>
                 </span>
 
                 <ul className="list-disc pl-5 space-y-2 mt-2 text-slate-700 text-xs sm:text-sm font-medium leading-relaxed">
                   {aiQuestions.map((q: string, idx: number) => (
-                    <li key={idx} className="hover:text-[#F27024] transition-colors marker:text-[#F27024]">{q}</li>
+                    <li key={idx} className="hover:text-primary transition-colors marker:text-primary">{q}</li>
                   ))}
                   {aiQuestions.length === 0 && (
                     <li className="list-none text-slate-400 italic text-xs py-4">[CHƯA CÓ GỢI Ý CÂU HỎI PHẢN BIỆN]</li>
@@ -1697,20 +1697,20 @@ export default function JudgeScoring() {
               </div>
 
               {/* Hoạt động Commit card moved from grading tab */}
-              <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 flex flex-col h-fit space-y-4">
+              <div className="bg-white border border-slate-200 shadow-xs rounded-2xl p-5 flex flex-col h-fit space-y-4">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-2">
                   <h3 className="text-xs font-bold text-slate-800 uppercase tracking-normal flex items-center gap-1.5">
-                    <Clock size={14} className="text-[#F27024]" />
+                    <Clock size={14} className="text-primary" />
                     <span>Hoạt động Commit ({commits.length})</span>
                   </h3>
                 </div>
 
                 <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
                   {commits.map((c: any, idx: number) => (
-                    <div key={c._id || idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm space-y-1.5 hover:border-slate-200 transition-colors shadow-sm">
+                    <div key={c._id || idx} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs sm:text-sm space-y-1.5 hover:border-slate-200 transition-colors shadow-xs">
                       <p className="font-semibold text-slate-800 truncate leading-snug">{c.message}</p>
                       <div className="flex justify-between items-center text-slate-500 font-sans text-xs">
-                        <span className="text-[#F27024] font-semibold">@{c.authorGithubUsername || c.authorName}</span>
+                        <span className="text-primary font-semibold">@{c.authorGithubUsername || c.authorName}</span>
                         <span>{new Date(c.committedAt).toLocaleDateString('vi-VN')}</span>
                       </div>
                       <div className="flex gap-2 text-xs font-bold font-mono">
@@ -1728,22 +1728,22 @@ export default function JudgeScoring() {
               </div>
 
               {/* Project Profile Info */}
-              <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 space-y-4">
-                <span className="text-[10px] text-[#F27024] font-bold uppercase bg-[#F27024]/10 border border-[#F27024]/20 px-2 py-0.5 rounded shadow-sm block w-fit">
+              <div className="bg-white border border-slate-200 shadow-xs rounded-2xl p-5 space-y-4">
+                <span className="text-[10px] text-primary font-bold uppercase bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-sm shadow-xs block w-fit">
                   Hồ sơ dự án đội thi
                 </span>
                 <h4 className="text-sm sm:text-base font-bold text-slate-850 uppercase truncate">{team.name}</h4>
 
                 {team.members && team.members.length > 0 && (
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 shadow-sm mt-4">
-                    <p className="text-[10px] text-[#F27024] font-bold uppercase tracking-normal mb-2 font-sans">Thành viên nhóm:</p>
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 shadow-xs mt-4">
+                    <p className="text-[10px] text-primary font-bold uppercase tracking-normal mb-2 font-sans">Thành viên nhóm:</p>
                     <div className="space-y-3">
                       {team.members.map((m: any) => (
                         <div key={m._id} className="text-xs text-slate-655 border-b border-slate-200/50 pb-2 last:border-none last:pb-0">
                           <div className="flex justify-between items-center">
                             <span className="font-bold text-slate-800">{m.userId?.fullName || 'Chưa cập nhật'}</span>
                             <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold uppercase ${m.role === 'leader'
-                              ? 'bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20'
+                              ? 'bg-primary/10 text-primary border border-primary/20'
                               : 'bg-slate-200 text-slate-600 border border-slate-300'
                               }`}>
                               {m.role === 'leader' ? 'Trưởng nhóm' : 'Thành viên'}
@@ -1757,8 +1757,8 @@ export default function JudgeScoring() {
                             Email: {m.userId?.email || 'N/A'}
                           </div>
                           {m.userId?.githubUsername && (
-                            <div className="text-[11px] text-[#F27024] font-sans mt-1 flex items-center gap-1">
-                              <span className="text-[9px] bg-slate-200 px-1 py-0.2 rounded border border-slate-300 text-slate-600 font-mono">GitHub</span>
+                            <div className="text-[11px] text-primary font-sans mt-1 flex items-center gap-1">
+                              <span className="text-[9px] bg-slate-200 px-1 py-0.2 rounded-sm border border-slate-300 text-slate-600 font-mono">GitHub</span>
                               <span className="truncate">{m.userId.githubUsername}</span>
                             </div>
                           )}
