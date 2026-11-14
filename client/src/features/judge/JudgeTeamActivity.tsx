@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Target
 } from 'lucide-react';
+import { parseImprovementPriority } from './improvementPriority';
 
 export default function JudgeTeamActivity() {
   const { teamId } = useParams();
@@ -93,9 +94,10 @@ export default function JudgeTeamActivity() {
       }
 
       const rubricRes = await axios.get(`http://localhost:5000/api/rubrics/round/${roundId}`, {
+        params: { trackId: team?.trackId?._id || team?.trackId || undefined },
         headers: { Authorization: `Bearer ${token}` }
       });
-      const rubricId = rubricRes.data?._id;
+      const rubricId = rubricRes.data?.rubric?._id;
       if (!rubricId) {
         throw new Error('Chưa tìm thấy Rubric active được gán cho vòng thi này.');
       }
@@ -149,11 +151,11 @@ export default function JudgeTeamActivity() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Breadcrumb Row */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-xs gap-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate('/expert/dashboard')}
-            className="text-[#F27024] hover:text-[#d95f1f] text-sm font-bold flex items-center gap-1.5 transition-colors"
+            className="text-primary hover:text-[#d95f1f] text-sm font-bold flex items-center gap-1.5 transition-colors"
           >
             <ArrowLeft size={16} />
             <span>Dashboard</span>
@@ -164,7 +166,7 @@ export default function JudgeTeamActivity() {
 
         <div className="flex items-center gap-3">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-normal">Đội:</span>
-          <span className="bg-[#F27024]/10 text-[#F27024] font-black px-3 py-1 rounded-xl text-sm border border-[#F27024]/20 shadow-sm">
+          <span className="bg-primary/10 text-primary font-black px-3 py-1 rounded-xl text-sm border border-primary/20 shadow-xs">
             {team.teamName || team.name}
           </span>
           {team.trackId && (
@@ -180,10 +182,10 @@ export default function JudgeTeamActivity() {
         
         {/* Left Column: Repository Commits Stream */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col space-y-4">
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs flex flex-col space-y-4">
             <div className="flex justify-between items-center border-b border-slate-100 pb-4">
               <h3 className="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
-                <GitBranch size={16} className="text-[#F27024]" />
+                <GitBranch size={16} className="text-primary" />
                 <span>Nhật ký Commit Đồng bộ ({commits.length})</span>
               </h3>
               <span className="text-xs font-medium text-slate-450">Tự động đối soát định kỳ</span>
@@ -191,9 +193,9 @@ export default function JudgeTeamActivity() {
 
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
               {commits.map((c: any, index: number) => (
-                <div key={index} className="p-4 rounded-xl border border-slate-150 bg-slate-50 hover:bg-white hover:border-[#F27024]/40 transition-all shadow-sm flex flex-col space-y-2">
+                <div key={index} className="p-4 rounded-xl border border-slate-150 bg-slate-50 hover:bg-white hover:border-primary/40 transition-all shadow-xs flex flex-col space-y-2">
                   <div className="flex justify-between items-start">
-                    <span className="font-mono text-xs font-bold text-[#F27024] bg-[#F27024]/10 px-2 py-0.5 rounded border border-[#F27024]/20">
+                    <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-sm border border-primary/20">
                       {c.commitSha ? c.commitSha.substring(0, 7) : 'Commit'}
                     </span>
                     <div className="flex items-center gap-1.5 text-slate-450 text-[11px] font-medium">
@@ -228,10 +230,10 @@ export default function JudgeTeamActivity() {
 
         {/* Right Column: AI Analysis & Preview Panel */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col space-y-5">
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-xs flex flex-col space-y-5">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-4">
               <h3 className="text-sm font-bold text-slate-800 uppercase flex items-center gap-2">
-                <Sparkles size={16} className="text-[#F27024]" />
+                <Sparkles size={16} className="text-primary" />
                 <span>Đánh giá Tổng quan từ AI (Agent 2)</span>
               </h3>
 
@@ -240,7 +242,7 @@ export default function JudgeTeamActivity() {
                 type="button"
                 onClick={handleTriggerAgent2}
                 disabled={triggerLoading}
-                className="flex items-center gap-1.5 bg-[#F27024] hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 bg-primary hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs hover:shadow-sm cursor-pointer disabled:opacity-50"
               >
                 <RefreshCw size={13} className={triggerLoading ? 'animate-spin' : ''} />
                 <span>{triggerLoading ? 'Agent 2 đang chạy...' : 'Chạy Agent 2 Phân tích'}</span>
@@ -262,10 +264,10 @@ export default function JudgeTeamActivity() {
             {aiInsight ? (
               <div className="space-y-6">
                 {/* System Identity & Track */}
-                <div className="bg-[#F27024]/5 p-4 rounded-xl border border-[#F27024]/20 shadow-sm space-y-1">
+                <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 shadow-xs space-y-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-[#F27024] font-bold uppercase tracking-normal block">Nhận diện Hệ thống</span>
-                    <span className="text-[11px] bg-[#F27024]/10 text-[#F27024] font-bold px-2 py-0.5 rounded">
+                    <span className="text-xs text-primary font-bold uppercase tracking-normal block">Nhận diện Hệ thống</span>
+                    <span className="text-[11px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded-sm">
                       {aiInsight.team_system_identity?.detected_track || aiInsight.system_identity?.detected_track || 'Track Auto-detect'}
                     </span>
                   </div>
@@ -281,7 +283,7 @@ export default function JudgeTeamActivity() {
 
                 {/* Disqualification Risks */}
                 {Array.isArray(aiInsight.disqualification_risks) && aiInsight.disqualification_risks.length > 0 && (
-                  <div className="bg-rose-50 border border-rose-250 p-4 rounded-xl space-y-1.5 shadow-sm">
+                  <div className="bg-rose-50 border border-rose-250 p-4 rounded-xl space-y-1.5 shadow-xs">
                     <span className="text-xs text-rose-700 font-bold uppercase tracking-normal flex items-center gap-1.5">
                       <AlertTriangle size={14} className="text-rose-600" /> Cảnh báo Rủi ro Loại (Disqualification Risks)
                     </span>
@@ -296,7 +298,7 @@ export default function JudgeTeamActivity() {
                 {/* Overall Historical Synthesis */}
                 <div className="space-y-2">
                   <span className="text-xs text-slate-500 font-bold uppercase tracking-normal block">Tổng hợp lịch sử phát triển</span>
-                  <p className="text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs leading-relaxed font-sans shadow-sm">
+                  <p className="text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs leading-relaxed font-sans shadow-xs">
                     {aiInsight.historical_synthesis?.evolution_summary || aiInsight.overall_picture?.historical_synthesis || 'Chưa có tóm tắt lịch sử.'}
                   </p>
                 </div>
@@ -305,7 +307,7 @@ export default function JudgeTeamActivity() {
                 {Array.isArray(aiInsight.minimum_acceptance) && aiInsight.minimum_acceptance.length > 0 && (
                   <div className="space-y-2">
                     <span className="text-xs text-slate-700 font-bold uppercase tracking-normal flex items-center gap-1.5">
-                      <CheckCircle2 size={13} className="text-[#F27024]" /> Kiểm tra Nghiệm thu Tối thiểu ({aiInsight.minimum_acceptance.filter((m: any) => m.status === 'pass' || m.status === 'implemented').length}/{aiInsight.minimum_acceptance.length} Đạt)
+                      <CheckCircle2 size={13} className="text-primary" /> Kiểm tra Nghiệm thu Tối thiểu ({aiInsight.minimum_acceptance.filter((m: any) => m.status === 'pass' || m.status === 'implemented').length}/{aiInsight.minimum_acceptance.length} Đạt)
                     </span>
                     <div className="grid grid-cols-1 gap-2">
                       {aiInsight.minimum_acceptance.map((m: any, i: number) => {
@@ -336,7 +338,7 @@ export default function JudgeTeamActivity() {
                   <span className="text-xs text-slate-500 font-bold uppercase tracking-normal block">Đánh giá tiêu chí Rubric</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     {Object.entries(aiInsight.criteria_comments || {}).map(([key, value]: [string, any]) => (
-                      <div key={key} className="bg-slate-50 p-3 rounded-xl border border-slate-150 flex flex-col gap-1 shadow-sm hover:border-slate-350 transition-colors">
+                      <div key={key} className="bg-slate-50 p-3 rounded-xl border border-slate-150 flex flex-col gap-1 shadow-xs hover:border-slate-350 transition-colors">
                         <div className="flex justify-between items-center">
                           <span className="font-bold text-slate-700 uppercase tracking-normal text-[10px]">[{key}]</span>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-normal ${
@@ -359,14 +361,14 @@ export default function JudgeTeamActivity() {
                 </div>
 
                 {/* AI Suggested Critique Questions */}
-                <div className="space-y-3 bg-amber-50 p-4 rounded-xl border border-amber-250 border-l-4 border-l-[#F27024] shadow-sm">
-                  <span className="text-xs font-bold text-[#F27024] uppercase tracking-normal block flex items-center gap-1.5 border-b border-amber-100 pb-2">
-                    <HelpCircle size={14} className="text-[#F27024]" />
+                <div className="space-y-3 bg-amber-50 p-4 rounded-xl border border-amber-250 border-l-4 border-l-primary shadow-xs">
+                  <span className="text-xs font-bold text-primary uppercase tracking-normal block flex items-center gap-1.5 border-b border-amber-100 pb-2">
+                    <HelpCircle size={14} className="text-primary" />
                     <span>Bộ câu hỏi phản biện gợi ý cho Giám khảo</span>
                   </span>
                   <ul className="list-disc pl-5 space-y-2 mt-2 text-slate-700 text-xs font-medium leading-relaxed">
                     {aiQuestions.map((q: string, idx: number) => (
-                      <li key={idx} className="hover:text-[#F27024] transition-colors marker:text-[#F27024]">{q}</li>
+                      <li key={idx} className="hover:text-primary transition-colors marker:text-primary">{q}</li>
                     ))}
                     {aiQuestions.length === 0 && (
                       <li className="list-none text-slate-400 italic font-sans">[Chưa cấu hình câu hỏi phản biện gợi ý]</li>
@@ -378,13 +380,11 @@ export default function JudgeTeamActivity() {
                 {Array.isArray(aiInsight.improvement_priorities) && aiInsight.improvement_priorities.length > 0 && (
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-slate-700 uppercase tracking-normal flex items-center gap-1.5">
-                      <Target size={13} className="text-[#F27024]" /> Danh sách Ưu tiên Cải thiện
+                      <Target size={13} className="text-primary" /> Danh sách Ưu tiên Cải thiện
                     </span>
                     <div className="space-y-2">
-                      {aiInsight.improvement_priorities.map((item: any, idx: number) => {
-                        const isObj = typeof item === 'object' && item !== null;
-                        const priority = isObj ? item.priority : (typeof item === 'string' && item.startsWith('P0') ? 'P0' : item.startsWith('P1') ? 'P1' : 'P2');
-                        const text = isObj ? `${item.requirement_gap ? `[${item.requirement_gap}] ` : ''}${item.actionable_step || ''}` : item;
+                      {aiInsight.improvement_priorities.map((item: unknown, idx: number) => {
+                        const { priority, text } = parseImprovementPriority(item);
                         return (
                           <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-start gap-2.5 text-xs">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-black shrink-0 ${
@@ -404,9 +404,9 @@ export default function JudgeTeamActivity() {
 
                 {/* Final Summary */}
                 {aiInsight.final_summary && (
-                  <div className="bg-amber-50/60 border border-amber-250 p-4 rounded-xl space-y-1.5 shadow-sm">
-                    <span className="text-xs font-bold text-[#F27024] uppercase tracking-normal flex items-center gap-1.5">
-                      <Sparkles size={13} className="text-[#F27024]" /> Tổng kết Đánh giá từ Agent 2
+                  <div className="bg-amber-50/60 border border-amber-250 p-4 rounded-xl space-y-1.5 shadow-xs">
+                    <span className="text-xs font-bold text-primary uppercase tracking-normal flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-primary" /> Tổng kết Đánh giá từ Agent 2
                     </span>
                     <p className="text-slate-700 text-xs leading-relaxed font-medium">
                       {aiInsight.final_summary}
@@ -416,7 +416,7 @@ export default function JudgeTeamActivity() {
 
               </div>
             ) : (
-              <div className="text-center py-16 bg-slate-50 rounded-xl border border-slate-200 shadow-sm space-y-3">
+              <div className="text-center py-16 bg-slate-50 rounded-xl border border-slate-200 shadow-xs space-y-3">
                 <AlertCircle size={28} className="mx-auto text-slate-400" />
                 <p className="text-xs text-slate-500 font-medium">Chưa có dữ liệu đánh giá tổng hợp từ Agent 2 cho đội này.</p>
                 <p className="text-[11px] text-slate-400">Nhấn nút "Chạy Agent 2 Phân tích" ở góc trên để kích hoạt ngay.</p>

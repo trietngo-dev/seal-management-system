@@ -134,6 +134,27 @@ export default function TeamsTab({
     setEmailResult(null);
   }, [selectedEvent?._id]);
 
+  const [creatingRepoTeamId, setCreatingRepoTeamId] = useState<string | null>(null);
+
+  const handleCreateRepo = async (teamId: string) => {
+    setCreatingRepoTeamId(teamId);
+    try {
+      const token = localStorage.getItem("token");
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      await axios.post(
+        `${apiBase}/api/github-repositories/create`,
+        { teamId },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success("Đã tạo GitHub repository và mời các thành viên.");
+      await onRefreshTeams?.();
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Không thể tạo GitHub repository.");
+    } finally {
+      setCreatingRepoTeamId(null);
+    }
+  };
+
   const handleDismissImportResult = () => {
     setImportResult(null);
     persistFlowState(null, emailStep, emailResult);
@@ -480,12 +501,12 @@ export default function TeamsTab({
   };
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+    <div className="bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
       {/* Top Header & Actions Bar */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-200">
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 font-mono">
-            <Users size={18} className="text-[#F27024]" />
+            <Users size={18} className="text-primary" />
             <span>Đội thi & Thí sinh ({teamsList.length} đội)</span>
           </h3>
         </div>
@@ -495,9 +516,9 @@ export default function TeamsTab({
           <button
             onClick={handleExportTeams}
             disabled={exporting || teamsList.length === 0}
-            className="text-xs font-bold px-4 py-2.5 rounded-xl font-mono transition-all flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer border border-slate-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-xs font-bold px-4 py-2.5 rounded-xl font-mono transition-all flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 cursor-pointer border border-slate-300 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Download size={14} className="text-[#F27024]" />
+            <Download size={14} className="text-primary" />
             <span>{exporting ? "Đang xuất..." : "Xuất Excel"}</span>
           </button>
 
@@ -513,7 +534,7 @@ export default function TeamsTab({
                 className={`text-xs font-bold px-4 py-2.5 rounded-xl font-mono transition-all flex items-center justify-center gap-1.5 ${
                   tracks.length > 0 &&
                   teamsList.some((t) => t.status === "confirmed" && !t.trackId)
-                    ? "bg-[#F27024] hover:bg-[#d95f1d] text-white cursor-pointer shadow-md shadow-[#F27024]/20"
+                    ? "bg-primary hover:bg-[#d95f1d] text-white cursor-pointer shadow-md shadow-[#F27024]/20"
                     : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
                 }`}
               >
@@ -530,10 +551,10 @@ export default function TeamsTab({
       </div>
 
       <nav className="flex gap-1 rounded-2xl border border-slate-200 bg-slate-50 p-1" aria-label="Chế độ quản lý đội thi">
-        <button type="button" onClick={() => setActiveTeamView("teams")} aria-pressed={activeTeamView === "teams"} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold font-mono transition-all focus:outline-none focus:ring-2 focus:ring-[#F27024]/40 ${activeTeamView === "teams" ? "bg-white text-[#F27024] shadow-sm" : "text-slate-500 hover:text-slate-800"}`}>
+        <button type="button" onClick={() => setActiveTeamView("teams")} aria-pressed={activeTeamView === "teams"} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold font-mono transition-all focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/40 ${activeTeamView === "teams" ? "bg-white text-primary shadow-xs" : "text-slate-500 hover:text-slate-800"}`}>
           Danh sách đội ({teamsList.length})
         </button>
-        <button type="button" onClick={() => setActiveTeamView("contestants")} aria-pressed={activeTeamView === "contestants"} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold font-mono transition-all focus:outline-none focus:ring-2 focus:ring-[#F27024]/40 ${activeTeamView === "contestants" ? "bg-white text-[#F27024] shadow-sm" : "text-slate-500 hover:text-slate-800"}`}>
+        <button type="button" onClick={() => setActiveTeamView("contestants")} aria-pressed={activeTeamView === "contestants"} className={`flex-1 rounded-xl px-4 py-2.5 text-xs font-bold font-mono transition-all focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/40 ${activeTeamView === "contestants" ? "bg-white text-primary shadow-xs" : "text-slate-500 hover:text-slate-800"}`}>
           Email thí sinh ({pendingContestants.length})
         </button>
       </nav>
@@ -545,13 +566,13 @@ export default function TeamsTab({
               <h4 id="contestant-email-title" className="text-sm font-bold text-slate-900">Quản lý email xác nhận</h4>
               <p className="mt-1 text-xs text-slate-500">Theo dõi và gửi lại lời mời cho các thí sinh chưa xác nhận.</p>
             </div>
-            {!readOnly && <button type="button" onClick={() => handleSendMemberEmails()} disabled={sendingMemberIds.length > 0 || !pendingContestants.some((member: any) => !member.invitationEmailSent && canQueueEmail(member))} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#F27024] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#d95f1d] focus:outline-none focus:ring-2 focus:ring-[#F27024]/40 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500">
+            {!readOnly && <button type="button" onClick={() => handleSendMemberEmails()} disabled={sendingMemberIds.length > 0 || !pendingContestants.some((member: any) => !member.invitationEmailSent && canQueueEmail(member))} className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white shadow-xs transition-all hover:bg-[#d95f1d] focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/40 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500">
               {sendingMemberIds.length > 0 ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} Gửi tất cả email chưa gửi
             </button>}
           </div>
-          <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 focus-within:border-[#F27024] focus-within:ring-2 focus-within:ring-[#F27024]/10">
+          <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 focus-within:border-primary focus-within:ring-2 focus-within:ring-[#F27024]/10">
             <Search size={15} className="text-slate-400" aria-hidden="true" /><span className="sr-only">Tìm thí sinh</span>
-            <input value={contestantSearch} onChange={(event) => setContestantSearch(event.target.value)} placeholder="Tìm theo tên, email, MSSV hoặc đội..." className="w-full bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400" />
+            <input value={contestantSearch} onChange={(event) => setContestantSearch(event.target.value)} placeholder="Tìm theo tên, email, MSSV hoặc đội..." className="w-full bg-transparent text-xs text-slate-800 outline-hidden placeholder:text-slate-400" />
           </label>
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="overflow-x-auto"><table className="min-w-full divide-y divide-slate-200 text-left text-xs">
@@ -563,7 +584,7 @@ export default function TeamsTab({
                   <td className="px-4 py-3 text-slate-600"><p>{member.teamName}</p><p className="mt-0.5 text-[10px] uppercase text-slate-400">{member.role === "leader" ? "Trưởng nhóm" : "Thành viên"}</p></td>
                   <td className="px-4 py-3"><span className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">Chờ xác nhận</span></td>
                   <td className="px-4 py-3"><span className={`rounded-lg border px-2 py-1 text-[10px] font-bold ${getEmailStatus(member).className}`}>{getEmailStatus(member).label}</span>{member.invitationEmailLastError && <p className="mt-1 max-w-xs truncate text-[10px] text-rose-600" title={member.invitationEmailLastError}>{member.invitationEmailLastError}</p>}</td>
-                  {!readOnly && <td className="px-4 py-3 text-right"><button type="button" onClick={() => handleSendMemberEmails([member._id])} disabled={sendingMemberIds.length > 0 || !canQueueEmail(member)} aria-label={`Gửi email lời mời cho ${member.userId?.fullName || member.userId?.email}`} className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 px-3 py-1.5 font-bold text-[#F27024] transition-all hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50">{isSending || !canQueueEmail(member) ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} />}{canQueueEmail(member) ? (member.invitationEmailSent ? "Gửi lại" : "Gửi mail") : "Đang xử lý"}</button></td>}
+                  {!readOnly && <td className="px-4 py-3 text-right"><button type="button" onClick={() => handleSendMemberEmails([member._id])} disabled={sendingMemberIds.length > 0 || !canQueueEmail(member)} aria-label={`Gửi email lời mời cho ${member.userId?.fullName || member.userId?.email}`} className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 px-3 py-1.5 font-bold text-primary transition-all hover:bg-orange-50 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50">{isSending || !canQueueEmail(member) ? <Loader2 size={12} className="animate-spin" /> : <Mail size={12} />}{canQueueEmail(member) ? (member.invitationEmailSent ? "Gửi lại" : "Gửi mail") : "Đang xử lý"}</button></td>}
                 </tr>;
               })}</tbody>
             </table></div>
@@ -574,9 +595,9 @@ export default function TeamsTab({
 
       {/* ─── IMPORT EXCEL SECTION FOR ADMIN (WHITE THEME) ─── */}
       {!readOnly && activeTeamView === "teams" && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xs">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
-            <h4 className="text-xs font-bold text-[#F27024] uppercase tracking-wider font-mono flex items-center gap-2">
+            <h4 className="text-xs font-bold text-primary uppercase tracking-wider font-mono flex items-center gap-2">
               <Upload size={15} />
               <span>Import Danh sách Đội thi từ Excel</span>
             </h4>
@@ -585,12 +606,12 @@ export default function TeamsTab({
               type="button"
               onClick={handleDownloadTemplate}
               disabled={downloadingTemplate}
-              className="text-xs font-mono text-slate-600 hover:text-[#F27024] flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 transition-all cursor-pointer disabled:opacity-50"
+              className="text-xs font-mono text-slate-600 hover:text-primary flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 transition-all cursor-pointer disabled:opacity-50"
             >
               {downloadingTemplate ? (
-                <Loader2 size={13} className="animate-spin text-[#F27024]" />
+                <Loader2 size={13} className="animate-spin text-primary" />
               ) : (
-                <FileText size={13} className="text-[#F27024]" />
+                <FileText size={13} className="text-primary" />
               )}
               <span>Tải file Excel mẫu</span>
             </button>
@@ -599,11 +620,11 @@ export default function TeamsTab({
           {/* Upload Controls */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
             <div className="md:col-span-8">
-              <label className="flex items-center gap-3 px-4 py-3 bg-white border-2 border-dashed border-slate-200 hover:border-[#F27024]/60 hover:bg-orange-50/20 rounded-2xl cursor-pointer transition-all group">
+              <label className="flex items-center gap-3 px-4 py-3 bg-white border-2 border-dashed border-slate-200 hover:border-primary/60 hover:bg-orange-50/20 rounded-2xl cursor-pointer transition-all group">
                 <div className="p-2 rounded-xl bg-orange-50 group-hover:bg-orange-100/70 transition-colors">
                   <FileSpreadsheet
                     size={20}
-                    className="text-[#F27024] shrink-0"
+                    className="text-primary shrink-0"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -633,7 +654,7 @@ export default function TeamsTab({
                 type="button"
                 onClick={handleImportTeams}
                 disabled={!importFile || importing}
-                className="w-full text-xs font-bold px-5 py-3 rounded-xl font-mono text-white transition-all flex items-center justify-center gap-2 bg-[#F27024] hover:bg-[#d95f1d] cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none shadow-md shadow-[#F27024]/20 active:scale-[0.99]"
+                className="w-full text-xs font-bold px-5 py-3 rounded-xl font-mono text-white transition-all flex items-center justify-center gap-2 bg-primary hover:bg-[#d95f1d] cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none shadow-md shadow-[#F27024]/20 active:scale-[0.99]"
               >
                 {importing ? (
                   <>
@@ -731,11 +752,11 @@ export default function TeamsTab({
           {hasPendingTeams && emailStep === 2 && (
             <div className="p-5 bg-orange-50/70 border border-orange-200 rounded-2xl space-y-3.5 animate-in fade-in duration-200">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-orange-100 text-[#F27024] shrink-0 mt-0.5">
+                <div className="p-2 rounded-xl bg-orange-100 text-primary shrink-0 mt-0.5">
                   <Mail size={16} />
                 </div>
                 <div className="space-y-1 flex-1">
-                  <h5 className="text-xs font-bold text-[#F27024] font-mono uppercase">
+                  <h5 className="text-xs font-bold text-primary font-mono uppercase">
                     Bước 2/2: Gửi email mời thí sinh vào đội
                   </h5>
                   <p className="text-xs text-slate-700 leading-relaxed">
@@ -748,7 +769,7 @@ export default function TeamsTab({
                 type="button"
                 onClick={handleSendInvitations}
                 disabled={sendingEmails}
-                className="w-full text-xs font-bold font-mono py-3.5 px-4 rounded-xl bg-[#F27024] hover:bg-[#d95f1d] text-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#F27024]/25 active:scale-[0.99]"
+                className="w-full text-xs font-bold font-mono py-3.5 px-4 rounded-xl bg-primary hover:bg-[#d95f1d] text-white transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#F27024]/25 active:scale-[0.99]"
               >
                 {sendingEmails ? (
                   <>
@@ -807,11 +828,11 @@ export default function TeamsTab({
               .map((team: any) => (
                 <div
                   key={team._id}
-                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm transition-all space-y-3"
+                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] font-bold text-[#F27024] font-mono block">
+                      <span className="text-[10px] font-bold text-primary font-mono block">
                         ĐỘI THI
                       </span>
                       <h5 className="font-bold text-slate-900 text-sm truncate" title={team.name}>
@@ -822,7 +843,7 @@ export default function TeamsTab({
                       {selectedEvent?.status !== "registration" &&
                         selectedEvent?.status !== "upcoming" &&
                         team.currentRoundId && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-lg font-mono font-bold bg-orange-50 text-[#F27024] border border-orange-200 shrink-0">
+                          <span className="text-[10px] px-2 py-0.5 rounded-lg font-mono font-bold bg-orange-50 text-primary border border-orange-200 shrink-0">
                             {(() => {
                               if (typeof team.currentRoundId === "object") {
                                 return team.currentRoundId?.name || "";
@@ -881,7 +902,7 @@ export default function TeamsTab({
                           href={team.repository.repoUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#F27024] hover:underline font-mono truncate max-w-[170px] sm:max-w-[220px]"
+                          className="text-primary hover:underline font-mono truncate max-w-[170px] sm:max-w-[220px]"
                           title={team.repository.repoName}
                         >
                           {team.repository.repoName}
@@ -896,7 +917,7 @@ export default function TeamsTab({
                             className={`text-[10px] font-mono px-2 py-0.5 rounded-lg border transition-all inline-flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed shrink-0 ${
                               syncingRepoId === team.repository._id
                                 ? "bg-orange-100 text-orange-700 border-orange-200"
-                                : "bg-orange-50 hover:bg-orange-100 text-[#F27024] border-orange-200"
+                                : "bg-orange-50 hover:bg-orange-100 text-primary border-orange-200"
                             }`}
                           >
                             <RefreshCw
@@ -915,9 +936,31 @@ export default function TeamsTab({
                           </button>
                         )}
                       </p>
+                    ) : team.status === "confirmed" ? (
+                      // Confirmed teams without a repo cannot be scored, so make it visible and fixable.
+                      <p className="flex items-center gap-2 flex-wrap min-w-0 text-rose-600">
+                        <AlertCircle size={12} className="shrink-0" />
+                        <span>Chưa có GitHub Repo (chưa thể chấm điểm)</span>
+                        {!readOnly && (
+                          <button
+                            onClick={() => handleCreateRepo(team._id)}
+                            disabled={loading || creatingRepoTeamId === team._id}
+                            className="text-[10px] font-mono px-2 py-0.5 rounded-lg border transition-all inline-flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200"
+                          >
+                            {creatingRepoTeamId === team._id ? (
+                              <Loader2 size={10} className="animate-spin" />
+                            ) : (
+                              <RefreshCw size={10} />
+                            )}
+                            <span>
+                              {creatingRepoTeamId === team._id ? "Đang tạo..." : "Tạo repo"}
+                            </span>
+                          </button>
+                        )}
+                      </p>
                     ) : (
                       <p className="text-slate-400 italic">
-                        GitHub Repo: Chưa cấp phát (chờ chia bảng)
+                        GitHub Repo: Chưa cấp phát (chờ đủ thành viên xác nhận)
                       </p>
                     )}
                   </div>
@@ -938,7 +981,7 @@ export default function TeamsTab({
                         return (
                           <div
                             key={m.userId?._id || m._id}
-                            className="flex items-center justify-between text-xs gap-2 py-0.5 hover:bg-slate-50/80 px-1 rounded transition-colors"
+                            className="flex items-center justify-between text-xs gap-2 py-0.5 hover:bg-slate-50/80 px-1 rounded-sm transition-colors"
                           >
                             {/* Cột trái: Tên + MSSV + Trường (truncate) + Nút/Badge vai trò (shrink-0) */}
                             <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -957,7 +1000,7 @@ export default function TeamsTab({
                               </span>
 
                               {m.role === "leader" ? (
-                                <span className="text-[10px] font-bold text-[#F27024] bg-orange-50 border border-orange-200/80 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
+                                <span className="text-[10px] font-bold text-primary bg-orange-50 border border-orange-200/80 px-1.5 py-0.5 rounded-sm shrink-0 whitespace-nowrap">
                                   Trưởng nhóm
                                 </span>
                               ) : (
@@ -965,7 +1008,7 @@ export default function TeamsTab({
                                   <button
                                     type="button"
                                     onClick={() => handleSetLeader(team._id, m.userId?._id)}
-                                    className="text-[10px] text-[#F27024] hover:text-[#d65f1a] hover:bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200/60 font-semibold shrink-0 whitespace-nowrap transition-colors cursor-pointer"
+                                    className="text-[10px] text-primary hover:text-[#d65f1a] hover:bg-orange-50 px-1.5 py-0.5 rounded-sm border border-orange-200/60 font-semibold shrink-0 whitespace-nowrap transition-colors cursor-pointer"
                                     title="Bổ nhiệm làm Trưởng nhóm mới"
                                   >
                                     Lên Trưởng nhóm
@@ -1004,7 +1047,7 @@ export default function TeamsTab({
                           type="text"
                           placeholder="Nhập Email hoặc MSSV để thêm..."
                           id={`add-member-input-${team._id}`}
-                          className="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#F27024] placeholder:text-slate-400 font-sans"
+                          className="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-primary placeholder:text-slate-400 font-sans"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               handleAddMember(team._id, (e.target as HTMLInputElement).value);
@@ -1021,7 +1064,7 @@ export default function TeamsTab({
                               inputEl.value = "";
                             }
                           }}
-                          className="shrink-0 bg-[#F27024] hover:bg-[#d65f1a] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors font-sans whitespace-nowrap cursor-pointer"
+                          className="shrink-0 bg-primary hover:bg-[#d65f1a] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors font-sans whitespace-nowrap cursor-pointer"
                         >
                           Thêm
                         </button>
@@ -1032,14 +1075,14 @@ export default function TeamsTab({
                   {/* Assign Track controls */}
                   {!readOnly && (
                     <div className="border-t border-slate-100 pt-2.5 flex flex-col gap-1.5">
-                      <p className="text-[10px] font-bold text-[#F27024] uppercase tracking-wider font-mono">
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono">
                         Phân chia / Thay đổi bảng đấu:
                       </p>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleAssignTrack(team._id, "random")}
                           disabled={loading || tracks.length === 0}
-                          className="flex-1 bg-white hover:bg-orange-50 disabled:bg-slate-100 disabled:text-slate-400 text-xs text-[#F27024] font-bold py-1.5 px-3 rounded-xl font-mono transition-all flex items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed border border-orange-200"
+                          className="flex-1 bg-white hover:bg-orange-50 disabled:bg-slate-100 disabled:text-slate-400 text-xs text-primary font-bold py-1.5 px-3 rounded-xl font-mono transition-all flex items-center justify-center gap-1 cursor-pointer disabled:cursor-not-allowed border border-orange-200"
                         >
                           Phân ngẫu nhiên
                         </button>
@@ -1108,11 +1151,11 @@ export default function TeamsTab({
               .map((team: any) => (
                 <div
                   key={team._id}
-                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 shadow-sm transition-all space-y-3"
+                  className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 hover:border-slate-300 shadow-xs transition-all space-y-3"
                 >
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] font-bold text-[#F27024] font-mono block">
+                      <span className="text-[10px] font-bold text-primary font-mono block">
                         ĐỘI CHỜ DUYỆT
                       </span>
                       <h5 className="font-bold text-slate-900 text-sm truncate" title={team.name}>
@@ -1154,7 +1197,7 @@ export default function TeamsTab({
                           href={team.repository.repoUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[#F27024] hover:underline font-mono truncate max-w-[170px] sm:max-w-[220px]"
+                          className="text-primary hover:underline font-mono truncate max-w-[170px] sm:max-w-[220px]"
                           title={team.repository.repoName}
                         >
                           {team.repository.repoName}
@@ -1183,7 +1226,7 @@ export default function TeamsTab({
                         return (
                           <div
                             key={m.userId?._id || m._id}
-                            className="flex items-center justify-between text-xs gap-2 py-0.5 hover:bg-slate-50/80 px-1 rounded transition-colors"
+                            className="flex items-center justify-between text-xs gap-2 py-0.5 hover:bg-slate-50/80 px-1 rounded-sm transition-colors"
                           >
                             {/* Cột trái: Tên + MSSV + Trường (truncate) + Nút/Badge vai trò (shrink-0) */}
                             <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -1202,7 +1245,7 @@ export default function TeamsTab({
                               </span>
 
                               {m.role === "leader" ? (
-                                <span className="text-[10px] font-bold text-[#F27024] bg-orange-50 border border-orange-200/80 px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap">
+                                <span className="text-[10px] font-bold text-primary bg-orange-50 border border-orange-200/80 px-1.5 py-0.5 rounded-sm shrink-0 whitespace-nowrap">
                                   Trưởng nhóm
                                 </span>
                               ) : (
@@ -1210,7 +1253,7 @@ export default function TeamsTab({
                                   <button
                                     type="button"
                                     onClick={() => handleSetLeader(team._id, m.userId?._id)}
-                                    className="text-[10px] text-[#F27024] hover:text-[#d65f1a] hover:bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200/60 font-semibold shrink-0 whitespace-nowrap transition-colors cursor-pointer"
+                                    className="text-[10px] text-primary hover:text-[#d65f1a] hover:bg-orange-50 px-1.5 py-0.5 rounded-sm border border-orange-200/60 font-semibold shrink-0 whitespace-nowrap transition-colors cursor-pointer"
                                     title="Bổ nhiệm làm Trưởng nhóm mới"
                                   >
                                     Lên Trưởng nhóm
@@ -1238,7 +1281,7 @@ export default function TeamsTab({
                                   type="button"
                                   onClick={() => handleSendMemberEmails([m._id])}
                                   disabled={sendingMemberIds.length > 0 || !canQueueEmail(m)}
-                                  className="inline-flex items-center gap-1 rounded-md border border-orange-200 px-1.5 py-0.5 text-[10px] font-bold text-[#F27024] transition-colors hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 cursor-pointer"
+                                  className="inline-flex items-center gap-1 rounded-md border border-orange-200 px-1.5 py-0.5 text-[10px] font-bold text-primary transition-colors hover:bg-orange-50 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50 shrink-0 cursor-pointer"
                                   title={m.invitationEmailSent ? "Gửi lại email lời mời" : "Gửi email lời mời"}
                                 >
                                   {sendingMemberIds.includes(m._id) || !canQueueEmail(m) ? (
@@ -1271,7 +1314,7 @@ export default function TeamsTab({
                           type="text"
                           placeholder="Nhập Email hoặc MSSV để thêm..."
                           id={`add-member-input-${team._id}`}
-                          className="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#F27024] placeholder:text-slate-400 font-sans"
+                          className="flex-1 min-w-0 text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-primary placeholder:text-slate-400 font-sans"
                           onKeyDown={(e) => {
                             if (e.key === "Enter") {
                               handleAddMember(team._id, (e.target as HTMLInputElement).value);
@@ -1288,7 +1331,7 @@ export default function TeamsTab({
                               inputEl.value = "";
                             }
                           }}
-                          className="shrink-0 bg-[#F27024] hover:bg-[#d65f1a] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors font-sans whitespace-nowrap cursor-pointer"
+                          className="shrink-0 bg-primary hover:bg-[#d65f1a] text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors font-sans whitespace-nowrap cursor-pointer"
                         >
                           Thêm
                         </button>

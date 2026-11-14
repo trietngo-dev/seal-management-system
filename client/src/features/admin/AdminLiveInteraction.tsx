@@ -162,8 +162,13 @@ export default function AdminLiveInteraction() {
       return;
     }
     fetchLiveRankings();
-    fetchRubric();
   }, [selectedRoundId]);
+
+  // Rubric follows the selected team's track (track-specific rubric, else the round-wide one)
+  const selectedTeamTrackId = selectedTeam?.trackId?._id;
+  useEffect(() => {
+    if (selectedRoundId) fetchRubric();
+  }, [selectedRoundId, selectedTeamTrackId]);
 
   // Fetch score override details when selected team or judge changes
   useEffect(() => {
@@ -269,6 +274,7 @@ export default function AdminLiveInteraction() {
       const res = await axios.get(
         `http://localhost:5000/api/rubrics/round/${selectedRoundId}`,
         {
+          params: { trackId: selectedTeamTrackId || undefined },
           headers: { Authorization: `Bearer ${token}` },
         },
       );
@@ -310,17 +316,17 @@ export default function AdminLiveInteraction() {
 
       const selectedJudgeHasScore = selectedJudgeId
         ? normalizedScores.some((entry: any) => {
-            const judge = entry.judge || entry.judgeId || entry.judgeId?._id || entry.judge?._id;
-            const judgeId = judge?._id ? judge._id.toString() : judge?._id?.toString() || judge?.toString();
-            return judgeId === selectedJudgeId;
-          })
+          const judge = entry.judge || entry.judgeId || entry.judgeId?._id || entry.judge?._id;
+          const judgeId = judge?._id ? judge._id.toString() : judge?._id?.toString() || judge?.toString();
+          return judgeId === selectedJudgeId;
+        })
         : false;
       const selectedJudgeScore = selectedJudgeId
         ? normalizedScores.find((entry: any) => {
-            const judge = entry.judge || entry.judgeId;
-            const judgeId = judge?._id?.toString() || judge?.toString();
-            return judgeId === selectedJudgeId;
-          })
+          const judge = entry.judge || entry.judgeId;
+          const judgeId = judge?._id?.toString() || judge?.toString();
+          return judgeId === selectedJudgeId;
+        })
         : null;
       const hasExistingScore = Boolean(res.data.score || selectedJudgeHasScore);
 
@@ -544,9 +550,9 @@ export default function AdminLiveInteraction() {
   return (
     <div className="space-y-6 font-sans text-slate-300">
       {/* HEADER BAR */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm gap-4 relative z-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-xs gap-4 relative z-20">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[#F27024]/10 border border-[#F27024]/20 flex items-center justify-center text-[#F27024]">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
             <Tv size={24} />
           </div>
           <div>
@@ -598,15 +604,15 @@ export default function AdminLiveInteraction() {
         {/* LEFT COLUMN: TEAMS RANKING & SOCKET LOGS (col-span-5) */}
         <div className="lg:col-span-5 space-y-6">
           {/* TEAMS CARD */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-xs">
             <div className="flex justify-between items-center pb-2 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-800 font-mono flex items-center gap-2">
-                <ListFilter size={16} className="text-[#F27024]" />
+                <ListFilter size={16} className="text-primary" />
                 <span>DANH SÁCH ĐỘI & ĐIỂM SỐ LIVE</span>
               </h3>
               <button
                 onClick={fetchLiveRankings}
-                className="text-[10px] font-mono text-[#F27024] hover:text-[#d95f1f] transition-colors"
+                className="text-[10px] font-mono text-primary hover:text-[#d95f1f] transition-colors"
               >
                 Tải lại
               </button>
@@ -633,14 +639,14 @@ export default function AdminLiveInteraction() {
                             setSelectedRankingTrackId(trackId);
                             setSelectedTeam(group.items[0] || null);
                           }}
-                          className={`min-w-0 rounded-lg border px-3 py-2 text-xs font-bold font-mono transition-all focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 ${isActive
-                            ? "border-[#F27024]/50 bg-[#F27024]/10 text-[#F27024]"
+                          className={`min-w-0 rounded-lg border px-3 py-2 text-xs font-bold font-mono transition-all focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 ${isActive
+                            ? "border-primary/50 bg-primary/10 text-primary"
                             : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
                             }`}
                         >
                           {group.trackName}
                           <span className={`ml-2 rounded px-1.5 py-0.5 text-[9px] ${isActive
-                            ? "bg-[#F27024]/15 text-[#F27024]"
+                            ? "bg-primary/15 text-primary"
                             : "bg-slate-100 text-slate-500"
                             }`}
                           >
@@ -656,82 +662,82 @@ export default function AdminLiveInteraction() {
                     className="space-y-2 max-h-[440px] overflow-y-auto pr-1"
                   >
                     {activeRankingTrack?.items.map((item, idx) => {
-                        const isHighlighted =
-                          highlightedTeamId === item.teamId._id;
-                        const isSelected =
-                          selectedTeam?.teamId._id === item.teamId._id;
-                        const rank = item.trackRank || idx + 1;
-                        return (
-                          <button
-                            key={item.teamId._id}
-                            type="button"
-                            onClick={() => setSelectedTeam(item)}
-                            aria-pressed={isSelected}
-                            className={`relative flex w-full items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer group focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] ${isSelected
-                              ? "bg-[#F27024]/10 border-[#F27024]/50 shadow-sm"
-                              : isHighlighted
-                                ? "bg-amber-500/10 border-amber-500/40"
-                                : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100"
-                              }`}
-                          >
-                            {/* Left glowing marker */}
-                            {isHighlighted && (
-                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l animate-pulse" />
-                            )}
+                      const isHighlighted =
+                        highlightedTeamId === item.teamId._id;
+                      const isSelected =
+                        selectedTeam?.teamId._id === item.teamId._id;
+                      const rank = item.trackRank || idx + 1;
+                      return (
+                        <button
+                          key={item.teamId._id}
+                          type="button"
+                          onClick={() => setSelectedTeam(item)}
+                          aria-pressed={isSelected}
+                          className={`relative flex w-full items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer group focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 focus:border-primary ${isSelected
+                            ? "bg-primary/10 border-primary/50 shadow-xs"
+                            : isHighlighted
+                              ? "bg-amber-500/10 border-amber-500/40"
+                              : "bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100"
+                            }`}
+                        >
+                          {/* Left glowing marker */}
+                          {isHighlighted && (
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l animate-pulse" />
+                          )}
 
-                            <div className="flex items-center gap-3">
-                              {/* Rank Badge */}
-                              <div
-                                className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold font-mono text-[10px] ${rank === 1
-                                  ? "bg-amber-500/15 text-amber-700 border border-amber-500/30"
-                                  : rank === 2
-                                    ? "bg-slate-200 text-slate-700 border border-slate-300"
-                                    : rank === 3
-                                      ? "bg-orange-900/10 text-orange-800 border border-orange-900/20"
-                                      : "bg-slate-100 text-slate-600 border border-slate-200"
-                                  }`}
-                              >
-                                {rank}
-                              </div>
+                          <div className="flex items-center gap-3">
+                            {/* Rank Badge */}
+                            <div
+                              className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold font-mono text-[10px] ${rank === 1
+                                ? "bg-amber-500/15 text-amber-700 border border-amber-500/30"
+                                : rank === 2
+                                  ? "bg-slate-200 text-slate-700 border border-slate-300"
+                                  : rank === 3
+                                    ? "bg-orange-900/10 text-orange-800 border border-orange-900/20"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200"
+                                }`}
+                            >
+                              {rank}
+                            </div>
 
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-extrabold text-xs tracking-wide text-slate-800">
-                                    {item.teamId.name}
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-extrabold text-xs tracking-wide text-slate-800">
+                                  {item.teamId.name}
+                                </span>
+                                {isHighlighted && (
+                                  <span className="bg-amber-500 text-slate-950 font-black text-[7px] px-1 py-0.5 rounded-sm tracking-widest uppercase animate-pulse">
+                                    LIVE
                                   </span>
-                                  {isHighlighted && (
-                                    <span className="bg-amber-500 text-slate-950 font-black text-[7px] px-1 py-0.5 rounded tracking-widest uppercase animate-pulse">
-                                      LIVE
-                                    </span>
-                                  )}
-                                </div>
-                                <span className="text-[10px] text-slate-500 block truncate max-w-[200px] mt-0.5 font-sans">
-                                  {item.teamId.topicSubmission?.title ||
-                                    "Chưa nộp đề tài"}
-                                </span>
+                                )}
                               </div>
+                              <span className="text-[10px] text-slate-500 block truncate max-w-[200px] mt-0.5 font-sans">
+                                {item.teamId.topicSubmission?.title ||
+                                  "Chưa nộp đề tài"}
+                              </span>
                             </div>
+                          </div>
 
-                            {/* Right: Scores */}
-                            <div className="text-right flex items-center gap-4">
-                              <div>
-                                <span className="text-xs font-mono font-bold text-[#F27024] block">
-                                  {item.averageScore > 0
-                                    ? `${item.averageScore}đ`
-                                    : "--"}
-                                </span>
-                                <span className="text-[9px] text-slate-500 block font-mono">
-                                  {item.judgeCount} Giám khảo
-                                </span>
-                              </div>
-                              <ChevronRight
-                                size={14}
-                                className="text-slate-400 group-hover:text-[#F27024] transition-colors"
-                              />
+                          {/* Right: Scores */}
+                          <div className="text-right flex items-center gap-4">
+                            <div>
+                              <span className="text-xs font-mono font-bold text-primary block">
+                                {item.averageScore > 0
+                                  ? `${item.averageScore}đ`
+                                  : "--"}
+                              </span>
+                              <span className="text-[9px] text-slate-500 block font-mono">
+                                {item.judgeCount} Giám khảo
+                              </span>
                             </div>
-                          </button>
-                        );
-                      })}
+                            <ChevronRight
+                              size={14}
+                              className="text-slate-400 group-hover:text-primary transition-colors"
+                            />
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               ) : (
@@ -743,9 +749,9 @@ export default function AdminLiveInteraction() {
           </div>
 
           {/* REAL-TIME EVENT LOGS BLOCK */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4 shadow-xs">
             <h3 className="text-sm font-bold text-slate-800 font-mono flex items-center gap-2 pb-2 border-b border-slate-100">
-              <Activity size={16} className="text-[#F27024]" />
+              <Activity size={16} className="text-primary" />
               <span>LIVE LOGGING (SOCKET)</span>
             </h3>
             <div className="space-y-2.5 max-h-[180px] overflow-y-auto text-[10px] font-mono pr-1">
@@ -773,12 +779,12 @@ export default function AdminLiveInteraction() {
         {/* RIGHT COLUMN: DETAIL CONTROL PANEL & SCORE OVERRIDE (col-span-7) */}
         <div className="lg:col-span-7 space-y-6">
           {selectedTeam ? (
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-xs">
               {/* Profile Card */}
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-4 border-b border-slate-850">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-slate-500 text-[10px] font-bold font-mono uppercase bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                    <span className="text-slate-500 text-[10px] font-bold font-mono uppercase bg-slate-900 px-2 py-0.5 rounded-sm border border-slate-800">
                       ĐỘI THI
                     </span>
                     <span className="text-[10px] text-cyan-400 font-mono">
@@ -825,26 +831,26 @@ export default function AdminLiveInteraction() {
                       const judgeId = (j._id || j.judgeId?._id || j.judgeId)?.toString();
                       const isSelected = judgeId === selectedJudgeId;
                       return (
-                      <button
-                        key={judgeId || jIdx}
-                        type="button"
-                        onClick={() => judgeId && setSelectedJudgeId(judgeId)}
-                        aria-pressed={isSelected}
-                        className={`p-3 rounded-xl border flex justify-between items-center text-xs text-left transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/70 ${isSelected
-                          ? "bg-cyan-500/10 border-cyan-500/60 shadow-[0_0_16px_rgba(6,182,212,0.12)]"
-                          : "bg-slate-900/30 border-slate-850 hover:border-slate-700 hover:bg-slate-900/60"
-                          }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <UserCheck size={14} className={isSelected ? "text-cyan-400" : "text-slate-500"} />
-                          <span className="font-bold text-slate-200">
-                            {j.fullName}
+                        <button
+                          key={judgeId || jIdx}
+                          type="button"
+                          onClick={() => judgeId && setSelectedJudgeId(judgeId)}
+                          aria-pressed={isSelected}
+                          className={`p-3 rounded-xl border flex justify-between items-center text-xs text-left transition-all focus:outline-hidden focus:ring-2 focus:ring-cyan-500/70 ${isSelected
+                            ? "bg-cyan-500/10 border-cyan-500/60 shadow-[0_0_16px_rgba(6,182,212,0.12)]"
+                            : "bg-slate-900/30 border-slate-850 hover:border-slate-700 hover:bg-slate-900/60"
+                            }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <UserCheck size={14} className={isSelected ? "text-cyan-400" : "text-slate-500"} />
+                            <span className="font-bold text-slate-200">
+                              {j.fullName}
+                            </span>
+                          </div>
+                          <span className="font-mono font-bold text-cyan-400 bg-cyan-900/10 border border-cyan-900/20 px-2 py-0.5 rounded-sm">
+                            {j.score}đ
                           </span>
-                        </div>
-                        <span className="font-mono font-bold text-cyan-400 bg-cyan-900/10 border border-cyan-900/20 px-2 py-0.5 rounded">
-                          {j.score}đ
-                        </span>
-                      </button>
+                        </button>
                       );
                     })
                   ) : (
@@ -869,7 +875,7 @@ export default function AdminLiveInteraction() {
                   <select
                     value={selectedJudgeId}
                     onChange={(e) => setSelectedJudgeId(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 text-slate-350 text-xs px-2.5 py-1.5 rounded-lg focus:outline-none w-48 font-semibold"
+                    className="bg-slate-950 border border-slate-800 text-slate-350 text-xs px-2.5 py-1.5 rounded-lg focus:outline-hidden w-48 font-semibold"
                   >
                     {judges.map((jg) => (
                       <option key={jg._id} value={jg._id}>
@@ -918,7 +924,7 @@ export default function AdminLiveInteraction() {
                             type="button"
                             disabled={isAssistActionLoading}
                             onClick={() => handleAssistAction("remind")}
-                            className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs font-bold text-slate-200 transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-600 disabled:opacity-50"
+                            className="flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs font-bold text-slate-200 transition-colors hover:bg-slate-800 focus:outline-hidden focus:ring-2 focus:ring-slate-600 disabled:opacity-50"
                           >
                             <BellRing size={14} />
                             Nhắc hoàn tất chấm điểm
@@ -927,7 +933,7 @@ export default function AdminLiveInteraction() {
                             type="button"
                             disabled={isAssistActionLoading || assistAccess.status === "pending"}
                             onClick={() => handleAssistAction("request")}
-                            className="flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-bold text-slate-950 transition-colors hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50"
+                            className="flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-3 py-2.5 text-xs font-bold text-slate-950 transition-colors hover:bg-cyan-400 focus:outline-hidden focus:ring-2 focus:ring-cyan-400/50 disabled:opacity-50"
                           >
                             <UserRoundCheck size={14} />
                             Đề nghị hỗ trợ chấm điểm
@@ -959,7 +965,7 @@ export default function AdminLiveInteraction() {
                             >
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-extrabold font-mono text-[10px] text-cyan-400 bg-cyan-900/10 px-1.5 py-0.5 rounded border border-cyan-900/25">
+                                  <span className="font-extrabold font-mono text-[10px] text-cyan-400 bg-cyan-900/10 px-1.5 py-0.5 rounded-sm border border-cyan-900/25">
                                     {c.code}
                                   </span>
                                   <span className="text-xs font-bold text-slate-200">
@@ -985,7 +991,7 @@ export default function AdminLiveInteraction() {
                                       parseFloat(e.target.value) || 0,
                                     )
                                   }
-                                  className="bg-slate-900 border border-slate-750 text-slate-200 text-xs px-2 py-1 w-16 text-center rounded-lg font-bold font-mono focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:cursor-default disabled:opacity-80"
+                                  className="bg-slate-900 border border-slate-750 text-slate-200 text-xs px-2 py-1 w-16 text-center rounded-lg font-bold font-mono focus:outline-hidden focus:ring-1 focus:ring-cyan-500 disabled:cursor-default disabled:opacity-80"
                                 />
                                 <span className="text-xs text-slate-500 font-mono">
                                   / {c.maxScore}đ
@@ -1006,7 +1012,7 @@ export default function AdminLiveInteraction() {
                           value={overrideComment}
                           disabled={readOnly || !scoreAccessState.canSubmit || !assistAccess.allowed}
                           onChange={(e) => setOverrideComment(e.target.value)}
-                          className="bg-slate-950 border border-slate-800 text-slate-350 text-xs px-3 py-2 w-full rounded-xl focus:outline-none focus:ring-1 focus:ring-cyan-500 placeholder-slate-650"
+                          className="bg-slate-950 border border-slate-800 text-slate-350 text-xs px-3 py-2 w-full rounded-xl focus:outline-hidden focus:ring-1 focus:ring-cyan-500 placeholder-slate-650"
                         />
                       </div>
 
@@ -1083,7 +1089,7 @@ export default function AdminLiveInteraction() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm flex flex-col items-center justify-center space-y-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs flex flex-col items-center justify-center space-y-4">
               <Tv size={48} className="text-slate-300" />
               <div>
                 <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider font-mono">

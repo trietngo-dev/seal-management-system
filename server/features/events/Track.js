@@ -16,7 +16,9 @@ const TrackSchema = new Schema({
   advanceTopN: { type: Number },
   topicName: { type: String },
   topicLink: { type: String },
-  environmentId: { type: String },
+  // Contest/track brief for the AI reviewers (task, required outputs, evaluation notes).
+  // Hidden from every query by default so participants never receive it; load with select('+aiBrief').
+  aiBrief: { type: String, select: false },
   // Per-track exam materials — each track stores its own Drive link
   examDriveFileId: { type: String },
   examDriveFileName: { type: String },

@@ -121,7 +121,7 @@ export default function SeminarTab({
               disabled={readOnly}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500"
               placeholder="e.g. Seminar Hướng Dẫn & Giải Đáp Thắc Mắc Cuộc Thi"
             />
           </div>
@@ -152,7 +152,7 @@ export default function SeminarTab({
                 disabled={readOnly}
                 value={meetUrl}
                 onChange={(e) => setMeetUrl(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-16 py-2.5 text-xs text-cyan-300 focus:outline-none focus:border-cyan-500 font-mono"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-16 py-2.5 text-xs text-cyan-300 focus:outline-hidden focus:border-cyan-500 font-mono"
                 placeholder="https://meet.google.com/abc-xyz-def"
               />
               {meetUrl && (
@@ -178,7 +178,7 @@ export default function SeminarTab({
               disabled={readOnly}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-hidden focus:border-cyan-500"
               placeholder="Nhập nội dung lưu ý cho thí sinh (ví dụ: Chuẩn bị thẻ sinh viên, bật camera khi tham gia...)"
             />
           </div>
@@ -216,7 +216,7 @@ export default function SeminarTab({
                 disabled={readOnly}
                 value={attendanceFormUrl}
                 onChange={(e) => setAttendanceFormUrl(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-hidden focus:border-emerald-500"
                 placeholder="https://forms.google.com/..."
               />
             </div>
@@ -231,7 +231,7 @@ export default function SeminarTab({
                   disabled={readOnly}
                   value={attendanceSpreadsheetUrl}
                   onChange={(e) => setAttendanceSpreadsheetUrl(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-emerald-300 focus:outline-none focus:border-emerald-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-emerald-300 focus:outline-hidden focus:border-emerald-500"
                   placeholder="https://docs.google.com/spreadsheets/..."
                 />
                 {attendanceSpreadsheetUrl && (

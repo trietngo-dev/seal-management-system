@@ -245,7 +245,7 @@ export default function GithubTab({
                 ? "bg-slate-800 text-slate-500 border border-slate-700/50"
                 : repos.length === 0
                   ? "bg-slate-800/80 text-white border border-slate-700/50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 border border-emerald-500/20"
+                  : "bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 border border-emerald-500/20"
                 }`}
             >
               <RefreshCw size={14} className={syncingAll ? "animate-spin" : ""} />
@@ -268,7 +268,7 @@ export default function GithubTab({
               {/* Bar track */}
               <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full transition-all duration-500"
+                  className="bg-linear-to-r from-emerald-500 to-teal-500 h-full transition-all duration-500"
                   style={{ width: `${(syncProgress.completed / (syncProgress.total || 1)) * 100}%` }}
                 />
               </div>

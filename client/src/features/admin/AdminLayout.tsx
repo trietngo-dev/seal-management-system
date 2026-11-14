@@ -239,7 +239,7 @@ export default function AdminLayout({
             isSidebarCollapsed ? "px-3 justify-center" : "px-6 gap-3"
           }`}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_10px_rgba(6,182,212,0.4)] shrink-0">
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-cyan-500 to-teal-600 text-white flex items-center justify-center font-bold text-sm shadow-[0_0_10px_rgba(6,182,212,0.4)] shrink-0">
             {user?.fullName?.charAt(0) || "A"}
           </div>
           {!isSidebarCollapsed && (
@@ -325,7 +325,7 @@ export default function AdminLayout({
         }`}
       >
         {/* Background Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none"></div>
 
         {/* TopAppBar */}
         <header className="h-16 w-full px-8 bg-slate-950/90 border-b border-white/5 flex justify-between items-center z-10 sticky top-0 shadow-lg">
@@ -408,7 +408,7 @@ export default function AdminLayout({
                         >
                           <div className="flex-1 pr-3">
                             <p
-                              className={`text-xs font-semibold whitespace-normal break-words ${
+                              className={`text-xs font-semibold whitespace-normal wrap-break-word ${
                                 notif.status === "pending" || !notif.isRead
                                   ? "text-cyan-300"
                                   : "text-slate-300"
@@ -416,7 +416,7 @@ export default function AdminLayout({
                             >
                               {notif.title}
                             </p>
-                            <p className="text-xs text-slate-400 mt-1 whitespace-normal break-words leading-relaxed">
+                            <p className="text-xs text-slate-400 mt-1 whitespace-normal wrap-break-word leading-relaxed">
                               {notif.body}
                             </p>
                             <p className="text-[10px] text-slate-500 mt-2">
@@ -426,7 +426,7 @@ export default function AdminLayout({
                           <button
                             type="button"
                             onClick={(e) => deleteNotification(notif._id, e)}
-                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 rounded transition-all shrink-0"
+                            className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-400 rounded-sm transition-all shrink-0"
                             title="Xóa thông báo"
                           >
                             <Trash2 size={13} />

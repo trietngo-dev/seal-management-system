@@ -40,6 +40,19 @@ const { ensureChatRoomForTeam } = require("../chat/chatRoomService");
 
 const DEPLOYED_CLIENT_URL = "https://seal-management-staging.vercel.app";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Team size rule: 3–5 people including the leader.
+const MIN_TEAM_SIZE = 3;
+const MAX_TEAM_SIZE = 5;
+const MIN_MEMBERS_BESIDES_LEADER = MIN_TEAM_SIZE - 1;
+const MAX_MEMBERS_BESIDES_LEADER = MAX_TEAM_SIZE - 1;
+
+// User input inside a RegExp must be escaped: names like "C++" otherwise throw (500).
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function resolveClientUrl() {
   const configuredUrl = process.env.CLIENT_URL?.trim();
   const isHostedEnvironment =
@@ -130,101 +143,21 @@ function normalizeUniversityName(name) {
   return cleaned.trim();
 }
 
-function getSemesterSuffix(event) {
-  if (!event || !event.semester || !event.year) return "";
-  const semLower = event.semester.toLowerCase();
-  let semCode = "";
-  if (semLower === "spring") semCode = "sp";
-  else if (semLower === "summer") semCode = "su";
-  else if (semLower === "fall") semCode = "fa";
-  return semCode ? `_${semCode}${event.year}` : "";
-}
-
-/**
- * Converts Vietnamese text (with diacritical marks) to a GitHub-safe ASCII slug.
- * Example: "Đội Sáng Tạo" → "doi-sang-tao"
- *          "Nhóm Phát Triển 2025" → "nhom-phat-trien-2025"
- * @param {string} text - Vietnamese text with diacritics
- * @returns {string} - ASCII slug safe for GitHub repository names
- */
-function vietnameseSlug(text) {
-  if (!text) return "";
-  let slug = text;
-
-  // Normalize Unicode to NFD (decomposed), then remove combining diacritical marks
-  slug = slug.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-  // Handle special Vietnamese characters not covered by NFD decomposition
-  slug = slug
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
-
-  // Lowercase, replace non-alphanumeric with hyphens, deduplicate hyphens, trim edges
-  slug = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-
-  return slug;
-}
-
 async function handleTeamFullConfirmation(team) {
   team.status = "confirmed";
   await team.save();
-
-  // Sync team to external simulator API for MQTT keys
-  try {
-    await syncTeamToExternalSimulator(team);
-  } catch (err) {
-    console.error("Lỗi đồng bộ simulator khi duyệt đội:", err.message);
-  }
 
   console.log(
     `[TEAM] Team "${team.name}" is now FULLY CONFIRMED! Creating repo...`,
   );
 
-  // 1. Automatically create Github Repository
+  // 1. Automatically create Github Repository (and invite collaborators)
   try {
-    const event = await Event.findById(team.eventId);
-    const orgName = event ? event.githubOrgName : undefined;
-    const suffix = getSemesterSuffix(event);
-    const slugRepoName = vietnameseSlug(team.name) + suffix;
+    const { repository } = await provisionTeamRepository(team);
+    const slugRepoName = repository.repoName;
     const populatedMembers = await TeamMember.find({
       teamId: team._id,
     }).populate("userId");
-
-    const gitResult = await githubService.createTeamRepository(
-      slugRepoName,
-      "private",
-      orgName,
-    );
-
-    const actualOrgName = gitResult.owner || orgName;
-
-    const newRepo = new GithubRepository({
-      eventId: team.eventId,
-      trackId: team.trackId,
-      teamId: team._id,
-      orgName: actualOrgName,
-      repoName: slugRepoName,
-      repoUrl: gitResult.repoUrl,
-      githubRepoId: gitResult.githubRepoId,
-      syncStatus: "not_synced",
-    });
-    await newRepo.save();
-
-    // 2. Add collaborators
-    for (const tm of populatedMembers) {
-      if (tm.userId && tm.userId.githubUsername) {
-        await githubService.addCollaborator(
-          slugRepoName,
-          tm.userId.githubUsername,
-          "push",
-          actualOrgName,
-        );
-      }
-    }
 
     // Notify all team members that team is confirmed
     for (const tm of populatedMembers) {
@@ -270,94 +203,8 @@ const {
   addInAppJob,
   isQueueAvailable,
 } = require("../notifications/notificationQueue");
-const { createExternalTeam } = require("./externalTeamService");
-
-function generateTeamCode(teamName) {
-  return teamName
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-async function syncTeamToExternalSimulator(team) {
-  try {
-    if (team.externalTeamId || team.testApiKey) {
-      console.log(
-        `[MQTT SERVICE] Team "${team.name}" is already synced to external API.`,
-      );
-      return;
-    }
-
-    if (!team.trackId) {
-      console.warn(
-        `[MQTT SERVICE] Team "${team.name}" has no trackId assigned. Skipping external sync.`,
-      );
-      return;
-    }
-
-    const targetTrackId = team.originalTrackId || team.trackId;
-    const track = await Track.findById(targetTrackId);
-    if (!track || !track.environmentId) {
-      console.warn(
-        `[MQTT SERVICE] Track not found or environmentId is empty for track "${targetTrackId}". Skipping external sync.`,
-      );
-      return;
-    }
-
-    let baseCode = generateTeamCode(team.name);
-    if (!baseCode) {
-      baseCode = `TEAM_${team._id.toString().substring(18).toUpperCase()}`;
-    }
-
-    let code = baseCode;
-    let syncSuccess = false;
-    let result = null;
-    let attempts = 0;
-
-    while (!syncSuccess && attempts < 3) {
-      try {
-        attempts++;
-        result = await createExternalTeam(code, team.name, track.environmentId);
-        syncSuccess = true;
-      } catch (err) {
-        if (err.code === "TEAM_CODE_EXISTS" && attempts < 3) {
-          const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
-          code = `${baseCode}_${suffix}`;
-          console.log(
-            `[MQTT SERVICE] Team code conflicted. Retrying with new code: ${code}`,
-          );
-        } else {
-          throw err;
-        }
-      }
-    }
-
-    if (result) {
-      team.externalTeamId = result.team?.id || "";
-      team.externalTeamCode = code;
-      team.accessCode = result.accessCode || "";
-      team.testApiKey = result.testApiKey || "";
-      team.judgeApiKey = result.judgeApiKey || "";
-      team.mqttUsername = result.mqttUsername || "";
-      team.mqttPassword = result.mqttPassword || "";
-      team.testTopic = `hackathon/${code.toLowerCase()}/test/telemetry`;
-      team.judgeTopic = `hackathon/${code.toLowerCase()}/judge/telemetry`;
-      await team.save();
-
-      console.log(
-        `[MQTT SERVICE] Successfully synchronized team "${team.name}" to simulator. Code: ${code}`,
-      );
-    }
-  } catch (error) {
-    console.error(
-      `[MQTT SERVICE] Failed to sync team "${team.name}" to external API:`,
-      error.message,
-    );
-  }
-}
+const { provisionTeamRepository } = require("../github-ai/repoProvisioning");
+const { isEventStaff } = require("./teamAccess");
 
 /**
  * @route   GET /api/teams/check-eligibility
@@ -443,7 +290,7 @@ router.get("/check-name", authenticateToken, async (req, res) => {
   try {
     const existingTeam = await Team.findOne({
       eventId,
-      name: { $regex: new RegExp(`^${name.trim()}$`, "i") },
+      name: { $regex: new RegExp(`^${escapeRegex(name.trim())}$`, "i") },
     });
 
     if (existingTeam) {
@@ -487,10 +334,16 @@ router.post("/register", authenticateToken, async (req, res) => {
       .json({ message: "Đã xảy ra lỗi trong quá trình đăng ký." });
   }
 
-  if (membersList.length < 2) {
+  // Teams have 3–5 people: the leader plus 2–4 members.
+  if (membersList.length < MIN_MEMBERS_BESIDES_LEADER) {
     return res
       .status(400)
-      .json({ message: "Số lượng thành viên không đủ (tối thiểu 3)." });
+      .json({ message: `Số lượng thành viên không đủ (tối thiểu ${MIN_TEAM_SIZE} người kể cả Trưởng nhóm).` });
+  }
+  if (membersList.length > MAX_MEMBERS_BESIDES_LEADER) {
+    return res
+      .status(400)
+      .json({ message: `Số lượng thành viên vượt quá giới hạn (tối đa ${MAX_TEAM_SIZE} người kể cả Trưởng nhóm).` });
   }
 
   if (!leaderInfo || !leaderInfo.fullName || !leaderInfo.githubUsername || !leaderInfo.height || !leaderInfo.weight) {
@@ -505,7 +358,19 @@ router.post("/register", authenticateToken, async (req, res) => {
       .json({ message: "Chiều cao và cân nặng của Trưởng nhóm phải là số hợp lệ." });
   }
 
+  // The leader is always the logged-in user. Accepting another email here would let
+  // anyone make an existing account the leader and overwrite its profile.
+  if (
+    leaderInfo.email &&
+    leaderInfo.email.toLowerCase().trim() !== req.user.email.toLowerCase()
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Email trưởng nhóm phải là email của tài khoản đang đăng nhập." });
+  }
+
   // Validate required fields for members
+  const seenEmails = new Set([req.user.email.toLowerCase()]);
   for (let i = 0; i < membersList.length; i++) {
     const m = membersList[i];
     if (!m.email || !m.fullName || !m.githubUsername) {
@@ -515,6 +380,15 @@ router.post("/register", authenticateToken, async (req, res) => {
           message: `Thành viên thứ ${i + 1} phải điền đầy đủ Email, Họ Tên và GitHub Username.`,
         });
     }
+    const normalizedEmail = String(m.email).toLowerCase().trim();
+    if (seenEmails.has(normalizedEmail)) {
+      return res
+        .status(400)
+        .json({
+          message: `Email "${m.email}" bị trùng (với trưởng nhóm hoặc thành viên khác).`,
+        });
+    }
+    seenEmails.add(normalizedEmail);
   }
 
   let createdTeamId = null;
@@ -528,17 +402,8 @@ router.post("/register", authenticateToken, async (req, res) => {
         });
     }
 
-    // Find leader by email if provided, fallback to logged-in user
     const User = mongoose.model("User");
-    let leader = null;
-    if (leaderInfo.email) {
-      leader = await User.findOne({
-        email: leaderInfo.email.toLowerCase().trim(),
-      });
-    }
-    if (!leader) {
-      leader = await User.findById(req.user._id);
-    }
+    const leader = await User.findById(req.user._id);
 
     if (leader) {
       if (leaderInfo.fullName) leader.fullName = leaderInfo.fullName;
@@ -825,49 +690,8 @@ router.post("/register", authenticateToken, async (req, res) => {
       confirmStatus: "pending",
     });
     if (pendingMembers === 0) {
-      team.status = "confirmed";
-      await team.save();
-
-      // Sync team to external simulator API for MQTT keys
-      await syncTeamToExternalSimulator(team);
-
-      console.log(
-        `[TEAM] Team "${team.name}" is now FULLY CONFIRMED immediately upon registration! Creating repo...`,
-      );
-
-      // Automatically create Github Repository
-      const orgName = event ? event.githubOrgName : undefined;
-      const suffix = getSemesterSuffix(event);
-      const slugRepoName = vietnameseSlug(team.name) + suffix;
-      const gitResult = await githubService.createTeamRepository(
-        slugRepoName,
-        "private",
-        orgName,
-      );
-
-      const actualOrgName = gitResult.owner || orgName;
-
-      const newRepo = new GithubRepository({
-        eventId: team.eventId,
-        trackId: team.trackId,
-        teamId: team._id,
-        orgName: actualOrgName,
-        repoName: slugRepoName,
-        repoUrl: gitResult.repoUrl,
-        githubRepoId: gitResult.githubRepoId,
-        syncStatus: "not_synced",
-      });
-      await newRepo.save();
-
-      // Invite collaborators (the leader)
-      if (req.user.githubUsername) {
-        await githubService.addCollaborator(
-          slugRepoName,
-          req.user.githubUsername,
-          "push",
-          actualOrgName,
-        );
-      }
+      await handleTeamFullConfirmation(team);
+      const newRepo = await GithubRepository.findOne({ teamId: team._id });
 
       return res.status(201).json({
         message:
@@ -1006,14 +830,19 @@ router.get("/confirm-invite", async (req, res) => {
       `);
     }
 
-    // If already confirmed, redirect directly to survey page with auth token
+    // If already confirmed, redirect directly to survey page with auth token.
+    // The invite link logs the user in, so it must stop doing that once it expires;
+    // otherwise an old email becomes a permanent login link.
     if (member.confirmStatus === "confirmed") {
+      if (!member.confirmTokenExpiry || member.confirmTokenExpiry < new Date()) {
+        return res.redirect(`${clientUrl}/login`);
+      }
       const team = await Team.findById(member.teamId);
       const user = await User.findById(member.userId);
       let authToken = "";
       if (user) {
         const jwt = require("jsonwebtoken");
-        const JWT_SECRET = process.env.JWT_SECRET || "seal_hackathon_secret_key_2026";
+        const JWT_SECRET = require("../auth/jwtSecret");
         const sessionId = crypto.randomBytes(16).toString("hex");
         user.activeSessionId = sessionId;
         await user.save();
@@ -1149,7 +978,7 @@ router.get("/confirm-invite", async (req, res) => {
 
     // Generate auth token so user is automatically authenticated on frontend
     const jwt = require("jsonwebtoken");
-    const JWT_SECRET = process.env.JWT_SECRET || "seal_hackathon_secret_key_2026";
+    const JWT_SECRET = require("../auth/jwtSecret");
     let authToken = "";
     if (user) {
       const sessionId = crypto.randomBytes(16).toString("hex");
@@ -1228,7 +1057,7 @@ router.post("/verify-past-participation", async (req, res) => {
     if (token) {
       try {
         const jwt = require('jsonwebtoken');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, require('../auth/jwtSecret'));
         loggedInUser = decoded;
       } catch (err) {}
     }
@@ -1416,12 +1245,12 @@ router.get("/my-team", authenticateToken, async (req, res) => {
         .populate({
           path: "originalTrackId",
           select:
-            "name description startTime endTime roundId environmentId examDriveFileId examDriveFileName examDriveFileUrl isExamManualOpen topicName topicLink",
+            "name description startTime endTime roundId examDriveFileId examDriveFileName examDriveFileUrl isExamManualOpen topicName topicLink",
         })
         .populate({
           path: "trackId",
           select:
-            "name description startTime endTime roundId environmentId examDriveFileId examDriveFileName examDriveFileUrl isExamManualOpen topicName topicLink",
+            "name description startTime endTime roundId examDriveFileId examDriveFileName examDriveFileUrl isExamManualOpen topicName topicLink",
           populate: {
             path: "roundId",
             model: "Round",
@@ -1499,9 +1328,6 @@ router.get("/my-team", authenticateToken, async (req, res) => {
       );
       if (effectiveOriginalTrack) {
         trackPlain.originalTrackName = effectiveOriginalTrack.name;
-        if (effectiveOriginalTrack.environmentId) {
-          trackPlain.environmentId = effectiveOriginalTrack.environmentId;
-        }
         if (effectiveOriginalTrack.topicName) {
           trackPlain.topicName = effectiveOriginalTrack.topicName;
         }
@@ -1563,36 +1389,6 @@ router.get("/my-team", authenticateToken, async (req, res) => {
     teamPlain.eliminationMessage = eliminationMessage;
     teamPlain.currentEventRound = currentEventRound;
     teamPlain.achievedResult = achievedResult;
-
-    // Fetch active judge status from simulator
-    let isJudgeActive = false;
-    if (teamPlain.externalTeamCode) {
-      const { getJudgeActive } = require("./externalTeamService");
-      try {
-        const activeInfo = await getJudgeActive();
-        const info = Array.isArray(activeInfo)
-          ? activeInfo.find(
-              (item) => item.teamCode === teamPlain.externalTeamCode,
-            )
-          : activeInfo && activeInfo.teamCode === teamPlain.externalTeamCode
-            ? activeInfo
-            : null;
-        if (info) {
-          isJudgeActive = true;
-          if (info.judgeApiKey) teamPlain.judgeApiKey = info.judgeApiKey;
-          if (info.judgeTopic) teamPlain.judgeTopic = info.judgeTopic;
-        }
-      } catch (err) {
-        console.warn(
-          "[SIMULATOR] Failed to fetch active judge status for my-team:",
-          err.message,
-        );
-      }
-      if (!teamPlain.judgeTopic && teamPlain.externalTeamCode) {
-        teamPlain.judgeTopic = `hackathon/${teamPlain.externalTeamCode.toLowerCase()}/judge/telemetry`;
-      }
-    }
-    teamPlain.isJudgeActive = isJudgeActive;
 
     // Fetch available tracks for this event
     const eventTracks = await Track.find({ eventId: team.eventId._id }).select(
@@ -2244,16 +2040,8 @@ router.post(
           .status(404)
           .json({ message: "Không tìm thấy thông tin cuộc thi." });
 
-      let isCoordinator = req.user.isSystemAdmin;
-      if (!isCoordinator) {
-        const coordinatorRole = await EventRole.findOne({
-          userId: req.user._id,
-          eventId,
-          role: { $in: ["coordinator", "student_assistant"] },
-          status: "active",
-        });
-        isCoordinator = !!coordinatorRole;
-      }
+      // "coordinator" is not a valid EventRole; organisers are resolved via isEventStaff.
+      const isCoordinator = await isEventStaff(req.user, eventId);
 
       if (event.status !== "registration" && !isCoordinator) {
         return res
@@ -2393,6 +2181,10 @@ router.post(
           errors.push(`Dòng ${rowNum}: Email là bắt buộc.`);
           continue;
         }
+        if (!EMAIL_PATTERN.test(email)) {
+          errors.push(`Dòng ${rowNum}: Email "${email}" không hợp lệ.`);
+          continue;
+        }
 
         // GitHub validation: only mandatory for non-admin standard format
         if (!isAdminFormat && !github) {
@@ -2448,14 +2240,17 @@ router.post(
           );
         }
 
-        // Group by teamName
-        if (!teamGroups[teamName]) {
-          teamGroups[teamName] = {
+        // Group by teamName, case-insensitively: "Beyond8" and "beyond8" are the same team
+        const groupKey = teamName.toLowerCase();
+        if (!teamGroups[groupKey]) {
+          teamGroups[groupKey] = {
+            displayName: teamName,
             leader: null,
             members: [],
             rowNums: [],
           };
         }
+        teamName = teamGroups[groupKey].displayName;
 
         const memberInfo = {
           email,
@@ -2468,25 +2263,25 @@ router.post(
           rowNum,
         };
 
-        teamGroups[teamName].rowNums.push(rowNum);
+        teamGroups[groupKey].rowNums.push(rowNum);
 
         if (isLeader) {
-          if (teamGroups[teamName].leader) {
+          if (teamGroups[groupKey].leader) {
             errors.push(
-              `Dòng ${rowNum}: Đội "${teamName}" đã có Trưởng nhóm ở dòng ${teamGroups[teamName].leader.rowNum}. Mỗi đội chỉ được phép có 1 trưởng nhóm.`,
+              `Dòng ${rowNum}: Đội "${teamName}" đã có Trưởng nhóm ở dòng ${teamGroups[groupKey].leader.rowNum}. Mỗi đội chỉ được phép có 1 trưởng nhóm.`,
             );
           } else {
-            teamGroups[teamName].leader = memberInfo;
+            teamGroups[groupKey].leader = memberInfo;
           }
         } else {
-          teamGroups[teamName].members.push(memberInfo);
+          teamGroups[groupKey].members.push(memberInfo);
         }
       }
 
-      const teamNames = Object.keys(teamGroups);
+      const teamKeys = Object.keys(teamGroups);
 
       // Limit regular users to 1 team
-      if (!isCoordinator && teamNames.length > 1) {
+      if (!isCoordinator && teamKeys.length > 1) {
         return res
           .status(403)
           .json({
@@ -2495,15 +2290,16 @@ router.post(
           });
       }
 
-      const prospectiveTeamsCount = currentActiveTeamsCount + teamNames.length;
+      const prospectiveTeamsCount = currentActiveTeamsCount + teamKeys.length;
       if (event.maxTeams && prospectiveTeamsCount > event.maxTeams) {
         errors.push(
           `Tổng số lượng đội thi sau khi import (${prospectiveTeamsCount}) vượt quá giới hạn tối đa của cuộc thi (${event.maxTeams}).`,
         );
       }
 
-      for (const teamName of teamNames) {
-        const group = teamGroups[teamName];
+      for (const teamKey of teamKeys) {
+        const group = teamGroups[teamKey];
+        const teamName = group.displayName;
 
         // 1. Verify leader exists
         if (!group.leader) {
@@ -2524,7 +2320,10 @@ router.post(
         }
 
         // Check unique name in DB
-        const existingTeam = await Team.findOne({ eventId, name: teamName });
+        const existingTeam = await Team.findOne({
+          eventId,
+          name: { $regex: new RegExp(`^${escapeRegex(teamName)}$`, "i") },
+        });
         if (existingTeam) {
           errors.push(
             `Đội "${teamName}": Tên nhóm đã tồn tại trong cuộc thi này.`,
@@ -2532,14 +2331,16 @@ router.post(
         }
 
         // Check member count (e.g. max 4 members plus 1 leader = 5 members total)
-        if (group.members.length > 4) {
+        // Teams have 3–5 people including the leader
+        const teamSize = group.members.length + 1;
+        if (teamSize > MAX_TEAM_SIZE) {
           errors.push(
-            `Đội "${teamName}": Số lượng thành viên phụ vượt quá giới hạn (tối đa 4 thành viên khác ngoài Trưởng nhóm).`,
+            `Đội "${teamName}": Có ${teamSize} người, vượt quá giới hạn ${MAX_TEAM_SIZE} người (kể cả Trưởng nhóm).`,
           );
         }
 
-        if (group.members.length < 2) {
-          errors.push(`Đội "${teamName}": Số lượng thành viên không đủ (tối thiểu 3).`);
+        if (teamSize < MIN_TEAM_SIZE) {
+          errors.push(`Đội "${teamName}": Có ${teamSize} người, chưa đủ tối thiểu ${MIN_TEAM_SIZE} người (kể cả Trưởng nhóm).`);
         }
       }
 
@@ -2554,8 +2355,9 @@ router.post(
       const importedTeams = [];
       const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
-      for (const teamName of teamNames) {
-        const group = teamGroups[teamName];
+      for (const teamKey of teamKeys) {
+        const group = teamGroups[teamKey];
+        const teamName = group.displayName;
         const { leader, members } = group;
 
         // Register or update Leader User
@@ -2600,7 +2402,8 @@ router.post(
 
         // Create Leader TeamMember
         const leaderConfirmToken = crypto.randomBytes(32).toString("hex");
-        const expiryDays = shouldSkipEmail ? 7 : 1;
+        // Same 7-day validity whether invitations go out now or later via send-import-invitations
+        const expiryDays = 7;
         const leaderConfirmTokenExpiry = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
 
         const leaderMember = new TeamMember({
@@ -2815,30 +2618,25 @@ router.get("/validate-github/:username", async (req, res) => {
  */
 router.post("/send-import-invitations", authenticateToken, async (req, res) => {
   try {
-    if (!req.user.isSystemAdmin) {
-      const coordRole = await EventRole.findOne({
-        userId: req.user._id,
-        role: { $in: ["coordinator", "student_assistant"] },
-        status: "active",
-      });
-      if (!coordRole) {
-        return res.status(403).json({ message: "Không có quyền thực hiện chức năng này." });
-      }
-    }
-
     const { teamIds, eventId } = req.body;
     if (!Array.isArray(teamIds) || teamIds.length === 0) {
       return res.status(400).json({ message: "Danh sách teamIds là bắt buộc." });
     }
+    if (!eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({ message: "Sự kiện không hợp lệ." });
+    }
+
+    // Must be an organiser of THIS event (previously any event's role was accepted).
+    if (!(await isEventStaff(req.user, eventId))) {
+      return res.status(403).json({ message: "Không có quyền thực hiện chức năng này." });
+    }
 
     const query = {
+      eventId,
       teamId: { $in: teamIds },
       confirmStatus: "pending",
       invitationEmailSent: false,
     };
-    if (eventId && mongoose.Types.ObjectId.isValid(eventId)) {
-      query.eventId = eventId;
-    }
 
     const pendingMembers = await TeamMember.find(query).populate("userId", "email fullName");
 
@@ -2934,16 +2732,8 @@ router.post("/send-member-invitations", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Sự kiện không hợp lệ." });
     }
 
-    if (!req.user.isSystemAdmin) {
-      const coordRole = await EventRole.findOne({
-        userId: req.user._id,
-        eventId,
-        role: { $in: ["coordinator", "student_assistant"] },
-        status: "active",
-      });
-      if (!coordRole) {
-        return res.status(403).json({ message: "Không có quyền gửi email lời mời." });
-      }
+    if (!(await isEventStaff(req.user, eventId))) {
+      return res.status(403).json({ message: "Không có quyền gửi email lời mời." });
     }
 
     if (!isQueueAvailable()) {
@@ -3515,7 +3305,7 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
       .populate({
         path: "trackId",
         select:
-          "name description roundId attachments environmentId examDriveFileId examDriveFileUrl examDriveFileName isExamManualOpen",
+          "name description roundId attachments examDriveFileId examDriveFileUrl examDriveFileName isExamManualOpen",
         populate: {
           path: "roundId",
           select:
@@ -3524,7 +3314,7 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
       })
       .populate({
         path: "originalTrackId",
-        select: "name description environmentId topicName topicLink",
+        select: "name description topicName topicLink",
       })
       .populate("leaderId", "fullName email")
       .populate("eventId", "name status isArchived");
@@ -3670,56 +3460,6 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
       };
     }
 
-    // Fetch environment code and active judge status if team has external code
-    if (team.externalTeamCode) {
-      const {
-        getJudgeActive,
-        getEnvironment,
-      } = require("./externalTeamService");
-
-      let isJudgeActive = false;
-      let currentScenario = "NORMAL";
-      try {
-        const activeInfo = await getJudgeActive();
-        const info = Array.isArray(activeInfo)
-          ? activeInfo.find((item) => item.teamCode === team.externalTeamCode)
-          : activeInfo && activeInfo.teamCode === team.externalTeamCode
-            ? activeInfo
-            : null;
-        if (info) {
-          isJudgeActive = true;
-          currentScenario = info.scenario;
-        }
-      } catch (err) {
-        console.warn(
-          "[SIMULATOR] Failed to fetch active judge status:",
-          err.message,
-        );
-      }
-      teamPlain.isJudgeActive = isJudgeActive;
-      teamPlain.currentScenario = currentScenario;
-
-      const targetEnvId =
-        (team.originalTrackId && team.originalTrackId.environmentId) ||
-        (team.trackId && team.trackId.environmentId);
-
-      if (targetEnvId) {
-        try {
-          const envInfo = await getEnvironment(targetEnvId);
-          teamPlain.environmentCode = envInfo.code;
-        } catch (err) {
-          console.warn(
-            "[SIMULATOR] Failed to fetch environment code:",
-            err.message,
-          );
-        }
-      }
-
-      if (!teamPlain.environmentCode && info && (info.environment || info.environmentCode)) {
-        teamPlain.environmentCode = info.environment || info.environmentCode;
-      }
-    }
-
     const Commit = mongoose.models.Commit || mongoose.model("Commit");
     const commitCount = await Commit.countDocuments({
       teamId: team._id,
@@ -3794,72 +3534,24 @@ router.put("/:teamId/assign-track", authenticateToken, async (req, res) => {
     if (!track)
       return res.status(404).json({ message: "Bảng đấu không tồn tại." });
 
-    const event = await Event.findById(team.eventId);
-    const orgName = event ? event.githubOrgName : undefined;
-
     team.trackId = track._id;
     await team.save();
 
-    // Sync team to external simulator if confirmed
-    if (team.status === "confirmed") {
-      try {
-        await syncTeamToExternalSimulator(team);
-      } catch (syncErr) {
-        console.error("[ASSIGN TRACK] Simulator sync failed:", syncErr.message);
-      }
-    }
-
-    // Trigger GitHub Repo creation in the background
-    const suffix = getSemesterSuffix(event);
-    const slugRepoName = vietnameseSlug(team.name) + suffix;
-
-    // Check if repo already exists for this team
-    const existingRepo = await GithubRepository.findOne({ teamId: team._id });
-    if (existingRepo) {
-      existingRepo.trackId = track._id;
-      await existingRepo.save();
-    } else {
-      githubService
-        .createTeamRepository(slugRepoName, "private", orgName)
-        .then(async (gitResult) => {
-          const actualOrgName = gitResult.owner || orgName;
-
-          const newRepo = new GithubRepository({
-            eventId: team.eventId,
-            trackId: track._id,
-            teamId: team._id,
-            orgName: actualOrgName,
-            repoName: slugRepoName,
-            repoUrl: gitResult.repoUrl,
-            githubRepoId: gitResult.githubRepoId,
-            syncStatus: "not_synced",
-          });
-          await newRepo.save();
-
-          const populatedMembers = await TeamMember.find({
-            teamId: team._id,
-          }).populate("userId");
-          for (const tm of populatedMembers) {
-            if (tm.userId && tm.userId.githubUsername) {
-              await githubService.addCollaborator(
-                slugRepoName,
-                tm.userId.githubUsername,
-                "push",
-                actualOrgName,
-              );
-            }
-          }
+    // Create the team's GitHub repo in the background, or move the existing one to this track
+    provisionTeamRepository(team, { trackId: track._id })
+      .then(({ created }) => {
+        if (created) {
           console.log(
             `[ASSIGN TRACK] Provisioned GitHub repo and added collaborators for team: ${team.name}`,
           );
-        })
-        .catch((gitErr) => {
-          console.error(
-            `[ASSIGN TRACK] Error provisioning GitHub repo for team ${team.name}:`,
-            gitErr.message,
-          );
-        });
-    }
+        }
+      })
+      .catch((gitErr) => {
+        console.error(
+          `[ASSIGN TRACK] Error provisioning GitHub repo for team ${team.name}:`,
+          gitErr.message,
+        );
+      });
 
     // Create EventLog
     const EventLog = mongoose.model("EventLog");
@@ -4058,469 +3750,6 @@ router.put("/:teamId/assign-mentor", authenticateToken, async (req, res) => {
 });
 
 /**
- * @route   POST /api/teams/:teamId/sync-mqtt
- * @desc    Manually sync MQTT credentials for a team
- * @access  Private (Admin, Coordinator, or Team Leader)
- */
-router.post("/:teamId/sync-mqtt", authenticateToken, async (req, res) => {
-  const { teamId } = req.params;
-
-  try {
-    const team = await Team.findById(teamId);
-    if (!team) {
-      return res.status(404).json({ message: "Không tìm thấy đội thi." });
-    }
-
-    // Auth check: System Admin, Coordinator of the event, or the team leader themselves
-    let hasAccess =
-      req.user.isSystemAdmin ||
-      team.leaderId.toString() === req.user._id.toString();
-    if (!hasAccess) {
-      const coordinatorRole = await EventRole.findOne({
-        userId: req.user._id,
-        eventId: team.eventId,
-        role: { $in: ["coordinator", "student_assistant"] },
-        status: "active",
-      });
-      if (coordinatorRole) {
-        hasAccess = true;
-      }
-    }
-
-    if (!hasAccess) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền thực hiện hành động này." });
-    }
-
-    // Check if track and environmentId are present
-    const targetTrackId = team.originalTrackId || team.trackId;
-    if (!targetTrackId) {
-      return res
-        .status(400)
-        .json({ message: "Đội thi chưa được phân vào bảng đấu." });
-    }
-
-    const track = await Track.findById(targetTrackId);
-    if (!track || !track.environmentId) {
-      return res
-        .status(400)
-        .json({
-          message: "Bảng đấu của đội thi chưa được cấu hình Environment ID.",
-        });
-    }
-
-    const forceReRegister = req.body?.forceReRegister || req.query?.forceReRegister === "true";
-
-    // If already registered on external system and not forcing re-register, fetch latest credentials using code
-    if (team.externalTeamCode && !forceReRegister) {
-      try {
-        const { fetchExternalKeys } = require("./externalTeamService");
-        const result = await fetchExternalKeys(team.externalTeamCode);
-
-        team.testApiKey = result.testApiKey || team.testApiKey || "";
-        team.judgeApiKey = result.judgeApiKey || team.judgeApiKey || "";
-        team.mqttUsername = result.mqttUsername || team.mqttUsername || "";
-        team.mqttPassword = result.mqttPassword || team.mqttPassword || "";
-        team.testTopic =
-          result.testTopic ||
-          team.testTopic ||
-          `hackathon/${team.externalTeamCode.toLowerCase()}/test/telemetry`;
-        team.judgeTopic =
-          result.judgeTopic ||
-          team.judgeTopic ||
-          `hackathon/${team.externalTeamCode.toLowerCase()}/judge/telemetry`;
-        await team.save();
-
-        return res.json({
-          message: "Đồng bộ khóa MQTT thành công từ hệ thống simulator!",
-          team,
-        });
-      } catch (err) {
-        console.error(
-          "[MQTT SERVICE] fetch keys error during manual sync:",
-          err.message,
-        );
-        return res.status(502).json({
-          message: `Không thể đồng bộ khóa từ simulator: ${err.message}`,
-        });
-      }
-    } else {
-      // Not registered yet or forcing re-register with current track environmentId
-      let baseCode = generateTeamCode(team.name);
-      if (!baseCode) {
-        baseCode = `TEAM_${team._id.toString().substring(18).toUpperCase()}`;
-      }
-
-      let code = forceReRegister && team.externalTeamCode
-        ? `${baseCode}_${crypto.randomBytes(2).toString("hex").toUpperCase()}`
-        : baseCode;
-      let syncSuccess = false;
-      let result = null;
-      let attempts = 0;
-
-      while (!syncSuccess && attempts < 5) {
-        try {
-          attempts++;
-          const { createExternalTeam } = require("./externalTeamService");
-          result = await createExternalTeam(
-            code,
-            team.name,
-            track.environmentId,
-          );
-          syncSuccess = true;
-        } catch (err) {
-          if (err.code === "TEAM_CODE_EXISTS" && attempts < 5) {
-            const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
-            code = `${baseCode}_${suffix}`;
-          } else {
-            console.error(
-              "[MQTT SERVICE] create team error during manual sync:",
-              err.message,
-            );
-            return res.status(err.status || 500).json({
-              message: `Lỗi kết nối simulator: ${err.message}`,
-            });
-          }
-        }
-      }
-
-      if (result) {
-        team.externalTeamId = result.team?.id || "";
-        team.externalTeamCode = code;
-        team.accessCode = result.accessCode || "";
-        team.testApiKey = result.testApiKey || "";
-        team.judgeApiKey = result.judgeApiKey || "";
-        team.mqttUsername = result.mqttUsername || "";
-        team.mqttPassword = result.mqttPassword || "";
-        team.testTopic = `hackathon/${code.toLowerCase()}/test/telemetry`;
-        team.judgeTopic = `hackathon/${code.toLowerCase()}/judge/telemetry`;
-        await team.save();
-
-        return res.json({
-          message:
-            "Đăng ký và khởi tạo khóa MQTT thành công từ hệ thống simulator!",
-          team,
-        });
-      }
-    }
-  } catch (error) {
-    console.error("Manual Sync Error:", error.message);
-    res.status(500).json({ message: "Lỗi hệ thống khi đồng bộ khóa MQTT." });
-  }
-});
-
-/**
- * @route   POST /api/teams/track/:trackId/re-register-mqtt
- * @desc    Re-register all teams in a track with current track environmentId
- * @access  Private (System Admin or Coordinator)
- */
-router.post("/track/:trackId/re-register-mqtt", authenticateToken, async (req, res) => {
-  const { trackId } = req.params;
-
-  try {
-    const track = await Track.findById(trackId);
-    if (!track || !track.environmentId) {
-      return res
-        .status(400)
-        .json({ message: "Bảng đấu chưa được cấu hình Environment ID." });
-    }
-
-    const coordinatorRole = await EventRole.findOne({
-      userId: req.user._id,
-      eventId: track.eventId,
-      role: { $in: ["coordinator", "student_assistant"] },
-      status: "active",
-    });
-
-    if (!req.user.isSystemAdmin && !coordinatorRole) {
-      return res.status(403).json({ message: "Bạn không có quyền thực hiện." });
-    }
-
-    const teams = await Team.find({
-      $or: [{ trackId: track._id }, { originalTrackId: track._id }],
-    });
-
-    const { createExternalTeam } = require("./externalTeamService");
-    let successCount = 0;
-    let failedCount = 0;
-
-    for (const team of teams) {
-      let baseCode = generateTeamCode(team.name) || `TEAM_${team._id.toString().substring(18).toUpperCase()}`;
-      let code = `${baseCode}_${crypto.randomBytes(2).toString("hex").toUpperCase()}`;
-      let syncSuccess = false;
-      let attempts = 0;
-
-      while (!syncSuccess && attempts < 5) {
-        try {
-          attempts++;
-          const result = await createExternalTeam(code, team.name, track.environmentId);
-          if (result) {
-            team.externalTeamId = result.team?.id || "";
-            team.externalTeamCode = code;
-            team.accessCode = result.accessCode || "";
-            team.testApiKey = result.testApiKey || "";
-            team.judgeApiKey = result.judgeApiKey || "";
-            team.mqttUsername = result.mqttUsername || "";
-            team.mqttPassword = result.mqttPassword || "";
-            team.testTopic = `hackathon/${code.toLowerCase()}/test/telemetry`;
-            team.judgeTopic = `hackathon/${code.toLowerCase()}/judge/telemetry`;
-            await team.save();
-            syncSuccess = true;
-            successCount++;
-          }
-        } catch (err) {
-          if (err.code === "TEAM_CODE_EXISTS" && attempts < 5) {
-            const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
-            code = `${baseCode}_${suffix}`;
-          } else {
-            console.error(`Re-register team ${team.name} failed:`, err.message);
-            failedCount++;
-            break;
-          }
-        }
-      }
-    }
-
-    return res.json({
-      message: `Đã đăng ký lại MQTT cho ${successCount}/${teams.length} đội trong bảng đấu ${track.name}.`,
-      successCount,
-      failedCount,
-      total: teams.length,
-    });
-  } catch (error) {
-    console.error("Re-register Track MQTT Error:", error.message);
-    res.status(500).json({ message: "Lỗi hệ thống khi đăng ký lại MQTT cho bảng đấu." });
-  }
-});
-
-/**
- * @route   PATCH /api/teams/:teamId/judge
- * @desc    Toggle active status of the judge environment for a team
- * @access  Private (System Admin or Event Judge/Coordinator)
- */
-router.patch("/:teamId/judge", authenticateToken, async (req, res) => {
-  const { teamId } = req.params;
-  const { active } = req.body;
-
-  try {
-    const team = await Team.findById(teamId);
-    if (!team) {
-      return res.status(404).json({ message: "Không tìm thấy đội thi." });
-    }
-
-    if (!team.externalTeamId) {
-      return res
-        .status(400)
-        .json({ message: "Đội thi chưa được đồng bộ với hệ thống Simulator." });
-    }
-
-    // Auth check: System Admin, or Event Coordinator/Judge
-    let hasAccess = req.user.isSystemAdmin;
-    if (!hasAccess) {
-      const role = await EventRole.findOne({
-        userId: req.user._id,
-        eventId: team.eventId,
-        role: { $in: ["coordinator", "judge"] },
-        status: "active",
-      });
-      if (role) {
-        hasAccess = true;
-      }
-    }
-
-    if (!hasAccess) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền thực hiện hành động này." });
-    }
-
-    const { toggleJudgeActive } = require("./externalTeamService");
-    await toggleJudgeActive(team.externalTeamId, active);
-
-    // Emit real-time status change to team members and live room
-    try {
-      const socketModule = require("../chat/socket");
-      const io = socketModule.getIO();
-
-      // Emit to live room (for judges/admins)
-      io.to(`live:${team.eventId}`).emit("judge_active_toggled", {
-        teamId: team._id.toString(),
-        isJudgeActive: active,
-        judgeApiKey: active ? team.judgeApiKey : null,
-        judgeTopic: active ? team.judgeTopic : null,
-      });
-
-      // Emit to each team member
-      const TeamMember = mongoose.model("TeamMember");
-      const members = await TeamMember.find({ teamId: team._id });
-      for (const member of members) {
-        if (member.userId) {
-          io.to(`user:${member.userId.toString()}`).emit(
-            "judge_active_toggled",
-            {
-              teamId: team._id.toString(),
-              isJudgeActive: active,
-              judgeApiKey: active ? team.judgeApiKey : null,
-              judgeTopic: active ? team.judgeTopic : null,
-            },
-          );
-        }
-      }
-
-      // If we activated this team, notify other teams in the same track that they are deactivated
-      if (active) {
-        const otherTeams = await Team.find({
-          trackId: team.trackId,
-          _id: { $ne: team._id },
-        });
-        for (const other of otherTeams) {
-          io.to(`live:${team.eventId}`).emit("judge_active_toggled", {
-            teamId: other._id.toString(),
-            isJudgeActive: false,
-            judgeApiKey: null,
-            judgeTopic: null,
-          });
-
-          // Also notify team members of other teams
-          const otherMembers = await TeamMember.find({ teamId: other._id });
-          for (const member of otherMembers) {
-            if (member.userId) {
-              io.to(`user:${member.userId.toString()}`).emit(
-                "judge_active_toggled",
-                {
-                  teamId: other._id.toString(),
-                  isJudgeActive: false,
-                  judgeApiKey: null,
-                  judgeTopic: null,
-                },
-              );
-            }
-          }
-        }
-      }
-    } catch (socketErr) {
-      console.warn(
-        "Socket emit judge_active_toggled failed:",
-        socketErr.message,
-      );
-    }
-
-    res.json({
-      message: active
-        ? "Đã bật môi trường chấm thi."
-        : "Đã tắt môi trường chấm thi.",
-    });
-  } catch (error) {
-    console.error("Toggle Judge Active Error:", error.message);
-    res
-      .status(error.status || 500)
-      .json({ message: `Lỗi kết nối simulator: ${error.message}` });
-  }
-});
-
-/**
- * @route   PATCH /api/teams/:teamId/judge-scenario
- * @desc    Update judge scenario for a team
- * @access  Private (System Admin or Event Judge/Coordinator)
- */
-router.patch("/:teamId/judge-scenario", authenticateToken, async (req, res) => {
-  const { teamId } = req.params;
-  const { scenario } = req.body;
-
-  try {
-    const team = await Team.findById(teamId);
-    if (!team) {
-      return res.status(404).json({ message: "Không tìm thấy đội thi." });
-    }
-
-    if (!team.externalTeamId) {
-      return res
-        .status(400)
-        .json({ message: "Đội thi chưa được đồng bộ với hệ thống Simulator." });
-    }
-
-    // Auth check: System Admin, or Event Coordinator/Judge
-    let hasAccess = req.user.isSystemAdmin;
-    if (!hasAccess) {
-      const role = await EventRole.findOne({
-        userId: req.user._id,
-        eventId: team.eventId,
-        role: { $in: ["coordinator", "judge"] },
-        status: "active",
-      });
-      if (role) {
-        hasAccess = true;
-      }
-    }
-
-    if (!hasAccess) {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền thực hiện hành động này." });
-    }
-
-    const { updateJudgeScenario } = require("./externalTeamService");
-    await updateJudgeScenario(team.externalTeamId, scenario);
-
-    res.json({ message: "Đã cập nhật kịch bản chấm thi." });
-  } catch (error) {
-    console.error("Update Judge Scenario Error:", error.message);
-    res
-      .status(error.status || 500)
-      .json({ message: `Lỗi kết nối simulator: ${error.message}` });
-  }
-});
-
-/**
- * @route   GET /api/teams/judge/scenarios
- * @desc    Get all judge scenarios
- * @access  Private (System Admin or Event Judge/Coordinator)
- */
-router.get("/judge/scenarios", authenticateToken, async (req, res) => {
-  try {
-    const { getJudgeScenarios } = require("./externalTeamService");
-    const result = await getJudgeScenarios();
-    res.json(result);
-  } catch (error) {
-    console.error("Get Judge Scenarios Error:", error.message);
-    res
-      .status(error.status || 500)
-      .json({ message: `Lỗi kết nối simulator: ${error.message}` });
-  }
-});
-
-/**
- * @route   GET /api/teams/judge/live
- * @desc    Get live sensors data
- * @access  Private (System Admin or Event Judge/Coordinator)
- */
-router.get("/judge/live", authenticateToken, async (req, res) => {
-  const { teamId } = req.query;
-  if (!teamId) {
-    return res.status(400).json({ message: "Thiếu tham số teamId." });
-  }
-
-  try {
-    const team = await Team.findById(teamId);
-    if (!team || !team.externalTeamId) {
-      return res
-        .status(404)
-        .json({ message: "Đội thi chưa được đồng bộ hoặc không tồn tại." });
-    }
-
-    const { getJudgeLive } = require("./externalTeamService");
-    const result = await getJudgeLive(team.externalTeamId);
-    res.json(result);
-  } catch (error) {
-    console.error("Get Judge Live Error:", error.message);
-    res
-      .status(error.status || 500)
-      .json({ message: `Lỗi kết nối simulator: ${error.message}` });
-  }
-});
-
-/**
  * @route   DELETE /api/teams/:teamId
  * @desc    Delete a team (only team leader can delete)
  * @access  Private
@@ -4569,7 +3798,7 @@ router.delete("/:teamId", authenticateToken, async (req, res) => {
  * @access  Private (Admin or CTSV)
  */
 router.post("/:teamId/admin/members", authenticateToken, async (req, res) => {
-  if (!req.user.isSystemAdmin && req.user.role !== "student_assistant") {
+  if (!req.user.isSystemAdmin && !req.user.isStudentAssistant) {
     return res.status(403).json({ message: "Không có quyền thực hiện." });
   }
 
@@ -4590,7 +3819,7 @@ router.post("/:teamId/admin/members", authenticateToken, async (req, res) => {
     const user = await User.findOne({
       $or: [
         { email: cleanVal },
-        { studentId: { $regex: new RegExp(`^${cleanVal}$`, "i") } }
+        { studentId: { $regex: new RegExp(`^${escapeRegex(cleanVal)}$`, "i") } }
       ]
     });
 
@@ -4693,13 +3922,13 @@ router.delete("/:teamId/admin", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy đội thi." });
     }
 
-    let isAuthorized = req.user.isSystemAdmin || req.user.role === "student_assistant";
+    let isAuthorized = req.user.isSystemAdmin || req.user.isStudentAssistant;
     if (!isAuthorized) {
       const EventRole = mongoose.model("EventRole");
       const coordinatorRole = await EventRole.findOne({
         eventId: team.eventId,
         userId: req.user._id,
-        role: { $in: ["admin", "coordinator"] },
+        role: { $in: ["admin_view", "student_assistant"] },
         status: "active"
       });
       if (coordinatorRole) isAuthorized = true;
@@ -4767,7 +3996,7 @@ router.delete("/:teamId/admin", authenticateToken, async (req, res) => {
  * @access  Private (Admin or CTSV)
  */
 router.delete("/:teamId/admin/members/:userId", authenticateToken, async (req, res) => {
-  if (!req.user.isSystemAdmin && req.user.role !== "student_assistant") {
+  if (!req.user.isSystemAdmin && !req.user.isStudentAssistant) {
     return res.status(403).json({ message: "Không có quyền thực hiện." });
   }
 
@@ -4819,7 +4048,7 @@ router.delete("/:teamId/admin/members/:userId", authenticateToken, async (req, r
  * @access  Private (Admin or CTSV)
  */
 router.put("/:teamId/admin/members/:userId/role", authenticateToken, async (req, res) => {
-  if (!req.user.isSystemAdmin && req.user.role !== "student_assistant") {
+  if (!req.user.isSystemAdmin && !req.user.isStudentAssistant) {
     return res.status(403).json({ message: "Không có quyền thực hiện." });
   }
 

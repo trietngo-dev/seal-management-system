@@ -16,29 +16,9 @@ const EventLog = mongoose.model('EventLog');
 const emailService = require('../notifications/emailService');
 const githubService = require('../github-ai/githubService');
 const { ensureChatRoomForTeam, ensureChatRoomsForMentorTrack } = require('../chat/chatRoomService');
+const { provisionTeamRepository } = require('../github-ai/repoProvisioning');
+const { findJudgeRoleForRound } = require('../teams/teamAccess');
 
-function getSemesterSuffix(event) {
-  if (!event || !event.semester || !event.year) return '';
-  const semLower = event.semester.toLowerCase();
-  let semCode = '';
-  if (semLower === 'spring') semCode = 'sp';
-  else if (semLower === 'summer') semCode = 'su';
-  else if (semLower === 'fall') semCode = 'fa';
-  return semCode ? `_${semCode}${event.year}` : '';
-}
-
-function vietnameseSlug(text) {
-  if (!text) return '';
-  let slug = text;
-  slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  slug = slug.replace(/đ/g, 'd').replace(/Đ/g, 'D');
-  slug = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .replace(/-{2,}/g, '-');
-  return slug;
-}
 const {
   extractDriveFileId,
   sanitizeRoundForAdmin
@@ -199,7 +179,7 @@ router.get('/', async (req, res) => {
   if (status) filter.status = status;
 
   // Check optional auth to decide if archived events can be shown
-  const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+  const JWT_SECRET = require('../auth/jwtSecret');
   const jwt = require('jsonwebtoken');
   const User = mongoose.model('User');
   const EventRole = mongoose.model('EventRole');
@@ -376,14 +356,11 @@ router.get('/judge/active-contest', authenticateToken, async (req, res) => {
       tracks = await Track.find({ roundId: currentRound._id }).lean();
     }
 
-    // 5. Find the judge's assigned track (if any)
+    // 5. Find the judge's assigned track in the current round (if any)
     let assignedTrack = null;
-    const userRole = await EventRole.findOne({
-      userId: req.user._id,
-      eventId: event._id,
-      role: 'judge',
-      status: 'active'
-    });
+    const userRole = currentRound
+      ? await findJudgeRoleForRound(req.user._id, event._id, currentRound._id)
+      : null;
 
     let isFinalRound = false;
     if (currentRound) {
@@ -457,7 +434,7 @@ router.get('/:id', async (req, res) => {
 
     if (event.isArchived) {
       // Enforce auth check for archived events
-      const JWT_SECRET = process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026';
+      const JWT_SECRET = require('../auth/jwtSecret');
       const jwt = require('jsonwebtoken');
       const User = mongoose.model('User');
       const EventRole = mongoose.model('EventRole');
@@ -567,7 +544,7 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
   const { eventId } = req.params;
-  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, environmentId } = req.body;
+  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, aiBrief } = req.body;
 
   if (!name || !roundId) {
     return res.status(400).json({ message: 'Tên bảng đấu và vòng thi là bắt buộc.' });
@@ -626,7 +603,7 @@ router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
       advanceTopN: advanceTopN ? parseInt(advanceTopN) : undefined,
       topicName,
       topicLink,
-      environmentId
+      aiBrief: aiBrief || undefined
     });
 
     await newTrack.save();
@@ -655,7 +632,7 @@ router.post('/:eventId/tracks', authenticateToken, async (req, res) => {
  */
 router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
   const { eventId, trackId } = req.params;
-  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, environmentId } = req.body;
+  const { name, description, maxTeams, roundId, startTime, endTime, gradingEndTime, advanceTopN, topicName, topicLink, aiBrief } = req.body;
 
   try {
     const event = await Event.findById(eventId);
@@ -663,7 +640,7 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Không tìm thấy sự kiện.' });
     }
 
-    const track = await Track.findOne({ _id: trackId, eventId });
+    const track = await Track.findOne({ _id: trackId, eventId }).select('+aiBrief');
     if (!track) {
       return res.status(404).json({ message: 'Không tìm thấy bảng đấu.' });
     }
@@ -776,11 +753,12 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
       logDetails.push(`Link đề tài: "${track.topicLink || 'Trống'}" -> "${topicLink}"`);
       track.topicLink = topicLink;
     }
-
-    if (environmentId !== undefined && environmentId !== track.environmentId) {
-      logDetails.push(`Environment ID: "${track.environmentId || 'Trống'}" -> "${environmentId}"`);
-      track.environmentId = environmentId;
+    if (aiBrief !== undefined && aiBrief !== (track.aiBrief || '')) {
+      // The brief is confidential exam content, so only record that it changed.
+      logDetails.push('Đã cập nhật mô tả đề cho AI');
+      track.aiBrief = aiBrief;
     }
+
 
     await track.save();
 
@@ -800,6 +778,27 @@ router.put('/:eventId/tracks/:trackId', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Update Track Error:', error.message);
     res.status(500).json({ message: 'Lỗi hệ thống khi cập nhật bảng đấu.' });
+  }
+});
+
+/**
+ * @route   GET /api/events/:eventId/tracks/:trackId/ai-brief
+ * @desc    Read the confidential AI brief of a track (excluded from every other track query)
+ * @access  Private (System Admin)
+ */
+router.get('/:eventId/tracks/:trackId/ai-brief', authenticateToken, async (req, res) => {
+  if (!req.user.isSystemAdmin) {
+    return res.status(403).json({ message: 'Quyền truy cập bị từ chối.' });
+  }
+  try {
+    const track = await Track.findOne({ _id: req.params.trackId, eventId: req.params.eventId }).select('+aiBrief');
+    if (!track) {
+      return res.status(404).json({ message: 'Không tìm thấy bảng đấu.' });
+    }
+    res.json({ aiBrief: track.aiBrief || '' });
+  } catch (error) {
+    console.error('Get Track AI Brief Error:', error.message);
+    res.status(500).json({ message: 'Lỗi hệ thống khi tải mô tả đề cho AI.' });
   }
 });
 
@@ -1315,7 +1314,6 @@ router.post('/:eventId/distribute-teams', authenticateToken, async (req, res) =>
     // Fetch Event to get org name
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ message: 'Không tìm thấy sự kiện.' });
-    const orgName = event ? event.githubOrgName : undefined;
 
     // 2. Fetch tracks, excluding those belonging to the final round(s)
     const Round = mongoose.model('Round');
@@ -1360,36 +1358,9 @@ router.post('/:eventId/distribute-teams', authenticateToken, async (req, res) =>
       team.trackId = track._id;
       await team.save();
 
-      // Trigger GitHub Repo creation in the background
-      const suffix = getSemesterSuffix(event);
-      const slugRepoName = vietnameseSlug(team.name) + suffix;
-
-      githubService.createTeamRepository(slugRepoName, 'private', orgName)
-        .then(async (gitResult) => {
-          // Check if repo already exists for this team
-          const existingRepo = await GithubRepository.findOne({ teamId: team._id });
-          if (!existingRepo) {
-            const actualOrgName = gitResult.owner || orgName;
-
-            const newRepo = new GithubRepository({
-              eventId: team.eventId,
-              trackId: track._id,
-              teamId: team._id,
-              orgName: actualOrgName,
-              repoName: slugRepoName,
-              repoUrl: gitResult.repoUrl,
-              githubRepoId: gitResult.githubRepoId,
-              syncStatus: 'not_synced'
-            });
-            await newRepo.save();
-
-            // Add collaborators
-            const populatedMembers = await TeamMember.find({ teamId: team._id }).populate('userId');
-            for (const tm of populatedMembers) {
-              if (tm.userId && tm.userId.githubUsername) {
-                await githubService.addCollaborator(slugRepoName, tm.userId.githubUsername, 'push', actualOrgName);
-              }
-            }
+      provisionTeamRepository(team, { trackId: track._id })
+        .then(({ created }) => {
+          if (created) {
             console.log(`[DISTRIBUTION] Provisioned GitHub repo and added collaborators for team: ${team.name}`);
           }
         })

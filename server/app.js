@@ -66,15 +66,20 @@ mongoose
       mongoUri.split("@").pop(),
     );
 
-    // Auto-create default system admin if not exists
+    // Default system admin (admin@seal.com). Its password comes from DEFAULT_ADMIN_PASSWORD
+    // and is re-applied on every start, so .env stays the source of truth.
     try {
       const User = mongoose.model('User');
       const bcrypt = require('bcryptjs');
-      const adminExists = await User.exists({ email: 'admin@seal.com' });
-      if (!adminExists) {
+      const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD;
+      const admin = await User.findOne({ email: 'admin@seal.com' });
+
+      if (!adminPassword) {
+        console.warn("DEFAULT_ADMIN_PASSWORD is not set: skipping default admin (admin@seal.com) setup.");
+      } else if (!admin) {
         console.log("Auto-creating default system admin (admin@seal.com)...");
         const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash('password123', salt);
+        const passwordHash = await bcrypt.hash(adminPassword, salt);
         const newAdmin = new User({
           email: 'admin@seal.com',
           passwordHash,
@@ -86,6 +91,10 @@ mongoose
         });
         await newAdmin.save();
         console.log("Default system admin auto-created successfully!");
+      } else if (!(await bcrypt.compare(adminPassword, admin.passwordHash))) {
+        admin.passwordHash = await bcrypt.hash(adminPassword, await bcrypt.genSalt(10));
+        await admin.save();
+        console.log("Default system admin password updated from DEFAULT_ADMIN_PASSWORD.");
       }
     } catch (err) {
       console.error("Error auto-creating admin account on startup:", err.message);

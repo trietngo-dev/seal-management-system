@@ -46,6 +46,7 @@ export default function MentorTeamDetail() {
             : payload.team.trackId.roundId;
           try {
             const rubricRes = await axios.get(`http://localhost:5000/api/rubrics/round/${roundId}`, {
+              params: { trackId: payload.team.trackId._id || undefined },
               headers: { Authorization: `Bearer ${token}` }
             });
             setRubrics(rubricRes.data);
@@ -74,7 +75,7 @@ export default function MentorTeamDetail() {
       <div className="flex items-center gap-4 mb-8">
         <button
           onClick={() => navigate('/mentor/dashboard')}
-          className="text-[#F27024] hover:text-[#d95f1f] font-bold flex items-center gap-1.5 bg-[#F27024]/5 hover:bg-[#F27024]/10 border border-[#F27024]/20 px-4 py-2 rounded-xl transition-all"
+          className="text-primary hover:text-[#d95f1f] font-bold flex items-center gap-1.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 px-4 py-2 rounded-xl transition-all"
         >
           <ArrowLeft size={16} /> Quay lại
         </button>
@@ -98,7 +99,7 @@ export default function MentorTeamDetail() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all ${
               activeTab === tab.id 
-                ? "bg-[#F27024] text-white shadow-sm" 
+                ? "bg-primary text-white shadow-xs" 
                 : "bg-white text-slate-500 hover:bg-slate-100 border border-slate-200"
             }`}
           >
@@ -108,19 +109,19 @@ export default function MentorTeamDetail() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm">
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xs">
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <div className="space-y-8">
             <div>
-              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Users className="text-[#F27024]" size={18}/> Thành viên trong đội</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><Users className="text-primary" size={18}/> Thành viên trong đội</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {team.members?.map((m: any) => (
                   <div key={m._id} className="bg-slate-50 p-4 rounded-xl border border-slate-150">
                     <p className="font-bold text-slate-800">{m.userId?.fullName}</p>
                     <p className="text-sm text-slate-500 mt-1">{m.userId?.email}</p>
                     {m.userId?._id === team.leaderId?._id && (
-                      <span className="inline-block mt-2 px-2 py-0.5 bg-[#F27024]/10 text-[#F27024] text-xs font-bold rounded">Trưởng nhóm</span>
+                      <span className="inline-block mt-2 px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded-sm">Trưởng nhóm</span>
                     )}
                   </div>
                 ))}
@@ -128,7 +129,7 @@ export default function MentorTeamDetail() {
             </div>
 
             <div className="border-t border-slate-100 pt-8">
-              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><FileText className="text-[#F27024]" size={18}/> Đề thi vòng thi</h3>
+              <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><FileText className="text-primary" size={18}/> Đề thi vòng thi</h3>
               {(team.trackId?.roundId?.hasExamMaterial || team.trackId?.examDriveFileId || team.trackId?.examDriveFileUrl) ? (
                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                   <div>
@@ -144,7 +145,7 @@ export default function MentorTeamDetail() {
                       href={team.trackId?.examDriveFileUrl || team.trackId?.roundId?.driveFileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-[#F27024] hover:bg-[#d95f1f] text-white text-xs font-bold rounded-xl transition-all shrink-0 text-center"
+                      className="px-4 py-2 bg-primary hover:bg-[#d95f1f] text-white text-xs font-bold rounded-xl transition-all shrink-0 text-center"
                     >
                       Xem đề thi
                     </a>
@@ -194,7 +195,7 @@ export default function MentorTeamDetail() {
                     <div>
                       <p className="font-bold text-sm text-slate-800 mb-1">{c.message}</p>
                       <p className="text-xs text-slate-500 font-sans">
-                        <span className="text-[#F27024] font-semibold">@{c.authorGithubUsername || c.authorName}</span> 
+                        <span className="text-primary font-semibold">@{c.authorGithubUsername || c.authorName}</span> 
                         <span className="mx-2">•</span> 
                         {new Date(c.committedAt).toLocaleString('vi-VN')}
                       </p>
@@ -202,7 +203,7 @@ export default function MentorTeamDetail() {
                     <div className="flex items-center gap-3 text-xs font-mono shrink-0">
                       <span className="text-emerald-600 font-bold">+{c.additions}</span>
                       <span className="text-rose-600 font-bold">-{c.deletions}</span>
-                      <span className="bg-slate-200 px-2 py-1 rounded text-slate-700 ml-2 font-mono">{c.commitSha?.slice(0,7)}</span>
+                      <span className="bg-slate-200 px-2 py-1 rounded-sm text-slate-700 ml-2 font-mono">{c.commitSha?.slice(0,7)}</span>
                     </div>
                   </div>
                 ))}
@@ -220,22 +221,22 @@ export default function MentorTeamDetail() {
         {activeTab === "rubric" && (
           <div>
             <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
-              <ListChecks className="text-[#F27024]" size={20}/> Tiêu chí chấm điểm
+              <ListChecks className="text-primary" size={20}/> Tiêu chí chấm điểm
             </h3>
             {rubrics ? (
               <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-                <h4 className="font-bold text-[#F27024] text-lg mb-2">{rubrics.name}</h4>
+                <h4 className="font-bold text-primary text-lg mb-2">{rubrics.name}</h4>
                 <p className="text-slate-600 text-sm mb-6">{rubrics.description}</p>
                 <div className="space-y-4">
                   {rubrics.criteria?.map((c: any, idx: number) => (
-                    <div key={c._id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-sm">
+                    <div key={c._id} className="bg-white p-4 rounded-xl border border-slate-200 flex justify-between items-center shadow-xs">
                       <div>
                         <p className="font-bold text-slate-800 text-sm">{idx + 1}. {c.name}</p>
                         <p className="text-xs text-slate-500 mt-1">{c.description}</p>
                       </div>
                       <div className="bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl text-center shrink-0 ml-4">
                         <p className="text-[10px] text-slate-500 font-bold uppercase">Trọng số</p>
-                        <p className="text-lg font-black text-[#F27024] font-mono">{c.weight}%</p>
+                        <p className="text-lg font-black text-primary font-mono">{c.weight}%</p>
                       </div>
                     </div>
                   ))}

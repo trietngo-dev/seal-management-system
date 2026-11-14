@@ -209,13 +209,13 @@ export default function BulkImportScoresModal({
         <div className="flex justify-between items-start border-b border-slate-100 pb-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="p-2 rounded-xl bg-orange-50 text-[#F27024] border border-orange-100">
+              <span className="p-2 rounded-xl bg-orange-50 text-primary border border-orange-100">
                 <FileSpreadsheet className="w-5 h-5" />
               </span>
               <h3 className="text-lg font-bold text-slate-800 tracking-tight">
                 Import Điểm Chấm Thi Theo Bảng Đấu
               </h3>
-              <span className="rounded-lg bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-xs font-bold text-[#F27024] font-mono">
+              <span className="rounded-lg bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-xs font-bold text-primary font-mono">
                 {trackName || 'Bảng đấu'}
               </span>
               <span className="rounded-lg bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
@@ -236,10 +236,10 @@ export default function BulkImportScoresModal({
         </div>
 
         {/* Step 1: Download Template */}
-        <div className="bg-gradient-to-r from-orange-50/70 to-slate-50 border border-orange-200/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="bg-linear-to-r from-orange-50/70 to-slate-50 border border-orange-200/60 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F27024] text-[11px] font-bold text-white">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
                 1
               </span>
               <h4 className="text-sm font-bold text-slate-800">Tải Form Mẫu Đầy Đủ Giám Khảo</h4>
@@ -252,7 +252,7 @@ export default function BulkImportScoresModal({
             type="button"
             onClick={handleDownloadTemplate}
             disabled={downloadingTemplate}
-            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl text-white bg-[#F27024] hover:bg-[#d95d16] active:scale-[0.98] transition shadow-sm whitespace-nowrap self-stretch sm:self-auto justify-center"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl text-white bg-primary hover:bg-[#d95d16] active:scale-[0.98] transition shadow-xs whitespace-nowrap self-stretch sm:self-auto justify-center"
           >
             {downloadingTemplate ? (
               <>
@@ -271,20 +271,20 @@ export default function BulkImportScoresModal({
         {/* Step 2: Upload File */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F27024] text-[11px] font-bold text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
               2
             </span>
             <h4 className="text-sm font-bold text-slate-800">Tải Lên File Excel Đã Điền Điểm</h4>
           </div>
 
-          <label className="border-2 border-dashed border-slate-300 hover:border-[#F27024] bg-slate-50/50 hover:bg-orange-50/20 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition text-center group">
+          <label className="border-2 border-dashed border-slate-300 hover:border-primary bg-slate-50/50 hover:bg-orange-50/20 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition text-center group">
             <input
               type="file"
               accept=".xlsx, .xls"
               onChange={handleFileChange}
               className="sr-only"
             />
-            <div className="p-3 rounded-full bg-white shadow-sm border border-slate-200 group-hover:border-orange-300 group-hover:scale-105 transition mb-2 text-[#F27024]">
+            <div className="p-3 rounded-full bg-white shadow-xs border border-slate-200 group-hover:border-orange-300 group-hover:scale-105 transition mb-2 text-primary">
               <Upload className="w-6 h-6" />
             </div>
             <div className="text-xs font-bold text-slate-700">
@@ -310,7 +310,7 @@ export default function BulkImportScoresModal({
         {/* Parsing Indicator */}
         {parsingFile && (
           <div className="py-6 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-            <Loader2 className="w-4 h-4 animate-spin text-[#F27024]" />
+            <Loader2 className="w-4 h-4 animate-spin text-primary" />
             <span>Đang đọc và phân tích dữ liệu bảng điểm...</span>
           </div>
         )}
@@ -320,7 +320,7 @@ export default function BulkImportScoresModal({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#F27024] text-[11px] font-bold text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
                   3
                 </span>
                 <h4 className="text-sm font-bold text-slate-800">
@@ -420,7 +420,7 @@ export default function BulkImportScoresModal({
             type="button"
             onClick={handleImportSubmit}
             disabled={importing || !selectedFile || previewRows.length === 0}
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl text-white bg-[#F27024] hover:bg-[#d95d16] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition active:scale-[0.98]"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold rounded-xl text-white bg-primary hover:bg-[#d95d16] disabled:opacity-50 disabled:cursor-not-allowed shadow-xs transition active:scale-[0.98]"
           >
             {importing ? (
               <>

@@ -11,16 +11,7 @@ const TeamSchema = new Schema({
   status: { type: String, enum: ['pending_confirm', 'confirmed', 'disqualified'], default: 'pending_confirm' },
   disqualifyReason: { type: String },
   topicSubmission: { type: Schema.Types.Mixed, default: {} },
-  mentorId: { type: Schema.Types.ObjectId, ref: 'User' },
-  externalTeamId: { type: String },
-  externalTeamCode: { type: String },
-  accessCode: { type: String },
-  testApiKey: { type: String },
-  judgeApiKey: { type: String },
-  mqttUsername: { type: String },
-  mqttPassword: { type: String },
-  testTopic: { type: String },
-  judgeTopic: { type: String }
+  mentorId: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
   timestamps: true
 });

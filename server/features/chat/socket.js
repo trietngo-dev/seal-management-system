@@ -32,7 +32,7 @@ module.exports = {
       // Support secure auth token handshake or query token fallback
       const token = socket.handshake.auth?.token || (socket.handshake.query && socket.handshake.query.token);
       if (token) {
-        jwt.verify(token, process.env.JWT_SECRET || 'seal_hackathon_secret_key_2026', function (err, decoded) {
+        jwt.verify(token, require('../auth/jwtSecret'), function (err, decoded) {
           if (err) {
             console.error('Socket authentication error:', err.message);
             return next(new Error('Authentication error'));
@@ -276,11 +276,36 @@ module.exports = {
       });
 
       // --- Real-time Interaction (Admin & Judge Synchronization) ---
-      socket.on('join_live_room', (data) => {
-        const { eventId } = data;
-        if (eventId) {
+      // The live room broadcasts every judge's score in real time (score_updated),
+      // so only organisers and judges of the event may join it.
+      socket.on('join_live_room', async (data) => {
+        try {
+          const eventId = data && data.eventId;
+          if (!eventId || !mongoose.Types.ObjectId.isValid(eventId)) return;
+
+          const User = mongoose.model('User');
+          const EventRole = mongoose.model('EventRole');
+          const user = await User.findById(userId).select('isSystemAdmin isStudentAssistant').lean();
+          const isAllowed = !!user && (
+            user.isSystemAdmin ||
+            user.isStudentAssistant ||
+            await EventRole.exists({
+              userId,
+              eventId,
+              role: { $in: ['admin_view', 'student_assistant', 'judge'] },
+              status: 'active'
+            })
+          );
+
+          if (!isAllowed) {
+            console.warn(`Unauthorized live room join by user ${userId} for event ${eventId}`);
+            return;
+          }
+
           socket.join(`live:${eventId}`);
           console.log(`User ${userId} joined live room for event ${eventId}`);
+        } catch (err) {
+          console.error('Error in join_live_room socket handler:', err);
         }
       });
 

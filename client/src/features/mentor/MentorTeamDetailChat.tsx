@@ -180,7 +180,7 @@ export default function MentorTeamDetailChat({ team, token }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-[500px] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-sm animate-fadeIn">
+    <div className="flex flex-col h-[500px] bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-xs animate-fadeIn">
       {/* Sub-Header */}
       <div className="px-4 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function MentorTeamDetailChat({ team, token }: Props) {
             {isConnected ? 'Kênh trực tuyến (Real-time)' : 'Mất kết nối'}
           </span>
         </div>
-        <span className="text-xs font-bold text-[#F27024] bg-[#F27024]/10 border border-[#F27024]/20 px-2 py-0.5 rounded">
+        <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-sm">
           {team.name}
         </span>
       </div>
@@ -216,7 +216,7 @@ export default function MentorTeamDetailChat({ team, token }: Props) {
                   <div className={`flex items-end gap-1.5 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                     {/* Initial Avatar */}
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                      isMe ? 'bg-[#F27024] text-white shadow-sm' : 'bg-slate-200 text-slate-655 border border-slate-300'
+                      isMe ? 'bg-primary text-white shadow-xs' : 'bg-slate-200 text-slate-655 border border-slate-300'
                     }`}>
                       {(msg.senderName || 'U').charAt(0).toUpperCase()}
                     </div>
@@ -226,13 +226,13 @@ export default function MentorTeamDetailChat({ team, token }: Props) {
                       msg.isRecalled
                         ? 'border border-slate-200 bg-slate-100 text-slate-400 italic rounded-bl-sm'
                         : isMe
-                          ? 'bg-[#F27024] text-white rounded-br-sm shadow-sm'
-                          : 'bg-white text-slate-800 rounded-bl-sm border border-slate-200 shadow-sm'
+                          ? 'bg-primary text-white rounded-br-sm shadow-xs'
+                          : 'bg-white text-slate-800 rounded-bl-sm border border-slate-200 shadow-xs'
                     }`}>
                       {!isMe && !msg.isRecalled && (
-                        <div className="text-[10px] font-bold text-[#F27024] mb-0.5">{msg.senderName}</div>
+                        <div className="text-[10px] font-bold text-primary mb-0.5">{msg.senderName}</div>
                       )}
-                      <div className="break-words break-all whitespace-pre-wrap">{msg.content}</div>
+                      <div className="wrap-break-word break-all whitespace-pre-wrap">{msg.content}</div>
                     </div>
                   </div>
                   <span className="text-[10px] text-slate-400 mt-1">
@@ -254,12 +254,12 @@ export default function MentorTeamDetailChat({ team, token }: Props) {
           onChange={e => setNewMessage(e.target.value)}
           placeholder="Nhập tin nhắn trao đổi với đội thi..."
           disabled={!isConnected}
-          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-805 focus:outline-none focus:border-[#F27024] focus:ring-1 focus:ring-[#F27024]/30 transition-all placeholder:text-slate-400"
+          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-805 focus:outline-hidden focus:border-primary focus:ring-1 focus:ring-[#F27024]/30 transition-all placeholder:text-slate-400"
         />
         <button
           type="submit"
           disabled={!newMessage.trim() || !isConnected}
-          className="bg-[#F27024] hover:bg-[#d95f1f] disabled:opacity-40 text-white px-4 py-2 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-sm shadow-[#F27024]/10 hover:shadow-[#F27024]/20 animate-fadeIn"
+          className="bg-primary hover:bg-[#d95f1f] disabled:opacity-40 text-white px-4 py-2 rounded-xl transition-all flex items-center justify-center cursor-pointer shadow-xs shadow-[#F27024]/10 hover:shadow-[#F27024]/20 animate-fadeIn"
         >
           <Send size={13} className="mr-1" />
           <span className="text-xs font-bold uppercase">Gửi</span>

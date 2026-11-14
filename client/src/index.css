@@ -1,6 +1,75 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/*
+  The app only ships a light UI. Without this, `dark:` utilities follow the
+  OS/browser dark-mode setting and turn text near-white on white cards.
+  `dark:` now only applies under a `.dark` class, which nothing sets yet —
+  add a theme toggle that sets it on <html> if a real dark mode is built.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /*
+    Brand palette — orange is the primary (main actions), navy from the logo
+    is the secondary (secondary actions, links, info accents).
+  */
+  --color-primary: #f27024; /* buttons, active states, links, icons */
+  --color-primary-hover: #d95f1f; /* hover/pressed state of `primary` */
+  --color-primary-soft: #fff1e8; /* tinted backgrounds */
+
+  --color-secondary: #014391; /* navy from the SEAL Hackathon logo (9.5:1 on white) */
+  --color-secondary-hover: #01336e;
+  --color-secondary-soft: #e8f0fa;
+
+  /* Warm neutrals used by the light landing shell */
+  --color-ink: #1e1e24; /* headings, body text */
+  --color-ink-muted: #6b6b75; /* secondary text (5:1 on canvas) */
+  --color-line: #e9e7e4; /* borders, dividers */
+  --color-canvas: #fdfcfb; /* page background */
+
+  /* Legacy dark "cyber" shell tokens */
+  --color-primary-container: #00f0ff;
+  --color-on-primary-container: #00363a;
+  --color-surface: #0a141d;
+  --color-surface-dim: #0a141d;
+  --color-surface-container-lowest: #060f17;
+  --color-surface-container-low: #131d25;
+  --color-surface-container: #172129;
+  --color-surface-container-high: #212b34;
+  --color-surface-container-highest: #2c363f;
+  --color-on-surface: #dae3f0;
+  --color-on-surface-variant: #b9cacb;
+  --color-outline: #849495;
+  --color-outline-variant: #3b494b;
+
+  --font-display: Roboto, sans-serif;
+  --font-sans: Roboto, sans-serif;
+  --font-mono: Roboto Mono, monospace;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind v4 resets buttons to `cursor: default`; keep the v3 pointer. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 
 html {
   scrollbar-gutter: stable;
@@ -145,6 +214,16 @@ input:focus, select:focus, textarea:focus {
   border-color: #cbd5e1 !important;
   box-shadow: 0 0 0 2px rgba(242, 112, 36, 0.25) !important;
   outline: none !important;
+}
+
+/* Judge Scoring Textarea Light Mode Fix - Prevents global textarea:focus dark background override */
+.judge-scoring-textarea,
+.judge-scoring-textarea:focus,
+.judge-scoring-textarea:active,
+.judge-scoring-textarea:focus-visible {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #f27024 !important;
 }
 
 /* Font Utility */

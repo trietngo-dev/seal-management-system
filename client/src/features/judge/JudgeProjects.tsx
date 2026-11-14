@@ -201,7 +201,7 @@ export default function JudgeProjects() {
       </div>
 
       {/* Selectors & Filter Row */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-6 justify-between items-start md:items-center animate-fadeIn">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-6 justify-between items-start md:items-center animate-fadeIn">
         <div className="flex flex-wrap gap-8 items-center w-full md:w-auto">
           {activeEvent ? (
             <>
@@ -214,7 +214,7 @@ export default function JudgeProjects() {
               <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-normal">Vòng thi hiện tại</p>
-                <p className="text-sm font-extrabold text-[#F27024] mt-1 uppercase">
+                <p className="text-sm font-extrabold text-primary mt-1 uppercase">
                   {activeRound ? (activeRound.advanceTopN > 0 ? `${activeRound.name} (Lấy Top ${activeRound.advanceTopN})` : activeRound.name) : "Không có vòng thi active"}
                 </p>
               </div>
@@ -240,7 +240,7 @@ export default function JudgeProjects() {
         {/* Filter Tab buttons & Search */}
         <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
           <div className="relative w-full sm:w-64">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#F27024]">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-primary">
               <Search size={14} />
             </span>
             <input
@@ -248,7 +248,7 @@ export default function JudgeProjects() {
               placeholder="Tìm kiếm dự án, đội..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-full text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 focus:border-[#F27024] shadow-inner"
+              className="bg-slate-50 border border-slate-200 rounded-full text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 focus:border-primary focus:bg-white shadow-inner"
             />
           </div>
 
@@ -256,7 +256,7 @@ export default function JudgeProjects() {
             <button
               onClick={() => setStatusFilter("all")}
               className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${statusFilter === "all"
-                ? "bg-[#F27024] text-white shadow-sm"
+                ? "bg-primary text-white shadow-xs"
                 : "text-slate-500 hover:text-slate-800"
                 }`}
             >
@@ -265,7 +265,7 @@ export default function JudgeProjects() {
             <button
               onClick={() => setStatusFilter("pending")}
               className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${statusFilter === "pending"
-                ? "bg-amber-500 text-white shadow-sm"
+                ? "bg-amber-500 text-white shadow-xs"
                 : "text-slate-500 hover:text-slate-800"
                 }`}
             >
@@ -274,7 +274,7 @@ export default function JudgeProjects() {
             <button
               onClick={() => setStatusFilter("graded")}
               className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${statusFilter === "graded"
-                ? "bg-emerald-600 text-white shadow-sm"
+                ? "bg-emerald-600 text-white shadow-xs"
                 : "text-slate-500 hover:text-slate-800"
                 }`}
             >
@@ -285,7 +285,7 @@ export default function JudgeProjects() {
       </div>
 
       {/* Projects Data Table */}
-      <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+      <div className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
         {loading ? (
           <div className="text-center py-20 text-slate-500 text-sm animate-pulse">
             Đang tải danh sách dự án...
@@ -298,7 +298,7 @@ export default function JudgeProjects() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500">
+                <tr className="bg-white text-black border-b border-slate-200 text-xs font-bold text-slate-500">
                   <th className="px-6 py-4">Tên đội thi (Team)</th>
                   <th className="px-6 py-4">Trạng thái chấm</th>
                   <th className="px-6 py-4">Điểm</th>
@@ -312,16 +312,15 @@ export default function JudgeProjects() {
                   return (
                     <tr
                       key={team._id}
-                      className={`transition-all ${
-                        team._id === highlightedTeamId
-                          ? "bg-amber-50/50 border-l-4 border-amber-500 shadow-sm animate-pulse"
-                          : "hover:bg-slate-50"
-                      }`}
+                      className={`transition-all ${team._id === highlightedTeamId
+                        ? "bg-amber-50/50 border-l-4 border-amber-500 shadow-xs animate-pulse"
+                        : "hover:bg-slate-50"
+                        }`}
                     >
                       {/* Column 1: Team Info */}
                       <td className="px-6 py-5 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-[#F27024]/10 border border-[#F27024]/20 flex items-center justify-center text-[#F27024] font-bold text-sm">
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                             {team.name.charAt(0)}
                           </div>
                           <div>
@@ -356,7 +355,7 @@ export default function JudgeProjects() {
                             <Check size={10} /> Đã chấm
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase tracking-normal">
+                          <span className="inline-flex items-center gap-1 bg-primary/10 text-primary border border-primary/20 px-2.5 py-0.5 rounded-lg text-xs font-bold uppercase tracking-normal">
                             Chờ chấm
                           </span>
                         )}
@@ -365,7 +364,7 @@ export default function JudgeProjects() {
                       {/* Column 3.5: Score */}
                       <td className="px-6 py-5 whitespace-nowrap">
                         {isGraded ? (
-                          <span className="text-[#F27024] font-bold text-sm bg-[#F27024]/5 border border-[#F27024]/20 px-2.5 py-1 rounded-lg">
+                          <span className="text-primary font-bold text-sm bg-primary/5 border border-primary/20 px-2.5 py-1 rounded-lg">
                             {scoreObj?.totalWeightedScore !== undefined ? scoreObj.totalWeightedScore : '0'}/{rubric ? rubric.maxCriterionScore : 10}đ
                           </span>
                         ) : (
@@ -380,9 +379,9 @@ export default function JudgeProjects() {
                         {!isRoundCompleted && (
                           <button
                             onClick={() => navigate(`/expert/score/${team._id}?roundId=${selectedRoundId}`)}
-                            className={`inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${isGraded
+                            className={`inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${isGraded
                               ? "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                              : "bg-[#F27024] hover:bg-[#d95f1f] text-white"
+                              : "bg-primary hover:bg-[#d95f1f] text-white"
                               }`}
                           >
                             <span>{isGraded ? "Xem & Sửa" : "Bắt đầu chấm"}</span>

@@ -60,8 +60,8 @@ export default function ForgotPassword() {
     <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12">
       <div className="glass-panel w-full max-w-md p-8 rounded-xl relative overflow-hidden z-10">
         {/* Top Rule */}
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-80"></div>
-        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-80"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-cyan-500 to-transparent opacity-30"></div>
 
         {/* Header Section */}
         <div className="text-center mb-6 flex flex-col items-center">
@@ -115,7 +115,7 @@ export default function ForgotPassword() {
               <label className="block font-mono text-xs text-cyan-400 opacity-80 mb-1.5" htmlFor="email">
                 Địa chỉ Email
               </label>
-              <div className="relative cyber-input-wrapper rounded overflow-hidden">
+              <div className="relative cyber-input-wrapper rounded-sm overflow-hidden">
                 <div className="relative terminal-prompt">
                   <input
                     type="email"
@@ -124,7 +124,7 @@ export default function ForgotPassword() {
                     placeholder="example@fpt.edu.vn"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="cyber-input relative z-10 w-full rounded py-2.5 px-4 font-mono text-xs focus:ring-0"
+                    className="cyber-input relative z-10 w-full rounded-sm py-2.5 px-4 font-mono text-xs focus:ring-0"
                   />
                   <div className="scanline"></div>
                 </div>

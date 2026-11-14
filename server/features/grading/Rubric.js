@@ -22,8 +22,9 @@ const RubricSchema = new Schema(
   },
 );
 
+// One active rubric per scope: round-wide (no trackId) or per track within the round.
 RubricSchema.index(
-  { roundId: 1 },
+  { roundId: 1, trackId: 1 },
   {
     unique: true,
     partialFilterExpression: { isActive: true },

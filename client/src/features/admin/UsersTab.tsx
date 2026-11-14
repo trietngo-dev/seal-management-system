@@ -73,7 +73,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   );
 
   const displayedUsers = (() => {
-    let list = isAssistant ? users.filter((u: any) => u.isTeamMember) : users;
+    const list = isAssistant ? users.filter((u: any) => u.isTeamMember) : users;
     return [...list].sort((a, b) => {
       if (isAssistant) {
         const aMerch = merchandise.find(
@@ -526,10 +526,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({
   return (
     <div className="space-y-6 font-sans">
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-white border border-slate-200 shadow-sm p-5 rounded-2xl">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-white border border-slate-200 shadow-xs p-5 rounded-2xl">
         <div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2 font-mono">
-            <Users className="text-[#F27024]" size={24} />
+            <Users className="text-primary" size={24} />
             <span>
               {isAssistant ? "Danh sách Thí sinh" : "Quản lý Tài khoản"}
             </span>
@@ -552,14 +552,14 @@ export const UsersTab: React.FC<UsersTabProps> = ({
               placeholder="Tìm theo tên, email, MSSV..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#F27024] w-56 transition-all font-mono"
+              className="bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-hidden focus:border-primary w-56 transition-all font-mono"
             />
           </div>
 
           {eventId && isAssistant && (
             <button
               onClick={handleExportExcel}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold font-mono flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0 border border-emerald-500/20"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold font-mono flex items-center gap-2 shadow-xs transition-all cursor-pointer shrink-0 border border-emerald-500/20"
             >
               <Download size={16} />
               Xuất Excel Size Áo
@@ -569,7 +569,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           {!readOnly && !isAssistant && (
             <button
               onClick={handleOpenCreateModal}
-              className="bg-[#F27024] hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold font-mono flex items-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
+              className="bg-primary hover:bg-[#d95f1f] text-white px-4 py-2 rounded-xl text-xs font-bold font-mono flex items-center gap-2 shadow-xs transition-all cursor-pointer shrink-0"
             >
               <UserPlus size={16} />
               Thêm Tài Khoản Mới
@@ -580,12 +580,12 @@ export const UsersTab: React.FC<UsersTabProps> = ({
 
       {/* Merchandise Sizing Stats Dashboard */}
       {eventId && isAssistant && merchStats && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-50 border border-slate-200/80 p-6 rounded-2xl shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-50 border border-slate-200/80 p-6 rounded-2xl shadow-xs">
           {/* Sizing Stats Metric Cards */}
           <div className="space-y-4 flex flex-col justify-between">
             <div>
               <h3 className="text-sm font-bold text-white font-mono uppercase tracking-wider flex items-center gap-2">
-                <Shirt size={16} className="text-[#F27024]" />
+                <Shirt size={16} className="text-primary" />
                 <span>Thống Kê Size Áo</span>
               </h3>
               <p className="text-xs text-slate-400 mt-1">
@@ -595,7 +595,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white border border-slate-200 p-3 rounded-xl text-center shadow-sm">
+              <div className="bg-white border border-slate-200 p-3 rounded-xl text-center shadow-xs">
                 <span className="text-[10px] text-slate-500 block font-mono">
                   TỔNG YÊU CẦU
                 </span>
@@ -632,7 +632,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
           </div>
 
           {/* Chart Container */}
-          <div className="lg:col-span-2 h-44 w-full bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
+          <div className="lg:col-span-2 h-44 w-full bg-white border border-slate-200 p-4 rounded-xl shadow-xs">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={Object.keys(merchStats.stats).map((size) => ({
@@ -672,7 +672,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       )}
 
       {/* Users Table */}
-      <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+      <div className="bg-white border border-slate-200 shadow-xs rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-mono text-[11px]">
@@ -715,7 +715,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                     >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-sm shadow-md shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-linear-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-sm shadow-md shrink-0">
                             {u.fullName
                               ? u.fullName.charAt(0).toUpperCase()
                               : "U"}
@@ -930,7 +930,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                                       e.target.value,
                                     )
                                   }
-                                  className={`bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-0.5 focus:outline-none focus:border-[#F27024] font-mono text-[11px] ${
+                                  className={`bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-0.5 focus:outline-hidden focus:border-primary font-mono text-[11px] ${
                                     isDistributed
                                       ? "opacity-60 cursor-not-allowed"
                                       : "cursor-pointer"
@@ -986,7 +986,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                                 {isDistributed ? (
                                   <button
                                     onClick={() => handleOpenMerchModal(u)}
-                                    className="px-3 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-600 text-white flex items-center gap-1 cursor-pointer transition-all hover:bg-emerald-700 shadow-sm"
+                                    className="px-3 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-600 text-white flex items-center gap-1 cursor-pointer transition-all hover:bg-emerald-700 shadow-xs"
                                     title="Xem lịch sử, đổi size hoặc thu hồi"
                                   >
                                     <span>Đã phát ✓</span>
@@ -1002,7 +1002,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                                     className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold border flex items-center gap-1 cursor-pointer transition-all ${
                                       wasRevoked
                                         ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
-                                        : "bg-[#F27024]/10 border-[#F27024]/30 text-[#F27024] hover:bg-[#F27024]/20"
+                                        : "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
                                     }`}
                                   >
                                     <span>
@@ -1051,7 +1051,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                                     handleToggleStudentAssistant(u)
                                   }
                                   disabled={readOnly}
-                                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-hidden ${
                                     readOnly
                                       ? "cursor-not-allowed opacity-50"
                                       : "cursor-pointer"
@@ -1067,7 +1067,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                                   }
                                 >
                                   <span
-                                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-sm ${
+                                    className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-xs ${
                                       isCtsv
                                         ? "translate-x-5"
                                         : "translate-x-1"
@@ -1319,7 +1319,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-mono"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-hidden focus:border-cyan-500 font-mono"
                     placeholder="user@example.com"
                   />
                 </div>
@@ -1349,7 +1349,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 pr-10 text-white focus:outline-none focus:border-cyan-500 font-mono"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 pr-10 text-white focus:outline-hidden focus:border-cyan-500 font-mono"
                       placeholder={
                         editingUser
                           ? "••••••••"
@@ -1378,7 +1378,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                     onChange={(e) =>
                       setFormData({ ...formData, fullName: e.target.value })
                     }
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white disabled:opacity-50 focus:outline-none focus:border-cyan-500 font-sans"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white disabled:opacity-50 focus:outline-hidden focus:border-cyan-500 font-sans"
                     placeholder="Nguyễn Văn A"
                   />
                 </div>
@@ -1394,7 +1394,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, studentId: e.target.value })
                       }
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white disabled:opacity-50 focus:outline-none focus:border-cyan-500 font-mono"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white disabled:opacity-50 focus:outline-hidden focus:border-cyan-500 font-mono"
                       placeholder="SE180000"
                     />
                   </div>
@@ -1409,7 +1409,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       }
                       placeholder="Chọn trường..."
                       className="w-full"
-                      inputClassName="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500 font-sans disabled:opacity-50"
+                      inputClassName="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-hidden focus:border-cyan-500 font-sans disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -1422,7 +1422,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       onChange={(e) =>
                         setFormData({ ...formData, isActive: e.target.checked })
                       }
-                      className="rounded bg-slate-950 border-slate-800 text-cyan-500 focus:ring-0 disabled:opacity-50"
+                      className="rounded-sm bg-slate-950 border-slate-800 text-cyan-500 focus:ring-0 disabled:opacity-50"
                     />
                     <span>
                       Tài khoản{" "}
@@ -1443,7 +1443,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                             isStudentAssistant: e.target.checked,
                           })
                         }
-                        className="rounded bg-slate-950 border-slate-800 text-cyan-500 focus:ring-0"
+                        className="rounded-sm bg-slate-950 border-slate-800 text-cyan-500 focus:ring-0"
                       />
                       <span>
                         Vai trò{" "}
@@ -1480,9 +1480,9 @@ export const UsersTab: React.FC<UsersTabProps> = ({
       {isMerchModalOpen && selectedMerchUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200 font-sans max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-shrink-0">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 shrink-0">
               <h3 className="text-sm font-bold text-slate-800 font-mono flex flex-wrap items-center gap-2">
-                <Shirt className="text-[#F27024]" size={18} />
+                <Shirt className="text-primary" size={18} />
                 <span>Phát áo: {selectedMerchUser.fullName}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded-lg text-[9px] font-mono font-bold select-none whitespace-nowrap border ${
@@ -1504,10 +1504,10 @@ export const UsersTab: React.FC<UsersTabProps> = ({
               </button>
             </div>
 
-            <div className="space-y-4 text-xs overflow-y-auto flex-grow pr-1 py-1">
+            <div className="space-y-4 text-xs overflow-y-auto grow pr-1 py-1">
               {/* Operations Control Panel */}
               <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-3">
-                <h5 className="text-[10px] font-bold text-[#F27024] uppercase tracking-wider font-mono">
+                <h5 className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono">
                   Thao Tác Phân Phối
                 </h5>
 
@@ -1521,7 +1521,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       <select
                         value={selectedMerchSize}
                         onChange={(e) => setSelectedMerchSize(e.target.value)}
-                        className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 focus:outline-none focus:border-[#F27024] font-mono text-xs cursor-pointer"
+                        className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1 focus:outline-hidden focus:border-primary font-mono text-xs cursor-pointer"
                       >
                         {["S", "M", "L", "XL", "XXL", "3XL"].map((sz) => (
                           <option key={sz} value={sz}>
@@ -1534,7 +1534,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                       type="button"
                       disabled={merchActionLoading}
                       onClick={handleDistributeMerch}
-                      className="w-full py-2 bg-[#F27024] hover:bg-[#d95f1f] disabled:opacity-50 text-white font-bold rounded-xl font-mono text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-[#F27024]/10 cursor-pointer"
+                      className="w-full py-2 bg-primary hover:bg-[#d95f1f] disabled:opacity-50 text-white font-bold rounded-xl font-mono text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-[#F27024]/10 cursor-pointer"
                     >
                       <Shirt size={14} />
                       Xác Nhận Phát Áo
@@ -1551,7 +1551,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                         <select
                           value={selectedMerchSize}
                           onChange={(e) => setSelectedMerchSize(e.target.value)}
-                          className="w-full bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#F27024] font-mono text-xs cursor-pointer"
+                          className="w-full bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-primary font-mono text-xs cursor-pointer"
                         >
                           {["S", "M", "L", "XL", "XXL", "3XL"].map((sz) => (
                             <option key={sz} value={sz}>
@@ -1571,7 +1571,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                           placeholder="Nhập lý do đổi size hoặc thu hồi áo..."
                           defaultValue=""
                           rows={2}
-                          className="w-full bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#F27024] text-xs resize-none"
+                          className="w-full bg-white border border-slate-200 text-slate-800 rounded-lg px-2.5 py-1.5 focus:outline-hidden focus:border-primary text-xs resize-none"
                         />
                       </div>
                     </div>
@@ -1637,7 +1637,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
                           className="relative text-[10.5px] leading-relaxed"
                         >
                           {/* Timeline dot */}
-                          <div className="absolute -left-[20.5px] top-3 w-3.5 h-3.5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+                          <div className="absolute left-[-20.5px] top-3 w-3.5 h-3.5 rounded-full bg-white border border-slate-200 flex items-center justify-center shadow-xs">
                             {getIcon()}
                           </div>
                           <div className="bg-slate-50 border border-slate-100/80 rounded-lg p-2">
@@ -1664,7 +1664,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({
               )}
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-slate-200 flex-shrink-0">
+            <div className="flex justify-end pt-3 border-t border-slate-200 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsMerchModalOpen(false)}

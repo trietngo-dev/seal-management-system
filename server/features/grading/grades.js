@@ -31,6 +31,8 @@ const aiService = require('../github-ai/aiService');
 const { authenticateToken } = require('../auth/authMiddleware');
 const { addInAppJob, isQueueAvailable } = require('../notifications/notificationQueue');
 const { validateScoreSubmissionPolicy, buildScoreChangeSummary } = require('./scorePolicy');
+const { findActiveRubric } = require('./rubricResolver');
+const { findJudgeRoleForRound } = require('../teams/teamAccess');
 
 const AUTO_GRANT_WINDOW_MS = 5 * 60 * 1000;
 
@@ -169,7 +171,7 @@ router.post('/suggestion', authenticateToken, async (req, res) => {
       status: { $in: ['completed', 'done', 'approved'] }
     }).sort({ createdAt: -1 }).limit(10);
 
-    let aggregateResult = null;
+    let aggregateResult;
     try {
       aggregateResult = await aiService.analyzeTeamAggregate(
         teamId,
@@ -178,47 +180,38 @@ router.post('/suggestion', authenticateToken, async (req, res) => {
         { roundId, rubricId: activeRubric._id, criteria }
       );
     } catch (aggErr) {
-      console.warn('[AI GRADES] analyzeTeamAggregate encountered an error, falling back:', aggErr.message);
+      console.warn('[AI GRADES] analyzeTeamAggregate failed:', aggErr.message);
+      return res.status(503).json({ message: `Không thể phân tích AI lúc này: ${aggErr.message}` });
     }
 
-    if (aggregateResult) {
-      try {
-        const aggregateAnalysis = new AiAnalysis({
-          repositoryId: repo._id,
-          teamId,
-          roundId,
-          repositorySnapshotId: snapshot._id,
-          analysisType: 'repository_review',
-          provider: aggregateResult._provider || 'Google Gemini',
-          model: aggregateResult._model || 'gemini-3.1-flash-lite',
-          inputSummary: {
-            trigger: 'judge_ai_analysis_button',
-            rubricId: activeRubric._id,
-            rubricVersion: activeRubric.version || 1,
-            agent1AnalysisIds: priorReviews.map(review => review._id)
-          },
-          result: aggregateResult,
-          status: 'completed',
-          completedAt: new Date()
-        });
-        await aggregateAnalysis.save();
-      } catch (saveErr) {
-        console.warn('[AI GRADES] Failed to persist aggregateAnalysis:', saveErr.message);
-      }
-    }
+    const aggregateAnalysis = new AiAnalysis({
+      repositoryId: repo._id,
+      teamId,
+      roundId,
+      repositorySnapshotId: snapshot._id,
+      analysisType: 'repository_review',
+      provider: aggregateResult._provider || 'Google Gemini',
+      model: aggregateResult._model || 'gemini-3.1-flash-lite',
+      inputSummary: {
+        trigger: 'judge_ai_analysis_button',
+        rubricId: activeRubric._id,
+        rubricVersion: activeRubric.version || 1,
+        agent1AnalysisIds: priorReviews.map(review => review._id)
+      },
+      result: aggregateResult,
+      status: 'completed',
+      completedAt: new Date()
+    });
+    await aggregateAnalysis.save();
 
     // 5. Convert Agent 2 qualitative evaluation into score suggestions. The
     // judge remains responsible for editing and submitting the official score.
-    let suggestions = [];
+    let suggestions;
     try {
       suggestions = await aiService.generateScoringSuggestion(snapshot, commits, criteria);
     } catch (sugErr) {
-      console.warn('[AI GRADES] generateScoringSuggestion failed, using criteria fallback:', sugErr.message);
-      suggestions = criteria.map(c => ({
-        criterionCode: c.code,
-        suggestedScore: Math.min(c.maxScore, 4),
-        comment: `[Gợi ý của AI]: Đội thi hoàn thành tiêu chí ${c.name || c.code}.`
-      }));
+      console.warn('[AI GRADES] generateScoringSuggestion failed:', sugErr.message);
+      return res.status(503).json({ message: `Không thể tạo gợi ý điểm: ${sugErr.message}` });
     }
 
     // Map code back to Criterion ID for UI ease
@@ -661,6 +654,9 @@ router.post('/submit', authenticateToken, async (req, res) => {
 
     const round = await Round.findById(roundId);
     if (!round) return res.status(404).json({ message: 'Round not found.' });
+    if (rubric.roundId.toString() !== round._id.toString()) {
+      return res.status(400).json({ message: 'Rubric không thuộc vòng thi đang chấm.' });
+    }
     if (round.status === 'completed') {
       return res.status(400).json({ message: 'Vòng đấu này đã bị khoá. Điểm số đã được chốt và không thể sửa đổi.' });
     }
@@ -696,6 +692,13 @@ router.post('/submit', authenticateToken, async (req, res) => {
     }
 
     const repo = await GithubRepository.findOne({ teamId });
+    // Score requires both (schema + unique index); fail with a clear message instead of a 500.
+    if (!repo) {
+      return res.status(400).json({ message: 'Đội thi chưa có GitHub repository nên chưa thể chấm điểm. Vui lòng liên hệ Ban tổ chức.' });
+    }
+    if (!team.trackId) {
+      return res.status(400).json({ message: 'Đội thi chưa được phân vào bảng đấu nên chưa thể chấm điểm.' });
+    }
     const snapshot = await RepositorySnapshot.findOne({ teamId, roundId });
 
     const existingScores = await Score.find({ teamId, roundId }).sort({ createdAt: 1 });
@@ -723,7 +726,8 @@ router.post('/submit', authenticateToken, async (req, res) => {
       }
     }
 
-    const policy = validateScoreSubmissionPolicy(existingScores, userRole?.role || 'judge', targetJudgeId);
+    const policyRole = req.user.isSystemAdmin ? 'system_admin' : (userRole?.role || 'judge');
+    const policy = validateScoreSubmissionPolicy(existingScores, policyRole, targetJudgeId);
     if (!policy.allowed) {
       await ScoreAudit.create({
         teamId,
@@ -744,13 +748,27 @@ router.post('/submit', authenticateToken, async (req, res) => {
 
     const criteriaList = await Criterion.find({ rubricId });
     const detailsToSave = [];
+    const scoredCriterionIds = new Set();
 
     for (const d of details) {
-      const { criterionId, scoreValue, comment } = d;
-      const criterion = criteriaList.find(c => c._id.toString() === criterionId.toString());
+      const { criterionId, comment } = d;
+      // Coerce explicitly: a string "5" would otherwise be concatenated into the total,
+      // and null/undefined would slip past the range check below.
+      const scoreValue = typeof d.scoreValue === 'string' && d.scoreValue.trim() !== ''
+        ? Number(d.scoreValue)
+        : d.scoreValue;
+      const criterion = criterionId && criteriaList.find(c => c._id.toString() === criterionId.toString());
 
       if (!criterion) {
         return res.status(400).json({ message: `Criterion ID ${criterionId} not found in rubric.` });
+      }
+      if (scoredCriterionIds.has(criterion._id.toString())) {
+        return res.status(400).json({ message: `Tiêu chí "${criterion.name}" bị chấm trùng.` });
+      }
+      scoredCriterionIds.add(criterion._id.toString());
+
+      if (typeof scoreValue !== 'number' || !Number.isFinite(scoreValue)) {
+        return res.status(400).json({ message: `Điểm của tiêu chí "${criterion.name}" không hợp lệ.` });
       }
 
       if (scoreValue < 0 || scoreValue > criterion.maxScore) {
@@ -770,6 +788,14 @@ router.post('/submit', authenticateToken, async (req, res) => {
         scoreValue,
         weightedScore: Math.round(wScore * 100) / 100,
         comment
+      });
+    }
+
+    // A partial sheet would rank the team on a smaller total than everyone else.
+    const missingCriteria = criteriaList.filter(c => !scoredCriterionIds.has(c._id.toString()));
+    if (missingCriteria.length > 0) {
+      return res.status(400).json({
+        message: `Chưa chấm đủ tiêu chí: ${missingCriteria.map(c => c.name).join(', ')}.`
       });
     }
 
@@ -1121,6 +1147,19 @@ router.post('/lock-round', authenticateToken, async (req, res) => {
  * @desc    Unlock all scores for a round to allow editing again
  * @access  Private (Coordinator or Admin)
  */
+/**
+ * Puts a locked round back into grading: drops its published rankings and prizes,
+ * unlocks every score sheet and marks the round active. Shared by unlock-round and
+ * rollback-round so a reopened round never keeps locked scores judges cannot edit.
+ */
+async function reopenRoundForGrading(round, eventId) {
+  await Ranking.deleteMany({ roundId: round._id });
+  await mongoose.model('Prize').deleteMany({ eventId, roundId: round._id });
+  await Score.updateMany({ roundId: round._id }, { status: 'submitted', $unset: { lockedAt: 1 } });
+  round.status = 'active';
+  await round.save();
+}
+
 router.post('/unlock-round', authenticateToken, async (req, res) => {
   const { eventId, roundId } = req.body;
 
@@ -1148,17 +1187,7 @@ router.post('/unlock-round', authenticateToken, async (req, res) => {
       });
     }
 
-    // 1. Delete generated rankings and prizes for this round
-    await Ranking.deleteMany({ roundId });
-    const Prize = mongoose.model('Prize');
-    await Prize.deleteMany({ eventId, roundId });
-
-    // 2. Unlock all scores (set status back to 'submitted')
-    await Score.updateMany({ roundId }, { status: 'submitted', $unset: { lockedAt: 1 } });
-
-    // 3. Set round status back to 'active'
-    round.status = 'active';
-    await round.save();
+    await reopenRoundForGrading(round, eventId);
 
     // Create EventLog
     const EventLog = mongoose.model('EventLog');
@@ -1630,18 +1659,11 @@ router.post('/rollback-round', authenticateToken, async (req, res) => {
     currentRound.isExamManualOpen = false;
     await currentRound.save();
 
-    previousRound.status = 'active';
-    await previousRound.save();
+    // Rankings were only needed to move teams back; the previous round returns to grading
+    await reopenRoundForGrading(previousRound, eventId);
 
-    // Clean up empty tracks under the current round
-    const Track = mongoose.model('Track');
-    const currentRoundTracks = await Track.find({ roundId: currentRoundId });
-    for (const track of currentRoundTracks) {
-      const teamCount = await Team.countDocuments({ trackId: track._id });
-      if (teamCount === 0) {
-        await Track.findByIdAndDelete(track._id);
-      }
-    }
+    // The current round's tracks are kept even when empty: judges, mentors, rubrics and exam
+    // links are assigned to them, and advance-round reuses the existing track next time.
 
     // Also revert Event status back to ongoing if it was set to completed (e.g. final round rolled back)
     const Event = mongoose.model('Event');
@@ -1651,8 +1673,16 @@ router.post('/rollback-round', authenticateToken, async (req, res) => {
       await eventObj.save();
     }
 
+    await new (mongoose.model('EventLog'))({
+      eventId,
+      actorId: req.user._id,
+      action: 'rollback_round',
+      type: 'grading',
+      details: `Thu hồi vòng "${currentRound.name}", mở lại chấm điểm vòng "${previousRound.name}" (${advancedRankings.length} đội quay về).`
+    }).save();
+
     return res.json({
-      message: `Đã thu hồi thành công vòng đấu. Trạng thái vòng "${previousRound.name}" đã được chuyển về "active" và đưa các đội quay về vòng trước.`,
+      message: `Đã thu hồi thành công vòng đấu. Vòng "${previousRound.name}" đã được mở lại để chấm điểm và các đội đã quay về vòng trước.`,
       previousRoundId: previousRound._id
     });
   } catch (error) {
@@ -1678,16 +1708,7 @@ router.get('/export-grading-sheet/:roundId', authenticateToken, async (req, res)
     const event = await Event.findById(round.eventId);
     if (!event) return res.status(404).json({ message: 'Event not found.' });
 
-    // 1. Get rubric for this round
-    const rubric = await Rubric.findOne({ roundId: round._id, isActive: true });
-    if (!rubric) {
-      return res.status(400).json({ message: 'Vòng thi này chưa được cấu hình Rubric chấm điểm.' });
-    }
-
-    // 2. Get criteria for this rubric
-    const criteria = await Criterion.find({ rubricId: rubric._id }).sort({ order: 1 });
-
-    // 3. Determine Judge and Track
+    // 1. Determine Judge and Track
     let targetJudgeId = judgeId;
     if (!targetJudgeId) {
       const roleRecord = await EventRole.findOne({
@@ -1707,18 +1728,20 @@ router.get('/export-grading-sheet/:roundId', authenticateToken, async (req, res)
     if (trackId) {
       track = await Track.findById(trackId);
     } else if (targetJudgeId) {
-      const judgeRole = await EventRole.findOne({
-        userId: targetJudgeId,
-        eventId: round.eventId,
-        role: 'judge',
-        status: 'active'
-      });
+      const judgeRole = await findJudgeRoleForRound(targetJudgeId, round.eventId, round._id);
       if (judgeRole && judgeRole.trackId) {
         track = await Track.findById(judgeRole.trackId);
       }
     }
 
-    // 4. Get Teams
+    // 2. Rubric that applies to this track (track-specific, else round-wide) and its criteria
+    const rubric = await findActiveRubric(round._id, track?._id);
+    if (!rubric) {
+      return res.status(400).json({ message: 'Vòng thi này chưa được cấu hình Rubric chấm điểm.' });
+    }
+    const criteria = await Criterion.find({ rubricId: rubric._id }).sort({ order: 1 });
+
+    // 3. Get Teams
     const teamsQuery = { eventId: round.eventId, status: 'confirmed' };
     if (track) {
       teamsQuery.trackId = track._id;
@@ -2106,7 +2129,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
     }
 
     // 1. Get rubric and criteria for this round
-    let rubric = await Rubric.findOne({ roundId: round._id, isActive: true });
+    let rubric = await findActiveRubric(round._id, track._id);
     if (!rubric) {
       rubric = await Rubric.findOne({ roundId: round._id });
     }
@@ -2124,13 +2147,13 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
       eventId: round.eventId,
       $or: [{ trackId: track._id }, { originalTrackId: track._id }],
       status: 'confirmed'
-    }).sort({ externalTeamCode: 1, code: 1, name: 1 });
+    }).sort({ name: 1 });
 
     if (teams.length === 0) {
       teams = await Team.find({
         eventId: round.eventId,
         trackId: track._id
-      }).sort({ externalTeamCode: 1, code: 1, name: 1 });
+      }).sort({ name: 1 });
     }
 
     // 3. Get all active judges for this event / round / track
@@ -2212,7 +2235,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
         judges.forEach(judge => {
           const row = [
             stt++,
-            team.externalTeamCode || team.code || team.name,
+            team.name,
             team.name,
             judge.email || '',
             judge.fullName || ''
@@ -2244,7 +2267,7 @@ router.get('/track/:trackId/round/:roundId/import-template', authenticateToken, 
         // If no judges defined yet, create team row with blank judge
         const row = [
           stt++,
-          team.externalTeamCode || team.code || team.name,
+          team.name,
           team.name,
           '',
           ''
@@ -2500,7 +2523,7 @@ router.post('/import-track-scores', authenticateToken, upload.single('file'), as
       }
     }
 
-    let rubric = targetRubricId ? await Rubric.findById(targetRubricId) : await Rubric.findOne({ roundId: round._id, isActive: true });
+    let rubric = targetRubricId ? await Rubric.findById(targetRubricId) : await findActiveRubric(round._id, targetTrackId);
     if (!rubric) rubric = await Rubric.findOne({ roundId: round._id });
     if (!rubric) {
       return res.status(400).json({ message: 'Chưa cấu hình Rubric cho vòng thi này.' });
@@ -2557,8 +2580,6 @@ router.post('/import-track-scores', authenticateToken, upload.single('file'), as
       if (!team && colTeamCode >= 0 && row[colTeamCode]) {
         const codeVal = String(row[colTeamCode]).trim();
         team = allTeams.find(t =>
-          (t.externalTeamCode && t.externalTeamCode.toLowerCase() === codeVal.toLowerCase()) ||
-          (t.code && t.code.toLowerCase() === codeVal.toLowerCase()) ||
           t.name.toLowerCase() === codeVal.toLowerCase()
         );
       }

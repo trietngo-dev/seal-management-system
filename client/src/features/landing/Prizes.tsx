@@ -113,7 +113,7 @@ export default function Prizes() {
         {/* Section Header */}
         <div className="prize-header flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-4 opacity-0">
           <div>
-            <span className="font-mono text-xs text-[#F27024] uppercase font-bold tracking-wider py-1 ">
+            <span className="font-mono text-xs text-primary uppercase font-bold tracking-wider py-1 ">
               CƠ CẤU GIẢI THƯỞNG
             </span>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight font-sans">
@@ -130,30 +130,30 @@ export default function Prizes() {
               <div
                 key={index}
                 className={`prize-card-item opacity-0 group relative bg-white rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between hover:-translate-y-1.5 ${isFirst
-                  ? "border-[#F27024]/40 shadow-lg shadow-[#F27024]/10 hover:shadow-xl hover:shadow-[#F27024]/20 hover:border-[#F27024]"
-                  : "border-slate-200/80 shadow-sm hover:shadow-md hover:border-slate-300"
+                  ? "border-primary/40 shadow-lg shadow-[#F27024]/10 hover:shadow-xl hover:shadow-[#F27024]/20 hover:border-primary"
+                  : "border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-300"
                   }`}
               >
                 {/* Accent Top Bar */}
                 <div
-                  className={`absolute top-0 left-6 right-6 h-1 rounded-b-full transition-colors ${isFirst ? "bg-[#F27024]" : "bg-slate-200 group-hover:bg-[#F27024]/50"
+                  className={`absolute top-0 left-6 right-6 h-1 rounded-b-full transition-colors ${isFirst ? "bg-primary" : "bg-slate-200 group-hover:bg-primary/50"
                     }`}
                 ></div>
 
                 <div>
                   {/* Badge & Icon */}
                   <div className="flex items-center justify-between mb-5 pt-2">
-                    <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-[#F27024] transition-colors">
+                    <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-primary transition-colors">
                       #{String(index + 1).padStart(2, '0')}
                     </span>
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isFirst
-                        ? "bg-[#F27024]/10 text-[#F27024]"
-                        : "bg-slate-100 text-slate-500 group-hover:bg-[#F27024]/10 group-hover:text-[#F27024]"
+                        ? "bg-primary/10 text-primary"
+                        : "bg-slate-100 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary"
                         }`}
                     >
                       {isFirst ? (
-                        <Trophy size={20} className="text-[#F27024]" />
+                        <Trophy size={20} className="text-primary" />
                       ) : (
                         <Award size={20} />
                       )}
@@ -164,7 +164,7 @@ export default function Prizes() {
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">
                     {item.title}
                   </h3>
-                  <div className="text-2xl xl:text-3xl font-black text-slate-900 font-mono tracking-tight group-hover:text-[#F27024] transition-colors">
+                  <div className="text-2xl xl:text-3xl font-black text-slate-900 font-mono tracking-tight group-hover:text-primary transition-colors">
                     {item.amount}
                   </div>
                 </div>
@@ -172,7 +172,7 @@ export default function Prizes() {
                 {/* Benefits */}
                 {item.benefits && (
                   <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-medium text-slate-600">
-                    <Sparkles size={14} className="text-[#F27024] shrink-0" />
+                    <Sparkles size={14} className="text-primary shrink-0" />
                     <span>{item.benefits}</span>
                   </div>
                 )}
@@ -187,10 +187,10 @@ export default function Prizes() {
             {specialPrizesList.map((special: any, idx: number) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-start gap-4 hover:border-slate-300 transition-all"
+                className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-start gap-4 hover:border-slate-300 transition-all"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 mt-0.5">
-                  {idx === 0 ? <Sparkles size={18} className="text-[#F27024]" /> : <FileText size={18} className="text-slate-600" />}
+                  {idx === 0 ? <Sparkles size={18} className="text-primary" /> : <FileText size={18} className="text-slate-600" />}
                 </div>
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">

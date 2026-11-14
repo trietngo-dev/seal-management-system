@@ -399,7 +399,7 @@ export default function PersonnelManagement() {
             roundName = matchedRound.name;
             const isFinal = matchedRound.advanceTopN === 0 || matchedRound.name.toLowerCase().includes("chung kết");
             const dashIndex = marker.indexOf("-");
-            let rawTrack = dashIndex >= 0
+            const rawTrack = dashIndex >= 0
               ? marker.substring(dashIndex + 1).trim()
               : (marker.match(/TRACK\s*\d+(?:\s*:\s*.+)?/i)?.[0] || "").replace(/\s*:\s*/g, ": ").trim();
 
@@ -430,7 +430,7 @@ export default function PersonnelManagement() {
             role = "judge";
             roundName = "Vòng sơ loại";
             const dashIndex = marker.indexOf("-");
-            let rawTrack = dashIndex >= 0
+            const rawTrack = dashIndex >= 0
               ? marker.substring(dashIndex + 1).trim()
               : (marker.match(/TRACK\s*\d+(?:\s*:\s*.+)?/i)?.[0] || "").replace(/\s*:\s*/g, ": ").trim();
             const matchedTrack = tracks.find((track: any) =>
@@ -737,9 +737,9 @@ export default function PersonnelManagement() {
 
   return (
     <div className="space-y-6 text-slate-800">
-      <header className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#F27024]/20 bg-[#F27024]/10 text-[#F27024]">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
             <BriefcaseBusiness size={24} />
           </div>
           <div>
@@ -766,10 +766,10 @@ export default function PersonnelManagement() {
               type="button"
               onClick={() => loadPersonnelData(selectedEventId)}
               disabled={!selectedEventId || isRefreshing}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-[#F27024] focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-xs transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-primary focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50"
               title="Tải lại dữ liệu sự kiện"
             >
-              {isRefreshing ? <Loader2 size={16} className="animate-spin text-[#F27024]" /> : <RefreshCw size={16} />}
+              {isRefreshing ? <Loader2 size={16} className="animate-spin text-primary" /> : <RefreshCw size={16} />}
             </button>
           </div>
         </div>
@@ -790,29 +790,29 @@ export default function PersonnelManagement() {
               ["Dòng hợp lệ trong file", stats.acceptedPreview],
               ["Dòng thiếu email", stats.invalidPreview],
             ].map(([label, value]) => (
-              <div key={String(label)} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={String(label)} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</p>
-                <p className="mt-2 text-2xl font-black text-[#F27024]">{value}</p>
+                <p className="mt-2 text-2xl font-black text-primary">{value}</p>
               </div>
             ))}
           </section>
 
           {!readOnly && (
-            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="flex items-center gap-2 text-sm font-bold"><FileSpreadsheet size={18} className="text-[#F27024]" /> Chuyển đổi Master Sheet</h2>
+                  <h2 className="flex items-center gap-2 text-sm font-bold"><FileSpreadsheet size={18} className="text-primary" /> Chuyển đổi Master Sheet</h2>
                   <p className="mt-1 text-xs text-slate-500">Tải form mẫu đã được thiết lập theo vòng thi & track hoặc import file Master Sheet đã điền.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={downloadTemplate}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30"
                   >
-                    <Download size={15} className="text-[#F27024]" /> Tải form mẫu
+                    <Download size={15} className="text-primary" /> Tải form mẫu
                   </button>
-                  <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#F27024] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#d95f1f] focus-within:ring-2 focus-within:ring-[#F27024]/30">
+                  <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-[#d95f1f] focus-within:ring-2 focus-within:ring-[#F27024]/30">
                     <Upload size={15} /> Import Excel
                     <input type="file" accept=".xlsx,.xls" className="sr-only" onChange={(event) => event.target.files?.[0] && parseMasterSheet(event.target.files[0])} />
                   </label>
@@ -823,7 +823,7 @@ export default function PersonnelManagement() {
           )}
 
           {preview.length > 0 && (
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
               <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-sm font-bold">Danh sách nhân sự xem trước</h2>
@@ -838,7 +838,7 @@ export default function PersonnelManagement() {
                       <button
                         type="button"
                         onClick={downloadConvertedPersonnel}
-                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30"
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30"
                       >
                         <Download size={14} /> Tải file đã chuyển đổi
                       </button>
@@ -848,7 +848,7 @@ export default function PersonnelManagement() {
                       type="button"
                       onClick={confirmConvertedPersonnel}
                       disabled={stats.invalidPreview > 0 || isImportingPersonnel}
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#F27024] px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#d95f1f] focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white transition-colors hover:bg-[#d95f1f] focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <CheckCircle2 size={14} /> {isImportingPersonnel ? "Đang nhập nhân sự..." : "Xác nhận & nhập nhân sự"}
                     </button>
@@ -861,7 +861,7 @@ export default function PersonnelManagement() {
                   <thead className="bg-slate-50 text-[12px] uppercase tracking-wider text-slate-500"><tr><th className="p-3">Họ tên</th><th className="p-3">Email / tài khoản</th><th className="p-3">Mật khẩu</th><th className="p-3">Vai trò</th><th className="p-3">Vòng/Track</th><th className="p-3">Kiểm tra</th></tr></thead>
                   <tbody className="divide-y divide-slate-100">
                     {visiblePreview.map(({ item, index }) => (
-                      <tr key={`${item.email}-${item.role}-${index}`}><td className="p-3 font-semibold" title={item.fullName}>{item.fullName}</td><td className="p-3 font-mono text-slate-600" title={item.email}><span className="block overflow-hidden text-ellipsis whitespace-nowrap">{item.email || "Thiếu email"}</span></td><td className="p-3 font-mono text-slate-600"><span className="block whitespace-nowrap">{item.password || "Thiếu mật khẩu"}</span></td><td className="p-3"><div className="flex flex-col items-start gap-2"><span className="rounded-md bg-[#F27024]/10 px-2 py-1 font-bold text-[#F27024]">{item.role.toUpperCase()}</span>{item.role === "judge" && <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold text-slate-600"><input type="checkbox" checked={item.isChiefJudge} onChange={(event) => updateChiefJudge(index, event.target.checked)} className="h-4 w-4 rounded border-slate-300 accent-[#F27024] focus:ring-2 focus:ring-[#F27024]/30" />Chủ tịch Hội đồng</label>}</div></td><td className="p-3 leading-snug text-slate-500">{item.role === "mentor" ? <span>Chọn Track sau khi import</span> : <>{item.roundName}{item.trackName ? ` · ${item.trackName}` : ""}</>}</td><td className="p-3">{item.email && item.password.length >= 6 ? <CheckCircle2 size={16} className="text-emerald-600" /> : <span className="text-rose-600">Thiếu thông tin</span>}</td></tr>
+                      <tr key={`${item.email}-${item.role}-${index}`}><td className="p-3 font-semibold" title={item.fullName}>{item.fullName}</td><td className="p-3 font-mono text-slate-600" title={item.email}><span className="block overflow-hidden text-ellipsis whitespace-nowrap">{item.email || "Thiếu email"}</span></td><td className="p-3 font-mono text-slate-600"><span className="block whitespace-nowrap">{item.password || "Thiếu mật khẩu"}</span></td><td className="p-3"><div className="flex flex-col items-start gap-2"><span className="rounded-md bg-primary/10 px-2 py-1 font-bold text-primary">{item.role.toUpperCase()}</span>{item.role === "judge" && <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold text-slate-600"><input type="checkbox" checked={item.isChiefJudge} onChange={(event) => updateChiefJudge(index, event.target.checked)} className="h-4 w-4 rounded-sm border-slate-300 accent-primary focus:ring-2 focus:ring-[#F27024]/30" />Chủ tịch Hội đồng</label>}</div></td><td className="p-3 leading-snug text-slate-500">{item.role === "mentor" ? <span>Chọn Track sau khi import</span> : <>{item.roundName}{item.trackName ? ` · ${item.trackName}` : ""}</>}</td><td className="p-3">{item.email && item.password.length >= 6 ? <CheckCircle2 size={16} className="text-emerald-600" /> : <span className="text-rose-600">Thiếu thông tin</span>}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -869,13 +869,13 @@ export default function PersonnelManagement() {
             </section>
           )}
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
             <div className="flex flex-col gap-3 border-b border-slate-100 p-5 lg:flex-row lg:items-center lg:justify-between">
               <div><h2 className="text-sm font-bold">Danh sách nhân sự đã nhập</h2><p className="mt-1 text-xs text-slate-500">Theo dõi phân công và trạng thái cấp quyền của nhân sự.</p></div>
               <div className="flex flex-wrap gap-2">
-                <button type="button" disabled={isAccountActionLoading || !invitations.some((item) => item.status === "accepted" && item.accountStatus !== "provisioned")} onClick={() => runAccountAction(`event/${selectedEventId || event?._id}/provision-all`, "Đã cấp tài khoản.")} className="rounded-lg bg-[#F27024] px-3 py-2 text-xs font-bold text-white hover:bg-[#d95f1f] disabled:opacity-50">Cấp tất cả đã chấp thuận</button>
+                <button type="button" disabled={isAccountActionLoading || !invitations.some((item) => item.status === "accepted" && item.accountStatus !== "provisioned")} onClick={() => runAccountAction(`event/${selectedEventId || event?._id}/provision-all`, "Đã cấp tài khoản.")} className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-[#d95f1f] disabled:opacity-50">Cấp tất cả đã chấp thuận</button>
                 <button type="button" disabled={isAccountActionLoading || !invitations.some((item) => item.accountStatus === "provisioned")} onClick={() => runAccountAction(`event/${selectedEventId || event?._id}/revoke-all`, "Đã thu hồi tất cả.", true)} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50">Thu hồi tất cả</button>
-                <button type="button" onClick={() => loadPersonnelData(selectedEventId)} disabled={isRefreshing} className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50" aria-label="Tải lại trạng thái"><RefreshCw size={15} className={isRefreshing ? "animate-spin text-[#F27024]" : ""} /></button>
+                <button type="button" onClick={() => loadPersonnelData(selectedEventId)} disabled={isRefreshing} className="rounded-lg border border-slate-200 p-2 text-slate-500 hover:bg-slate-50 disabled:opacity-50" aria-label="Tải lại trạng thái"><RefreshCw size={15} className={isRefreshing ? "animate-spin text-primary" : ""} /></button>
               </div>
             </div>
             {invitations.length ? (
@@ -888,10 +888,10 @@ export default function PersonnelManagement() {
                       : "bg-amber-50 text-amber-700";
                   const statusLabel = invitation.status === "accepted" ? "Đã xác nhận" : invitation.status === "rejected" ? "Đã từ chối" : "Chờ xử lý";
                   return (
-                    <article key={invitation._id} className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:flex-row sm:items-start sm:justify-between">
+                    <article key={invitation._id} className="group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-md sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-50 to-orange-100 text-[#F27024] ring-1 ring-orange-200">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-orange-50 to-orange-100 text-primary ring-1 ring-orange-200">
                             <UserRoundCheck size={21} aria-hidden="true" />
                           </div>
                           <div className="min-w-0">
@@ -917,7 +917,7 @@ export default function PersonnelManagement() {
                                   <span className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
                                     Track ({item.role.toUpperCase()}{item.roundName ? ` · ${item.roundName}` : ""})
                                   </span>
-                                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-sm">
+                                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 shadow-xs">
                                     Bảng Chung Kết
                                   </div>
                                 </div>
@@ -936,7 +936,7 @@ export default function PersonnelManagement() {
                                   value={matchedTrackId}
                                   disabled={isAccountActionLoading}
                                   onChange={(event) => updateInvitationAssignmentTrack(invitation._id, assignIndex, event.target.value)}
-                                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-800 shadow-sm transition-colors hover:border-orange-300 focus:border-[#F27024] focus:outline-none focus:ring-4 focus:ring-[#F27024]/15 disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-800 shadow-xs transition-colors hover:border-orange-300 focus:border-primary focus:outline-hidden focus:ring-4 focus:ring-[#F27024]/15 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   <option value="">Chọn track ({item.role})</option>
                                   {availableTracks.map((track) => (
@@ -952,20 +952,20 @@ export default function PersonnelManagement() {
                         {editingPersonnelId === invitation._id && personnelDraft && (
                           <div className="mt-4 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
                             <label className="text-xs font-bold text-slate-600">Email / tài khoản
-                              <input value={personnelDraft.email} onChange={(event) => setPersonnelDraft((current: any) => ({ ...current, email: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono font-normal focus:outline-none focus:ring-2 focus:ring-[#F27024]/30" />
+                              <input value={personnelDraft.email} onChange={(event) => setPersonnelDraft((current: any) => ({ ...current, email: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono font-normal focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30" />
                             </label>
                             <label className="text-xs font-bold text-slate-600">Mật khẩu mới
-                              <input type="password" value={personnelDraft.password} placeholder="Để trống nếu không đổi" onChange={(event) => setPersonnelDraft((current: any) => ({ ...current, password: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono font-normal focus:outline-none focus:ring-2 focus:ring-[#F27024]/30" />
+                              <input type="password" value={personnelDraft.password} placeholder="Để trống nếu không đổi" onChange={(event) => setPersonnelDraft((current: any) => ({ ...current, password: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono font-normal focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30" />
                             </label>
                             <fieldset className="sm:col-span-2">
                               <legend className="text-xs font-bold text-slate-600">Vai trò</legend>
                               <div className="mt-2 flex gap-4">
-                                {(["judge", "mentor"] as const).map((role) => <label key={role} className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" checked={personnelDraft.assignments.some((item: any) => item.role === role)} onChange={() => toggleDraftRole(role)} className="h-4 w-4 rounded border-slate-300 accent-[#F27024]" />{role === "judge" ? "Judge" : "Mentor"}</label>)}
+                                {(["judge", "mentor"] as const).map((role) => <label key={role} className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700"><input type="checkbox" checked={personnelDraft.assignments.some((item: any) => item.role === role)} onChange={() => toggleDraftRole(role)} className="h-4 w-4 rounded-sm border-slate-300 accent-primary" />{role === "judge" ? "Judge" : "Mentor"}</label>)}
                               </div>
                             </fieldset>
                             <div className="flex gap-2 sm:col-span-2">
-                              <button type="button" disabled={isAccountActionLoading} onClick={() => savePersonnelDetails(invitation._id)} className="inline-flex items-center gap-2 rounded-lg bg-[#F27024] px-3 py-2 text-xs font-bold text-white hover:bg-[#d95f1f] focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:opacity-50"><Save size={13} />Lưu thay đổi</button>
-                              <button type="button" onClick={() => { setEditingPersonnelId(null); setPersonnelDraft(null); }} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"><X size={13} />Hủy</button>
+                              <button type="button" disabled={isAccountActionLoading} onClick={() => savePersonnelDetails(invitation._id)} className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white hover:bg-[#d95f1f] focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:opacity-50"><Save size={13} />Lưu thay đổi</button>
+                              <button type="button" onClick={() => { setEditingPersonnelId(null); setPersonnelDraft(null); }} className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 focus:outline-hidden focus:ring-2 focus:ring-slate-300"><X size={13} />Hủy</button>
                             </div>
                           </div>
                         )}
@@ -974,17 +974,17 @@ export default function PersonnelManagement() {
                         <span className={`rounded-lg border border-current/15 px-2.5 py-1.5 text-[10px] font-extrabold ${statusStyle}`}>{statusLabel}</span>
                         {invitation.emailStatus === "failed" && <span className="rounded-lg bg-rose-50 px-2.5 py-1.5 text-[10px] font-bold text-rose-700">Gửi email thất bại</span>}
                         {invitation.accountEmailStatus === "failed" && <span className="rounded-lg bg-rose-50 px-2.5 py-1.5 text-[10px] font-bold text-rose-700">Email tài khoản thất bại</span>}
-                        {["pending", "rejected"].includes(invitation.status) && <button type="button" disabled={isAccountActionLoading} onClick={() => resendInvitation(invitation)} className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-[10px] font-bold text-orange-700 transition-colors hover:bg-orange-100 focus:outline-none focus:ring-2 focus:ring-orange-300 disabled:cursor-not-allowed disabled:opacity-50">Gửi lại lời mời</button>}
-                        {invitation.status === "accepted" && invitation.accountStatus !== "provisioned" && <button type="button" disabled={isAccountActionLoading} onClick={() => runAccountAction(`${invitation._id}/provision`, "Đã cấp tài khoản.")} className="rounded-lg bg-[#F27024] px-3 py-1.5 text-[10px] font-bold text-white hover:bg-[#d95f1f] disabled:opacity-50">{invitation.accountStatus === "revoked" ? "Cấp lại tài khoản" : "Cấp tài khoản"}</button>}
+                        {["pending", "rejected"].includes(invitation.status) && <button type="button" disabled={isAccountActionLoading} onClick={() => resendInvitation(invitation)} className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-[10px] font-bold text-orange-700 transition-colors hover:bg-orange-100 focus:outline-hidden focus:ring-2 focus:ring-orange-300 disabled:cursor-not-allowed disabled:opacity-50">Gửi lại lời mời</button>}
+                        {invitation.status === "accepted" && invitation.accountStatus !== "provisioned" && <button type="button" disabled={isAccountActionLoading} onClick={() => runAccountAction(`${invitation._id}/provision`, "Đã cấp tài khoản.")} className="rounded-lg bg-primary px-3 py-1.5 text-[10px] font-bold text-white hover:bg-[#d95f1f] disabled:opacity-50">{invitation.accountStatus === "revoked" ? "Cấp lại tài khoản" : "Cấp tài khoản"}</button>}
                         {invitation.accountStatus === "provisioned" && <><span className="rounded-lg bg-emerald-50 px-2.5 py-1.5 text-[10px] font-bold text-emerald-700">Đã cấp tài khoản</span><button type="button" disabled={isAccountActionLoading} onClick={() => runAccountAction(`${invitation._id}/revoke`, "Đã thu hồi quyền.", true)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-[10px] font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50">Thu hồi</button></>}
                         {invitation.accountStatus === "revoked" && <span className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-[10px] font-bold text-slate-600">Đã thu hồi</span>}
-                        {!readOnly && <button type="button" disabled={isAccountActionLoading} onClick={() => startEditingPersonnel(invitation)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:opacity-50"><Pencil size={12} />Chỉnh sửa</button>}
+                        {!readOnly && <button type="button" disabled={isAccountActionLoading} onClick={() => startEditingPersonnel(invitation)} className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-bold text-slate-700 hover:bg-slate-50 focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:opacity-50"><Pencil size={12} />Chỉnh sửa</button>}
                         <button
                           type="button"
                           aria-label={`Xóa nhân sự ${invitation.fullName}`}
                           disabled={isAccountActionLoading}
                           onClick={() => deleteInvitation(invitation)}
-                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-700 transition-colors hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-[10px] font-bold text-rose-700 transition-colors hover:bg-rose-100 focus:outline-hidden focus:ring-2 focus:ring-rose-300 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           <Trash2 size={12} aria-hidden="true" />
                           Xóa nhân sự
@@ -997,8 +997,8 @@ export default function PersonnelManagement() {
             ) : <p className="p-8 text-center text-xs text-slate-500">Chưa có nhân sự nào được nhập.</p>}
           </section>
 
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-100 p-5"><h2 className="flex items-center gap-2 text-sm font-bold"><UserRoundCheck size={18} className="text-[#F27024]" /> Nhân sự đã được cấp quyền</h2></div>
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+            <div className="border-b border-slate-100 p-5"><h2 className="flex items-center gap-2 text-sm font-bold"><UserRoundCheck size={18} className="text-primary" /> Nhân sự đã được cấp quyền</h2></div>
             {groupedProvisionedRoles.length ? (
               <div className="divide-y divide-slate-100">
                 {groupedProvisionedRoles.map(({ user, roles: userRoles }) => (

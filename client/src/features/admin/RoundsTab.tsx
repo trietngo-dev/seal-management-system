@@ -14,6 +14,8 @@ interface RoundsTabProps {
   setSelectedTrack: (track: any) => void;
   selectedRubricRoundId: string;
   setSelectedRubricRoundId: (id: string) => void;
+  selectedRubricTrackId: string;
+  setSelectedRubricTrackId: (id: string) => void;
   fetchEventDetails: () => Promise<void>;
   handleAdvanceRound: (roundId: string) => Promise<void>;
   handleLockRound: (roundId: string) => Promise<void>;
@@ -105,6 +107,8 @@ export default function RoundsTab({
   setSelectedTrack,
   selectedRubricRoundId,
   setSelectedRubricRoundId,
+  selectedRubricTrackId,
+  setSelectedRubricTrackId,
   handleAdvanceRound,
   handleLockRound,
   handleDeleteRound,
@@ -226,7 +230,7 @@ export default function RoundsTab({
   const handleExportRubric = async (rubricId: string) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/rubrics/${rubricId}/export`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/rubrics/${rubricId}/export`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -272,7 +276,7 @@ export default function RoundsTab({
         }
 
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5000/api/rubrics/import", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/rubrics/import`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -280,6 +284,7 @@ export default function RoundsTab({
           },
           body: JSON.stringify({
             eventId: selectedEvent._id,
+            trackId: selectedRubricTrackId || undefined,
             roundId: selectedRubricRoundId,
             rubricData
           })
@@ -638,8 +643,8 @@ export default function RoundsTab({
                   setSelectedRubricRoundId(r._id);
                 }}
                 className={`w-full text-left p-3 rounded-xl border text-xs flex justify-between items-center transition-all ${selectedRubricRoundId === r._id
-                  ? "bg-orange-500/10 border-orange-500/50 text-slate-900 dark:text-orange-300 font-bold shadow-xs"
-                  : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:border-orange-500/40 text-slate-900 dark:text-slate-300 shadow-xs"
+                  ? "bg-orange-500/10 border-orange-500/50 text-slate-900 dark:text-orange-300 font-bold shadow-2xs"
+                  : "bg-white dark:bg-slate-900/40 border-slate-200 dark:border-slate-800/80 hover:border-orange-500/40 text-slate-900 dark:text-slate-300 shadow-2xs"
                   }`}
               >
                 <div>
@@ -647,7 +652,7 @@ export default function RoundsTab({
                     <strong className="font-black text-slate-950 dark:text-white text-sm text-track-title">{r.name}</strong>
                     {r.hasCriteria === false && (
                       <span
-                        className="inline-flex items-center gap-0.5 bg-amber-950/70 text-amber-400 border border-amber-900/50 px-1 py-0.2 rounded text-[7px] font-bold tracking-wider uppercase shrink-0 font-sans"
+                        className="inline-flex items-center gap-0.5 bg-amber-950/70 text-amber-400 border border-amber-900/50 px-1 py-0.2 rounded-sm text-[7px] font-bold tracking-wider uppercase shrink-0 font-sans"
                         title="Vòng thi này chưa được cấu hình Tiêu chí chấm điểm (Rubric)"
                       >
                         <AlertTriangle size={8} className="shrink-0 text-amber-400" />
@@ -664,7 +669,7 @@ export default function RoundsTab({
                       .map((t: any) => (
                         <span
                           key={t._id}
-                          className="bg-slate-950 px-1.5 py-0.5 rounded text-[8px] border border-slate-800 text-slate-450 font-sans"
+                          className="bg-slate-950 px-1.5 py-0.5 rounded-sm text-[8px] border border-slate-800 text-slate-450 font-sans"
                         >
                           {t.name}
                         </span>
@@ -828,6 +833,30 @@ export default function RoundsTab({
           />
         </div>
 
+        {/* Rubric scope: one round-wide rubric, or a separate rubric per track */}
+        {selectedRubricRoundId && (() => {
+          const roundTracks = tracks.filter(
+            (t: any) => String(t.roundId?._id || t.roundId) === String(selectedRubricRoundId),
+          );
+          if (roundTracks.length === 0) return null;
+          return (
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+                Phạm vi Rubric
+              </label>
+              <CustomSelect
+                value={roundTracks.some((t: any) => t._id === selectedRubricTrackId) ? selectedRubricTrackId : ""}
+                onChange={(val) => setSelectedRubricTrackId(val)}
+                options={[
+                  { value: "", label: "Chung cho cả vòng (áp dụng cho track chưa có rubric riêng)" },
+                  ...roundTracks.map((t: any) => ({ value: t._id, label: `Riêng cho track: ${t.name}` })),
+                ]}
+                className="w-full font-mono"
+              />
+            </div>
+          );
+        })()}
+
         {(() => {
           const currentSelectedRound = rounds.find((r: any) => r._id === selectedRubricRoundId);
           const isSelectedRoundFinal = currentSelectedRound &&
@@ -958,14 +987,14 @@ export default function RoundsTab({
                   <div className="flex flex-col gap-2 items-end">
                     {rubric.isLocked ? (
                       <div className="flex flex-col gap-1.5 items-end">
-                        <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded text-[10px] font-bold font-mono">
+                        <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-sm text-[10px] font-bold font-mono">
                           <Lock size={10} /> ĐÃ KHÓA
                         </span>
 
                         {selectedRound && selectedRound.status !== "completed" && !readOnly && (
                           <button
                             onClick={() => handleLockRound(selectedRound._id)}
-                            className="bg-cyan-500 hover:bg-cyan-500 text-[10px] font-bold px-3 py-1.5 rounded text-white cursor-pointer font-sans shadow-lg hover:shadow-cyan-500/20 transition-all uppercase tracking-wider mt-1"
+                            className="bg-cyan-500 hover:bg-cyan-500 text-[10px] font-bold px-3 py-1.5 rounded-sm text-white cursor-pointer font-sans shadow-lg hover:shadow-cyan-500/20 transition-all uppercase tracking-wider mt-1"
                           >
                             Khóa & Công Bố Điểm Vòng Đấu
                           </button>
@@ -980,7 +1009,7 @@ export default function RoundsTab({
                             return (
                               <button
                                 onClick={() => handleAdvanceRound(selectedRound._id)}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-[10px] font-bold px-3 py-1.5 rounded text-white cursor-pointer font-sans shadow-lg hover:shadow-emerald-600/20 transition-all uppercase tracking-wider mt-1"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-[10px] font-bold px-3 py-1.5 rounded-sm text-white cursor-pointer font-sans shadow-lg hover:shadow-emerald-600/20 transition-all uppercase tracking-wider mt-1"
                               >
                                 Chốt & Thăng Hạng Đội Thi
                               </button>
@@ -1006,14 +1035,14 @@ export default function RoundsTab({
                               setEditRubricIsActive(rubric.isActive);
                               setEditingRubric(true);
                             }}
-                            className="bg-slate-850 hover:bg-slate-800 border border-cyan-500/20 text-[9px] font-bold px-2 py-0.5 rounded text-cyan-400 cursor-pointer"
+                            className="bg-slate-850 hover:bg-slate-800 border border-cyan-500/20 text-[9px] font-bold px-2 py-0.5 rounded-sm text-cyan-400 cursor-pointer"
                           >
                             SỬA
                           </button>
                           <button
                             type="button"
                             onClick={handleDeleteRubric}
-                            className="bg-slate-850 hover:bg-slate-800 border border-rose-500/20 text-[9px] font-bold px-2 py-0.5 rounded text-rose-450 cursor-pointer"
+                            className="bg-slate-850 hover:bg-slate-800 border border-rose-500/20 text-[9px] font-bold px-2 py-0.5 rounded-sm text-rose-450 cursor-pointer"
                           >
                             XÓA
                           </button>
@@ -1024,14 +1053,14 @@ export default function RoundsTab({
                     {!rubric.isLocked && !readOnly ? (
                       <button
                         onClick={handleLockRubric}
-                        className="bg-cyan-500 hover:bg-cyan-400 text-[9px] font-bold px-2.5 py-1 rounded text-white cursor-pointer transition-all shadow-md shadow-cyan-500/20"
+                        className="bg-cyan-500 hover:bg-cyan-400 text-[9px] font-bold px-2.5 py-1 rounded-sm text-white cursor-pointer transition-all shadow-md shadow-cyan-500/20"
                       >
                         KHÓA RUBRIC
                       </button>
                     ) : isSystemAdmin && !readOnly ? (
                       <button
                         onClick={handleUnlockRubric}
-                        className="bg-amber-600 hover:bg-amber-500 text-[9px] font-bold px-2.5 py-1 rounded text-white cursor-pointer transition-all shadow-md shadow-amber-600/20"
+                        className="bg-amber-600 hover:bg-amber-500 text-[9px] font-bold px-2.5 py-1 rounded-sm text-white cursor-pointer transition-all shadow-md shadow-amber-600/20"
                         title="Quyền Super-Admin: Mở khóa Rubric để mở lại luồng chỉnh sửa tiêu chí"
                       >
                         MỞ KHÓA (UNLOCK)
@@ -1040,7 +1069,7 @@ export default function RoundsTab({
                     <button
                       type="button"
                       onClick={() => handleExportRubric(rubric._id)}
-                      className="bg-slate-800 hover:bg-slate-750 border border-slate-750 text-[9px] font-bold px-2.5 py-1 rounded text-slate-200 cursor-pointer shadow-md hover:text-white transition-all btn-import-export"
+                      className="bg-slate-800 hover:bg-slate-750 border border-slate-750 text-[9px] font-bold px-2.5 py-1 rounded-sm text-slate-200 cursor-pointer shadow-md hover:text-white transition-all btn-import-export"
                     >
                       XUẤT JSON (EXPORT)
                     </button>
@@ -1257,7 +1286,7 @@ export default function RoundsTab({
                         <div className="flex flex-wrap gap-1">
                           <span className="text-[9px] text-slate-500 mr-1">Mức chấm:</span>
                           {importGradingDefs.map((def: any, i: number) => (
-                            <span key={i} className="bg-slate-900 border border-slate-800 text-[8px] px-1.5 py-0.5 rounded text-cyan-300 font-mono">
+                            <span key={i} className="bg-slate-900 border border-slate-800 text-[8px] px-1.5 py-0.5 rounded-sm text-cyan-300 font-mono">
                               {def.label} ({def.minScore}-{def.maxScore})
                             </span>
                           ))}
@@ -1301,19 +1330,19 @@ export default function RoundsTab({
                                     }`}>{item.weight}%</td>
                                   <td className="py-1.5">
                                     {item.issues.length > 0 ? (
-                                      <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded">
+                                      <span className="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded-sm">
                                         {item.issues.join(", ")}
                                       </span>
                                     ) : isDelete ? (
-                                      <span className="text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.5 rounded font-bold">
+                                      <span className="text-[9px] bg-rose-500/20 text-rose-400 border border-rose-500/30 px-1.5 py-0.5 rounded-sm font-bold">
                                         XÓA
                                       </span>
                                     ) : isCreate ? (
-                                      <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
+                                      <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded-sm font-bold">
                                         THÊM MỚI
                                       </span>
                                     ) : (
-                                      <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded font-bold">
+                                      <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded-sm font-bold">
                                         CẬP NHẬT
                                       </span>
                                     )}
@@ -1444,7 +1473,7 @@ export default function RoundsTab({
                               placeholder="Mã (e.g. CODE)"
                               value={critCode}
                               onChange={(e) => setCritCode(e.target.value)}
-                              className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                              className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                             />
                           </div>
                           <div className="col-span-2">
@@ -1457,7 +1486,7 @@ export default function RoundsTab({
                               placeholder="Tên tiêu chí (e.g. Clean Code)"
                               value={critName}
                               onChange={(e) => setCritName(e.target.value)}
-                              className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                              className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                             />
                           </div>
                         </div>
@@ -1473,7 +1502,7 @@ export default function RoundsTab({
                               placeholder="Trọng số %"
                               value={critWeight}
                               onChange={(e) => setCritWeight(e.target.value)}
-                              className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                              className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                             />
                           </div>
                           <div>
@@ -1486,7 +1515,7 @@ export default function RoundsTab({
                               placeholder="Max Điểm"
                               value={critMaxScore}
                               onChange={(e) => setCritMaxScore(e.target.value)}
-                              className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                              className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                             />
                           </div>
                         </div>
@@ -1500,7 +1529,7 @@ export default function RoundsTab({
                             placeholder="Mô tả tiêu chí"
                             value={critDesc}
                             onChange={(e) => setCritDesc(e.target.value)}
-                            className="w-full px-3 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                            className="w-full px-3 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                           />
                         </div>
 
@@ -1547,7 +1576,7 @@ export default function RoundsTab({
                                 placeholder="Nhãn (Tốt)"
                                 value={levelLabel}
                                 onChange={(e) => setLevelLabel(e.target.value)}
-                                className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                                className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                               />
                             </div>
                             <div>
@@ -1560,7 +1589,7 @@ export default function RoundsTab({
                                 placeholder="Điểm min (7.0)"
                                 value={levelMinScore}
                                 onChange={(e) => setLevelMinScore(e.target.value)}
-                                className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                                className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                               />
                             </div>
                             <div>
@@ -1573,7 +1602,7 @@ export default function RoundsTab({
                                 placeholder="Điểm max (8.5)"
                                 value={levelMaxScore}
                                 onChange={(e) => setLevelMaxScore(e.target.value)}
-                                className="w-full px-2 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                                className="w-full px-2 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                               />
                             </div>
                           </div>
@@ -1587,12 +1616,12 @@ export default function RoundsTab({
                                 placeholder="Mô tả chi tiết mức chấm này..."
                                 value={levelDesc}
                                 onChange={(e) => setLevelDesc(e.target.value)}
-                                className="flex-1 px-3 py-1.5 rounded text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
+                                className="flex-1 px-3 py-1.5 rounded-sm text-xs bg-slate-900 border border-slate-800 text-slate-200 placeholder:text-[11px] placeholder:text-slate-500 font-mono"
                               />
                               <button
                                 type="button"
                                 onClick={handleAddGradingLevel}
-                                className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded text-xs font-bold font-mono cursor-pointer whitespace-nowrap"
+                                className="bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 px-3 py-1.5 rounded-sm text-xs font-bold font-mono cursor-pointer whitespace-nowrap"
                               >
                                 + Thêm
                               </button>
@@ -1651,9 +1680,9 @@ export default function RoundsTab({
               </form>
 
               <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-slate-800"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-slate-550 uppercase tracking-widest font-bold font-mono">HOẶC NHẬP TỪ FILE</span>
-                <div className="flex-grow border-t border-slate-800"></div>
+                <div className="grow border-t border-slate-800"></div>
+                <span className="shrink mx-4 text-[9px] text-slate-550 uppercase tracking-widest font-bold font-mono">HOẶC NHẬP TỪ FILE</span>
+                <div className="grow border-t border-slate-800"></div>
               </div>
 
               <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-800 space-y-3 font-mono">
@@ -1705,7 +1734,7 @@ export default function RoundsTab({
                   required
                   value={editRoundNameInput}
                   onChange={(e) => setEditRoundNameInput(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-hidden focus:border-cyan-500"
                   placeholder="e.g. Vòng Sơ Loại"
                 />
               </div>
@@ -1726,7 +1755,7 @@ export default function RoundsTab({
                     min="1"
                     value={editRoundOrderInput}
                     onChange={(e) => setEditRoundOrderInput(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-hidden focus:border-cyan-500"
                   />
                 )}
               </div>

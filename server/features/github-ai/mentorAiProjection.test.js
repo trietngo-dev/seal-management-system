@@ -4,14 +4,14 @@ const { projectTechnicalResult } = require('./mentorAiProjection');
 
 test('mentor projection keeps technical data and removes judging data', () => {
   const projected = projectTechnicalResult({
-    team_system_identity: { project_about: 'System', detected_track: 'Smart Home' },
+    team_system_identity: { project_about: 'System', detected_track: 'Track 1' },
     assessment: { potential_errors: 'Race condition', source_structure: 'Layered' },
     suggested_test_cases: [{ test_case_name: 'Retry test', given: 'Tool fails', when: 'Agent retries', then: 'No duplicate action' }],
     improvement_priorities: [{ priority: 'P0', action: 'Validate every tool input' }],
     suggested_questions_for_team: ['How do agents hand off?'],
     technology_inventory: { frameworks_and_runtimes: ['Node.js'], suggested_score: 5 },
-    rubric_scores: { R1_01: { suggested_score: 5 } },
-    criteria_comments: { R1_01: { grade: 'Excellent' } },
+    rubric_scores: { T1: { suggested_score: 5 } },
+    criteria_comments: { T1: { grade: 'Excellent' } },
     disqualification_risks: ['Hidden judge data']
   });
   assert.equal(projected.summary.projectAbout, 'System');
