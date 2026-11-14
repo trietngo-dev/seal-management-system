@@ -138,10 +138,10 @@ export default function JudgeLeaderboard() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#F27024]/50 to-transparent"></div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-[#F27024]/50 to-transparent"></div>
         <div className="flex items-center gap-3">
-          <div className="bg-[#F27024]/10 p-3 rounded-xl text-[#F27024] border border-[#F27024]/20 shadow-sm">
+          <div className="bg-primary/10 p-3 rounded-xl text-primary border border-primary/20 shadow-xs">
             <Trophy size={24} />
           </div>
           <div>
@@ -155,7 +155,7 @@ export default function JudgeLeaderboard() {
         </div>
 
         <div className="flex items-center gap-2 self-start md:self-center">
-          <span className="flex items-center gap-1.5 bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm">
+          <span className="flex items-center gap-1.5 bg-primary/10 text-primary border border-primary/20 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-xs">
             <Users size={12} />
             Chế độ Giám khảo
           </span>
@@ -166,7 +166,7 @@ export default function JudgeLeaderboard() {
               disabled={exporting}
               className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download size={12} className="text-[#F27024]" />
+              <Download size={12} className="text-primary" />
               <span>{exporting ? "Đang xuất..." : "Xuất Phiếu Điểm"}</span>
             </button>
           )}
@@ -183,7 +183,7 @@ export default function JudgeLeaderboard() {
       </div>
 
       {/* Selectors and Search */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center justify-between relative z-10">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap gap-4 items-center justify-between relative z-10">
         <div className="flex flex-wrap gap-4 items-center z-10">
           <div>
             <label className="block text-xs font-bold text-slate-500 mb-1.5 font-sans">
@@ -218,7 +218,7 @@ export default function JudgeLeaderboard() {
 
           {selectedRound?.status === "completed" && (
             <div className="self-end pb-0.5">
-              <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-250 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-sm">
+              <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-250 px-2.5 py-1.5 rounded-xl text-xs font-bold shadow-xs">
                 <CheckSquare size={12} />
                 Đã khóa & Công bố
               </span>
@@ -228,7 +228,7 @@ export default function JudgeLeaderboard() {
 
         {/* Search */}
         <div className="relative w-full md:w-64">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-[#F27024]">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-primary">
             <Search size={14} />
           </span>
           <input
@@ -236,13 +236,13 @@ export default function JudgeLeaderboard() {
             placeholder="Tìm kiếm đội, đề tài..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-xl text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#F27024]/30 focus:border-[#F27024] transition-all"
+            className="bg-slate-50 border border-slate-200 rounded-xl text-xs pl-9 pr-4 py-2 w-full text-slate-800 placeholder-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#F27024]/30 focus:border-primary transition-all"
           />
         </div>
       </div>
 
       {/* Standings Table Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden relative z-0">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden relative z-0">
         {lastUpdated && (
           <div className="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center text-xs font-bold text-slate-500 tracking-normal uppercase">
             <span>Danh sách xếp hạng tạm thời (Live)</span>
@@ -252,7 +252,7 @@ export default function JudgeLeaderboard() {
 
         {loading && standings.length === 0 ? (
           <div className="text-center py-16 text-slate-500 text-xs">
-            <RefreshCw size={24} className="animate-spin mx-auto text-[#F27024] mb-2" />
+            <RefreshCw size={24} className="animate-spin mx-auto text-primary mb-2" />
             Đang tải bảng xếp hạng...
           </div>
         ) : filteredStandings.length > 0 ? (
@@ -273,11 +273,11 @@ export default function JudgeLeaderboard() {
                   const rank = row.rank ?? idx + 1;
                   const rankStyles =
                     rank === 1
-                      ? "bg-amber-100 text-amber-800 border-amber-300 shadow-sm"
+                      ? "bg-amber-100 text-amber-800 border-amber-300 shadow-xs"
                       : rank === 2
-                        ? "bg-slate-200 text-slate-800 border-slate-350 shadow-sm"
+                        ? "bg-slate-200 text-slate-800 border-slate-350 shadow-xs"
                         : rank === 3
-                          ? "bg-orange-100 text-orange-850 border-orange-250 shadow-sm"
+                          ? "bg-orange-100 text-orange-850 border-orange-250 shadow-xs"
                           : "bg-slate-50 text-slate-550 border-slate-200";
 
                   return (
@@ -309,26 +309,26 @@ export default function JudgeLeaderboard() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-center text-slate-700 font-medium">
-                        <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs font-semibold border border-slate-200">
+                        <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-sm text-xs font-semibold border border-slate-200">
                           {row.judgeCount} Giám khảo
                         </span>
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <span className="text-[#F27024] font-black text-sm">
+                        <span className="text-primary font-black text-sm">
                           {row.averageScore != null ? row.averageScore.toFixed(2) : "—"}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-center">
                         {selectedRound?.status !== "completed" ? (
-                          <span className="inline-flex items-center bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 px-2 py-0.5 rounded text-xs font-bold tracking-wide uppercase">
+                          <span className="inline-flex items-center bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded-sm text-xs font-bold tracking-wide uppercase">
                             Đang Đánh Giá
                           </span>
                         ) : row.isAdvanced ? (
-                          <span className="inline-flex items-center gap-0.5 bg-emerald-50 text-emerald-700 border border-emerald-250 px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-normal">
+                          <span className="inline-flex items-center gap-0.5 bg-emerald-50 text-emerald-700 border border-emerald-250 px-2.5 py-0.5 rounded-sm text-xs font-bold uppercase tracking-normal">
                             Đã Đi Tiếp
                           </span>
                         ) : (
-                          <span className="inline-flex items-center bg-slate-100 text-slate-400 border border-slate-250 px-2 py-0.5 rounded text-xs font-medium uppercase">
+                          <span className="inline-flex items-center bg-slate-100 text-slate-400 border border-slate-250 px-2 py-0.5 rounded-sm text-xs font-medium uppercase">
                             Dừng Bước
                           </span>
                         )}

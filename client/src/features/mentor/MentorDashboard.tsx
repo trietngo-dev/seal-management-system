@@ -73,13 +73,13 @@ export default function MentorDashboard({ user, roles }: any) {
       </div>
 
       {mentorRoles.length === 0 ? (
-        <div className="bg-white border border-slate-200 p-8 text-center rounded-2xl shadow-sm">
+        <div className="bg-white border border-slate-200 p-8 text-center rounded-2xl shadow-xs">
           <p className="text-slate-500 text-sm">Bạn chưa được phân công làm Mentor cho bất kỳ sự kiện nào.</p>
         </div>
       ) : (
         <div className="space-y-6">
           {uniqueEvents.length > 1 && (
-            <div className="bg-white border border-slate-200 p-4 flex items-center gap-4 rounded-2xl max-w-md shadow-sm">
+            <div className="bg-white border border-slate-200 p-4 flex items-center gap-4 rounded-2xl max-w-md shadow-xs">
               <label className="text-xs font-bold uppercase text-slate-500 whitespace-nowrap">Chọn sự kiện:</label>
               <CustomSelect 
                 options={uniqueEvents}
@@ -90,9 +90,9 @@ export default function MentorDashboard({ user, roles }: any) {
             </div>
           )}
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl border-t-4 border-t-[#F27024] shadow-sm">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl border-t-4 border-t-primary shadow-xs">
             <div className="flex items-center gap-2.5 mb-6">
-              <Users className="text-[#F27024]" size={20} />
+              <Users className="text-primary" size={20} />
               <h2 className="text-lg font-bold text-slate-800">
                 Danh sách đội thi thuộc quyền hướng dẫn
               </h2>
@@ -109,7 +109,7 @@ export default function MentorDashboard({ user, roles }: any) {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {teams.map((team) => (
-                  <div key={team._id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-[#F27024]/50 transition-all shadow-sm hover:shadow-md flex flex-col h-full">
+                  <div key={team._id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-primary/50 transition-all shadow-xs hover:shadow-md flex flex-col h-full">
                     <div className="flex justify-between items-start gap-2 mb-3">
                       <div>
                         <h3 className="text-base font-bold text-slate-800 mb-1">{team.name}</h3>
@@ -118,10 +118,10 @@ export default function MentorDashboard({ user, roles }: any) {
                         </span>
                       </div>
                       <div 
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50/80 text-[#F27024] border border-orange-200/70 rounded-xl text-xs font-semibold shrink-0 shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-50/80 text-primary border border-orange-200/70 rounded-xl text-xs font-semibold shrink-0 shadow-2xs"
                         title={`Số lượng commit: ${team.commitCount || 0}`}
                       >
-                        <GitCommit size={14} className="text-[#F27024]" />
+                        <GitCommit size={14} className="text-primary" />
                         <span>{team.commitCount || 0} commit{(team.commitCount || 0) === 1 ? "" : "s"}</span>
                       </div>
                     </div>
@@ -137,7 +137,7 @@ export default function MentorDashboard({ user, roles }: any) {
                       {team.members?.map((m: any) => (
                         <div key={m._id} className="text-sm flex items-center justify-between mt-1">
                           <span className="text-slate-700 flex items-center gap-1.5">
-                            {m.userId?.fullName} {m.userId?._id === team.leaderId?._id && <span className="text-[#F27024] font-semibold text-xs">(Trưởng nhóm)</span>}
+                            {m.userId?.fullName} {m.userId?._id === team.leaderId?._id && <span className="text-primary font-semibold text-xs">(Trưởng nhóm)</span>}
                           </span>
                         </div>
                       ))}
@@ -146,7 +146,7 @@ export default function MentorDashboard({ user, roles }: any) {
                     <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-slate-100">
                       <a 
                         href={`/mentor/team/${team._id}`}
-                        className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-[#F27024] hover:bg-[#d95f1f] text-white font-bold rounded-xl text-sm transition-all"
+                        className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-primary hover:bg-[#d95f1f] text-white font-bold rounded-xl text-sm transition-all"
                       >
                         <Users size={16} /> Quản lý tiến độ & Theo dõi
                       </a>

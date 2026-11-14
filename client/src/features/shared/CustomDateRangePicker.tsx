@@ -117,10 +117,10 @@ function TimeSelect({
                   : "text-slate-800 opacity-20 cursor-not-allowed"
                 : active
                 ? usesLightShell
-                  ? "bg-[#F27024] text-white font-bold cursor-pointer"
+                  ? "bg-primary text-white font-bold cursor-pointer"
                   : "bg-cyan-500 text-slate-955 font-bold cursor-pointer"
                 : usesLightShell
-                ? "text-slate-600 hover:bg-slate-100 hover:text-[#F27024] cursor-pointer"
+                ? "text-slate-600 hover:bg-slate-100 hover:text-primary cursor-pointer"
                 : "text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer"
             }`}
           >
@@ -573,7 +573,7 @@ export default function CustomDateRangePicker({
             onClick={(e) => { e.preventDefault(); setCurrentMonth(new Date(year, month - 1, 1)); }}
             className={`w-7 h-7 flex items-center justify-center rounded-md transition-all cursor-pointer ${
               usesLightShell 
-                ? "text-slate-600 hover:text-[#F27024] hover:bg-slate-100" 
+                ? "text-slate-600 hover:text-primary hover:bg-slate-100" 
                 : "text-slate-400 hover:text-cyan-400 hover:bg-slate-800"
             }`}
           >
@@ -589,7 +589,7 @@ export default function CustomDateRangePicker({
             onClick={(e) => { e.preventDefault(); setCurrentMonth(new Date(year, month + 1, 1)); }}
             className={`w-7 h-7 flex items-center justify-center rounded-md transition-all cursor-pointer ${
               usesLightShell 
-                ? "text-slate-600 hover:text-[#F27024] hover:bg-slate-100" 
+                ? "text-slate-600 hover:text-primary hover:bg-slate-100" 
                 : "text-slate-400 hover:text-cyan-400 hover:bg-slate-800"
             }`}
           >
@@ -624,7 +624,7 @@ export default function CustomDateRangePicker({
               cellClass += "cursor-pointer z-10 ";
             } else if (inRange) {
               cellClass += usesLightShell
-                ? "bg-[#F27024]/10 cursor-pointer text-[#F27024] "
+                ? "bg-primary/10 cursor-pointer text-primary "
                 : "bg-cyan-500/10 cursor-pointer text-cyan-200 ";
             } else if (!cell.isCurrentMonth) {
               cellClass += usesLightShell
@@ -632,11 +632,11 @@ export default function CustomDateRangePicker({
                 : "text-slate-600 cursor-pointer hover:text-slate-400 ";
             } else if (isToday) {
               cellClass += usesLightShell
-                ? "text-[#F27024] cursor-pointer hover:bg-slate-100 rounded-lg "
+                ? "text-primary cursor-pointer hover:bg-slate-100 rounded-lg "
                 : "text-cyan-400 cursor-pointer hover:bg-slate-800 rounded-lg ";
             } else {
               cellClass += usesLightShell
-                ? "text-slate-700 cursor-pointer hover:bg-slate-100 hover:text-[#F27024] rounded-lg "
+                ? "text-slate-700 cursor-pointer hover:bg-slate-100 hover:text-primary rounded-lg "
                 : "text-slate-300 cursor-pointer hover:bg-slate-800 hover:text-white rounded-lg ";
             }
 
@@ -650,17 +650,17 @@ export default function CustomDateRangePicker({
               >
                 {/* Range highlight background strip */}
                 {inRange && (
-                  <span className={`absolute inset-y-0 inset-x-0 ${usesLightShell ? 'bg-[#F27024]/10' : 'bg-cyan-500/10'}`} />
+                  <span className={`absolute inset-y-0 inset-x-0 ${usesLightShell ? 'bg-primary/10' : 'bg-cyan-500/10'}`} />
                 )}
                 {/* Dot for today */}
                 {isToday && !isStart && !isEnd && (
-                  <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${usesLightShell ? 'bg-[#F27024]' : 'bg-cyan-400'}`} />
+                  <span className={`absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${usesLightShell ? 'bg-primary' : 'bg-cyan-400'}`} />
                 )}
                 {/* Selected circle */}
                 {(isStart || isEnd) ? (
                   <span className={`w-8 h-8 rounded-full flex items-center justify-center font-bold z-10 relative ${
                     usesLightShell
-                      ? 'bg-[#F27024] text-white shadow-[0_0_12px_rgba(242,112,36,0.35)]'
+                      ? 'bg-primary text-white shadow-[0_0_12px_rgba(242,112,36,0.35)]'
                       : 'bg-cyan-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(0,240,255,0.4)]'
                   } ${!bothSame && isStart ? 'rounded-r-full' : ''} ${!bothSame && isEnd ? 'rounded-l-full' : ''}`}>
                     {cell.day}
@@ -745,7 +745,7 @@ export default function CustomDateRangePicker({
               onClick={handleToday}
               className={`flex-1 py-2 rounded-xl border text-xs font-bold uppercase tracking-wider font-mono transition-all cursor-pointer ${
                 usesLightShell
-                  ? "border-[#F27024]/40 text-[#F27024] hover:bg-[#F27024]/10"
+                  ? "border-primary/40 text-primary hover:bg-primary/10"
                   : "border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10"
               }`}
             >
@@ -757,7 +757,7 @@ export default function CustomDateRangePicker({
               disabled={!startDate || !endDate || !!validationError}
               className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider font-mono transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
                 usesLightShell
-                  ? "bg-[#F27024] hover:bg-[#e05e1b] text-white shadow-[0_0_16px_rgba(242,112,36,0.25)]"
+                  ? "bg-primary hover:bg-[#e05e1b] text-white shadow-[0_0_16px_rgba(242,112,36,0.25)]"
                   : "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-[0_0_16px_rgba(0,240,255,0.25)]"
               }`}
             >
@@ -777,12 +777,12 @@ export default function CustomDateRangePicker({
         onClick={() => !disabled && setIsOpen((v) => !v)}
         className={`w-full border rounded-xl px-4 py-2.5 text-xs flex items-center justify-between cursor-pointer select-none transition-all ${
           usesLightShell
-            ? "bg-white border-slate-300 hover:border-[#F27024] text-slate-800"
+            ? "bg-white border-slate-300 hover:border-primary text-slate-800"
             : "bg-slate-900/80 border-slate-700 hover:border-cyan-500/50 text-white"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${
           isOpen
             ? usesLightShell
-              ? "border-[#F27024] shadow-[0_0_10px_rgba(242,112,36,0.15)]"
+              ? "border-primary shadow-[0_0_10px_rgba(242,112,36,0.15)]"
               : "border-cyan-500/80 shadow-[0_0_10px_rgba(0,240,255,0.1)]"
             : ""
         }`}
@@ -800,7 +800,7 @@ export default function CustomDateRangePicker({
             <span className={usesLightShell ? "text-slate-400" : "text-slate-500"}>{endLabel}...</span>
           )}
         </span>
-        <Calendar size={16} className={usesLightShell ? "text-[#F27024] shrink-0 ml-2" : "text-cyan-300 shrink-0 ml-2"} />
+        <Calendar size={16} className={usesLightShell ? "text-primary shrink-0 ml-2" : "text-cyan-300 shrink-0 ml-2"} />
       </div>
 
       {typeof document !== "undefined" && ReactDOM.createPortal(popover, document.body)}

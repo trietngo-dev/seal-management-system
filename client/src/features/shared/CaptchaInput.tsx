@@ -24,7 +24,7 @@ export default function CaptchaInput({
       <div className="flex items-center gap-3">
         {/* Captcha SVG container */}
         <div 
-          className="flex-shrink-0 cursor-pointer overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
+          className="shrink-0 cursor-pointer overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
           onClick={onRefresh}
           title="Click để đổi mã khác"
           dangerouslySetInnerHTML={{ __html: captchaSvg }}
@@ -35,7 +35,7 @@ export default function CaptchaInput({
           type="button"
           onClick={onRefresh}
           disabled={disabled}
-          className="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all focus:outline-none disabled:opacity-50"
+          className="p-2.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all focus:outline-hidden disabled:opacity-50"
           title="Tải mã xác thực mới"
         >
           <RotateCw size={16} className="animate-hover-spin" />
@@ -49,7 +49,7 @@ export default function CaptchaInput({
           value={value}
           onChange={e => onChange(e.target.value)}
           maxLength={6}
-          className="flex-grow min-w-0 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50 transition-all font-mono placeholder:text-slate-600 tracking-widest text-center text-sm"
+          className="grow min-w-0 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:outline-hidden focus:border-cyan-500/50 transition-all font-mono placeholder:text-slate-600 tracking-widest text-center text-sm"
           placeholder="MÃ SỐ"
           autoComplete="off"
           autoCorrect="off"

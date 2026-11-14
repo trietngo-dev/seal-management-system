@@ -114,14 +114,14 @@ export default function TeamDetailDrawer({
     rankData?.averageScore != null ? rankData.averageScore.toFixed(2) : "—";
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/55 backdrop-blur-sm p-4 md:p-5 animate-fade-in font-mono">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/55 backdrop-blur-xs p-4 md:p-5 animate-fade-in font-mono">
       {/* Backdrop click to close */}
       <div className="absolute inset-0" onClick={onClose} />
 
       {/* Modal Box - Perfectly Balanced Size (w-[90vw] max-w-5xl) */}
       <div className="relative w-[90vw] max-w-5xl bg-[#faf9f6] border border-slate-300 text-slate-800 rounded-3xl shadow-2xl p-6 z-10 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Decorative Top Accent Bar */}
-        <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-orange-400 via-orange-500 to-amber-500" />
+        <div className="absolute top-0 left-0 w-full h-[3px] bg-linear-to-r from-orange-400 via-orange-500 to-amber-500" />
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-4">
@@ -166,7 +166,7 @@ export default function TeamDetailDrawer({
         ) : (
           <div className="space-y-4 overflow-y-auto pr-1">
             {/* Top Summary Banner - Balanced Horizontal Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs">
               {/* Round Info */}
               <div className="flex items-center gap-3 border-r border-slate-100 pr-2">
                 <div className="w-9 h-9 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center shrink-0">
@@ -236,7 +236,7 @@ export default function TeamDetailDrawer({
             {/* Main Content - Horizontal Multi-Column Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               {/* Column 1: Members (4 cols) */}
-              <div className="md:col-span-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs space-y-3 flex flex-col">
+              <div className="md:col-span-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs space-y-3 flex flex-col">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <div className="flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                     <Users size={16} className="text-orange-500" />
@@ -254,7 +254,7 @@ export default function TeamDetailDrawer({
                         key={m._id || idx}
                         className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-start gap-2.5 text-xs"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                        <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
                           {isLeader ? (
                             <Crown size={14} className="text-amber-500" />
                           ) : (
@@ -293,7 +293,7 @@ export default function TeamDetailDrawer({
               </div>
 
               {/* Column 2: Grading Breakdown (5 cols) */}
-              <div className="md:col-span-5 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs space-y-3 flex flex-col">
+              <div className="md:col-span-5 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs space-y-3 flex flex-col">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <div className="flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-slate-800 uppercase tracking-wide">
                     <FileText size={16} className="text-orange-500" />
@@ -404,7 +404,7 @@ export default function TeamDetailDrawer({
               </div>
 
               {/* Column 3: GitHub Activity & Actions (3 cols) */}
-              <div className="md:col-span-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-xs space-y-3 flex flex-col justify-between">
+              <div className="md:col-span-3 bg-white border border-slate-200 p-4 rounded-2xl shadow-2xs space-y-3 flex flex-col justify-between">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-1">
                     <div className="flex items-center gap-1.5 text-xs md:text-sm font-extrabold text-slate-800 uppercase tracking-wide">

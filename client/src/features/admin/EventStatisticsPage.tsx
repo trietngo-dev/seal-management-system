@@ -80,9 +80,9 @@ export default function EventStatisticsPage() {
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-8">
-      <header className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between">
+      <header className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <div className="flex items-center gap-2 text-[#F27024]"><BarChart3 size={20} /><span className="text-xs font-bold uppercase tracking-[0.16em]">Báo cáo quản trị</span></div>
+          <div className="flex items-center gap-2 text-primary"><BarChart3 size={20} /><span className="text-xs font-bold uppercase tracking-[0.16em]">Báo cáo quản trị</span></div>
           <h1 className="mt-2 text-2xl font-extrabold text-slate-900">Dashboard thống kê</h1>
           <p className="mt-1 text-sm text-slate-500">Theo dõi quy mô thí sinh, đội thi và nhân sự theo từng sự kiện.</p>
         </div>
@@ -90,7 +90,7 @@ export default function EventStatisticsPage() {
           <label htmlFor="statistics-event-select" className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Sự kiện</label>
           <div className="flex gap-2">
             <CustomSelect value={selectedEventId} onChange={setSelectedEventId} options={events.map((event) => ({ value: event._id, label: `${event.name} · ${event.semester} ${event.year}` }))} placeholder="Chọn sự kiện" className="flex-1" />
-            <button type="button" onClick={() => void loadStatistics(selectedEventId)} disabled={!selectedEventId || loading} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-[#F27024] focus:outline-none focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Làm mới dashboard">
+            <button type="button" onClick={() => void loadStatistics(selectedEventId)} disabled={!selectedEventId || loading} className="rounded-xl border border-slate-200 p-2.5 text-slate-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-primary focus:outline-hidden focus:ring-2 focus:ring-[#F27024]/30 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Làm mới dashboard">
               {loading ? <Loader2 size={17} className="animate-spin" /> : <RefreshCw size={17} />}
             </button>
           </div>

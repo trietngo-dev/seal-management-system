@@ -221,7 +221,7 @@ export default function JudgeDashboard() {
         </div>
 
         {/* Countdown Badge */}
-        <div className="bg-white border border-slate-200 px-6 py-3.5 rounded-2xl flex items-center gap-4 shadow-sm">
+        <div className="bg-white border border-slate-200 px-6 py-3.5 rounded-2xl flex items-center gap-4 shadow-xs">
           <div className="p-2 bg-rose-50 border border-rose-200 rounded-full">
             <Timer className="text-rose-600" size={20} />
           </div>
@@ -237,7 +237,7 @@ export default function JudgeDashboard() {
       </div>
 
       {/* Selectors Row (Read-only Active Contest Info) */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-8 items-center animate-fadeIn">
+      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap gap-8 items-center animate-fadeIn">
         {activeEvent ? (
           <>
             <div>
@@ -249,7 +249,7 @@ export default function JudgeDashboard() {
             <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-normal">Vòng thi hiện tại</p>
-              <p className="text-sm font-extrabold text-[#F27024] mt-1 uppercase">
+              <p className="text-sm font-extrabold text-primary mt-1 uppercase">
                 {activeRound ? (activeRound.advanceTopN > 0 ? `${activeRound.name} (Lấy Top ${activeRound.advanceTopN})` : activeRound.name) : "Không có vòng thi active"}
               </p>
             </div>
@@ -274,31 +274,31 @@ export default function JudgeDashboard() {
 
       {/* Bento Grid Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-[#F27024] shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-primary shadow-xs hover:shadow-md transition-all">
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
             Tổng số đội thi
           </p>
           <p className="text-3xl font-black text-slate-800 mt-2">
             {stats.activeTeamsCount || teams.length}
           </p>
-          <p className="text-xs text-[#F27024] mt-1.5 uppercase font-semibold">
+          <p className="text-xs text-primary mt-1.5 uppercase font-semibold">
             Tham gia sự kiện
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-[#F27024] shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-primary shadow-xs hover:shadow-md transition-all">
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
             Push Per-Push (Đã tải)
           </p>
           <p className="text-3xl font-black text-slate-800 mt-2">
             {stats.perPushCount || allCommits.length}
           </p>
-          <p className="text-xs text-[#F27024] mt-1.5 uppercase font-semibold">
+          <p className="text-xs text-primary mt-1.5 uppercase font-semibold">
             Đồng bộ từ webhook
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-emerald-500 shadow-xs hover:shadow-md transition-all">
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
             Hoạt động code gần nhất
           </p>
@@ -312,7 +312,7 @@ export default function JudgeDashboard() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-pink-500 shadow-sm hover:shadow-md transition-all">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 border-l-4 border-l-pink-500 shadow-xs hover:shadow-md transition-all">
           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
             Tổng bản ghi đã tải
           </p>
@@ -327,11 +327,11 @@ export default function JudgeDashboard() {
 
       {/* Quick Resume Grading Banner */}
       {lastGradedTeamId && (
-        <div className="bg-gradient-to-r from-[#F27024]/5 to-[#f9823a]/5 border border-[#F27024]/20 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden">
+        <div className="bg-linear-to-r from-[#F27024]/5 to-[#f9823a]/5 border border-primary/20 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(242,112,36,0.08),transparent_50%)] pointer-events-none"></div>
           <div className="flex items-center gap-4 relative z-10">
-            <div className="w-12 h-12 bg-[#F27024]/10 border border-[#F27024]/20 rounded-full flex items-center justify-center text-[#F27024] shrink-0">
-              <Play size={20} className="fill-[#F27024] animate-pulse ml-0.5" />
+            <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
+              <Play size={20} className="fill-primary animate-pulse ml-0.5" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-slate-800">
@@ -339,7 +339,7 @@ export default function JudgeDashboard() {
               </h3>
               <p className="text-sm text-slate-600 mt-0.5">
                 Tiếp tục xem chi tiết và chấm điểm cho đội thi:{" "}
-                <strong className="text-[#F27024] font-bold">
+                <strong className="text-primary font-bold">
                   "{lastGradedTeamName}"
                 </strong>
               </p>
@@ -347,7 +347,7 @@ export default function JudgeDashboard() {
           </div>
           <button
             onClick={() => navigate(`/expert/score/${lastGradedTeamId}?roundId=${selectedRoundId}`)}
-            className="bg-[#F27024] hover:bg-[#d95f1f] text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shrink-0 relative z-10 shadow-sm"
+            className="bg-primary hover:bg-[#d95f1f] text-white font-bold text-sm px-6 py-3 rounded-xl transition-all shrink-0 relative z-10 shadow-xs"
           >
             Vào bàn chấm điểm
           </button>
@@ -355,15 +355,15 @@ export default function JudgeDashboard() {
       )}
 
       {/* Recent Activity Feed */}
-      <div className="bg-white border border-slate-200 shadow-sm rounded-2xl flex flex-col">
+      <div className="bg-white border border-slate-200 shadow-xs rounded-2xl flex flex-col">
         <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
           <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-            <Activity size={16} className="text-[#F27024]" />
+            <Activity size={16} className="text-primary" />
             <span>Hoạt động Git gần nhất từ các đội ({allCommits.length})</span>
           </h3>
           <button
             onClick={() => navigate("/expert/projects")}
-            className="text-[#F27024] hover:text-[#d95f1f] font-bold text-xs uppercase tracking-wider transition-colors"
+            className="text-primary hover:text-[#d95f1f] font-bold text-xs uppercase tracking-wider transition-colors"
           >
             Xem tất cả dự án &rarr;
           </button>
@@ -382,10 +382,10 @@ export default function JudgeDashboard() {
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-slate-800 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded shadow-sm">
+                    <span className="text-xs font-bold text-slate-800 bg-slate-200 border border-slate-300 px-2 py-0.5 rounded-sm shadow-xs">
                       {c.teamName}
                     </span>
-                    <span className="text-xs text-[#F27024] font-semibold">
+                    <span className="text-xs text-primary font-semibold">
                       @{c.authorGithubUsername || c.authorName}
                     </span>
                     <span className="text-xs text-slate-400 font-mono">
@@ -410,7 +410,7 @@ export default function JudgeDashboard() {
 
                 <button
                   onClick={() => navigate(`/expert/activity/${c.teamId}`)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-[#F27024] hover:text-white border border-[#F27024]/20 hover:border-transparent hover:bg-[#F27024] bg-[#F27024]/5 px-4 py-2 rounded-lg transition-all uppercase tracking-wider shrink-0"
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-white border border-primary/20 hover:border-transparent hover:bg-primary bg-primary/5 px-4 py-2 rounded-lg transition-all uppercase tracking-wider shrink-0"
                 >
                   <span>Hoạt động</span>
                   <ArrowRight size={14} />

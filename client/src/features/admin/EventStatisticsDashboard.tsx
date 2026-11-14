@@ -120,7 +120,7 @@ export default function EventStatisticsDashboard({
   ];
 
   const toneClasses: Record<string, string> = {
-    orange: "border-orange-200 bg-orange-50/70 text-[#F27024]",
+    orange: "border-orange-200 bg-orange-50/70 text-primary",
     blue: "border-sky-200 bg-sky-50/70 text-sky-700",
     slate: "border-slate-200 bg-slate-50 text-slate-700",
     emerald: "border-emerald-200 bg-emerald-50/70 text-emerald-700",
@@ -155,10 +155,10 @@ export default function EventStatisticsDashboard({
 
   return (
     <section className="space-y-6" aria-labelledby="event-statistics-title">
-      <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <header className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#F27024]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
               Tổng quan sự kiện
             </p>
             <h2 id="event-statistics-title" className="mt-2 text-2xl font-extrabold text-slate-900">
@@ -177,7 +177,7 @@ export default function EventStatisticsDashboard({
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {cards.map(({ label, value, detail, icon: Icon, tone }) => (
-          <article key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+          <article key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-md">
             <div className={`inline-flex rounded-xl border p-2.5 ${toneClasses[tone]}`}>
               <Icon size={20} aria-hidden="true" />
             </div>
@@ -189,14 +189,14 @@ export default function EventStatisticsDashboard({
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
             <Clock3 size={17} className="text-amber-600" aria-hidden="true" />
             Tiến độ xác nhận thí sinh
           </div>
           <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-100">
             <div
-              className="h-full rounded-full bg-[#F27024] transition-all duration-500"
+              className="h-full rounded-full bg-primary transition-all duration-500"
               style={{ width: `${statistics.contestants ? (statistics.confirmedContestants / statistics.contestants) * 100 : 0}%` }}
             />
           </div>
@@ -205,7 +205,7 @@ export default function EventStatisticsDashboard({
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
           <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
             <ShieldCheck size={17} className="text-violet-600" aria-hidden="true" />
             Cơ cấu nhân sự
@@ -219,12 +219,12 @@ export default function EventStatisticsDashboard({
 
       <div className="space-y-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#F27024]">Báo cáo trực quan</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Báo cáo trực quan</p>
           <h2 className="mt-1 text-lg font-extrabold text-slate-900">Phân tích quy mô cuộc thi</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <h3 className="text-sm font-bold text-slate-900">Trạng thái thí sinh</h3>
             <p className="mt-1 text-xs text-slate-500">Tỷ lệ xác nhận tham gia đội thi.</p>
             <div className="mt-4 h-64" role="img" aria-label="Biểu đồ trạng thái xác nhận của thí sinh">
@@ -242,7 +242,7 @@ export default function EventStatisticsDashboard({
             </div>
           </article>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <h3 className="text-sm font-bold text-slate-900">Trạng thái đội thi</h3>
             <p className="mt-1 text-xs text-slate-500">So sánh đội đã hoàn tất và đang chờ xác nhận.</p>
             <div className="mt-4 h-64" role="img" aria-label="Biểu đồ trạng thái đội thi">
@@ -260,7 +260,7 @@ export default function EventStatisticsDashboard({
             </div>
           </article>
 
-          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
             <h3 className="text-sm font-bold text-slate-900">Cơ cấu nhân sự</h3>
             <p className="mt-1 text-xs text-slate-500">Tương quan số Mentor và Judge.</p>
             <div className="mt-4 h-64" role="img" aria-label="Biểu đồ cơ cấu Mentor và Judge">
@@ -279,7 +279,7 @@ export default function EventStatisticsDashboard({
           </article>
         </div>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs sm:p-6">
           <h3 className="text-sm font-bold text-slate-900">Phân bổ đội theo Track</h3>
           <p className="mt-1 text-xs text-slate-500">Số đội hiện được phân vào từng bảng đấu hoặc Track.</p>
           <div className="mt-5 h-80" role="img" aria-label="Biểu đồ phân bổ đội thi theo Track">

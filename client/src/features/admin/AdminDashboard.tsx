@@ -23,16 +23,16 @@ export default function AdminDashboard() {
   const getLogTypeBadge = (type: string) => {
     switch (type) {
       case 'error':
-        return <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(244,63,94,0.1)]">Lỗi</span>;
+        return <span className="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(244,63,94,0.1)]">Lỗi</span>;
       case 'login':
-        return <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(168,85,247,0.1)]">Đăng nhập</span>;
+        return <span className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(168,85,247,0.1)]">Đăng nhập</span>;
       case 'grading':
-        return <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.1)]">Chấm điểm</span>;
+        return <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.1)]">Chấm điểm</span>;
       case 'system':
-        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(16,185,129,0.1)]">Hệ thống</span>;
+        return <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(16,185,129,0.1)]">Hệ thống</span>;
       case 'operation':
       default:
-        return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(6,182,212,0.1)]">Thao tác</span>;
+        return <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-sm text-[9px] font-bold font-mono uppercase tracking-wider shadow-[0_0_8px_rgba(6,182,212,0.1)]">Thao tác</span>;
     }
   };
 
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
                     <span className="font-bold text-sm tracking-tight text-slate-200">
                       {e.name}
                     </span>
-                    <span className="text-[10px] bg-slate-950 px-2 py-0.5 rounded font-mono border border-slate-800 text-slate-350">
+                    <span className="text-[10px] bg-slate-950 px-2 py-0.5 rounded-sm font-mono border border-slate-800 text-slate-350">
                       {e.semester} {e.year}
                     </span>
                   </div>
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
                       {e.status}
                     </strong>
                   </span>
-                  <span className="text-cyan-400 font-bold bg-cyan-500/5 px-2.5 py-0.5 rounded">
+                  <span className="text-cyan-400 font-bold bg-cyan-500/5 px-2.5 py-0.5 rounded-sm">
                     {e.teamCount || 0} Đội tham gia
                   </span>
                 </div>
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
       <div className="w-full space-y-4 pt-6 border-t border-slate-200">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h3 className="text-md font-bold text-slate-800 flex items-center gap-2 font-mono">
-            <Info size={18} className="text-[#F27024]" />
+            <Info size={18} className="text-primary" />
             <span>NHẬT KÝ HOẠT ĐỘNG HỆ THỐNG</span>
           </h3>
           <div className="flex flex-wrap gap-3 items-center">
@@ -222,10 +222,10 @@ export default function AdminDashboard() {
                   className={`px-3 py-1.5 text-[9px] font-bold rounded uppercase transition-all cursor-pointer ${
                     logFilter === btn.value
                       ? btn.value === 'error'
-                        ? 'bg-rose-500 !text-white shadow-sm'
+                        ? 'bg-rose-500 text-white! shadow-xs'
                         : btn.value === 'grading'
-                        ? 'bg-amber-500 !text-white shadow-sm'
-                        : 'bg-[#F27024] !text-white shadow-sm'
+                        ? 'bg-amber-500 text-white! shadow-xs'
+                        : 'bg-primary text-white! shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -242,7 +242,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-h-96 overflow-y-auto">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-h-96 overflow-y-auto">
           {filteredLogs.length > 0 ? (
             <div className="flow-root">
               <ul className="-mb-8">
@@ -267,7 +267,7 @@ export default function AdminDashboard() {
                         <div className="flex-1 min-w-0 pt-1.5 flex justify-between space-x-4">
                           <div>
                             <p className="text-sm text-slate-800">
-                              <span className="text-[#F27024] font-bold font-mono mr-2 bg-[#F27024]/10 px-2 py-0.5 rounded border border-[#F27024]/20 text-[10px]">
+                              <span className="text-primary font-bold font-mono mr-2 bg-primary/10 px-2 py-0.5 rounded-sm border border-primary/20 text-[10px]">
                                 {log.eventId?.name || "HỆ THỐNG"}
                               </span>
                               {log.details}{" "}
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                             </p>
                             <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-2">
                               <span>Thực hiện bởi:</span>
-                              <span className="text-[#F27024] font-semibold font-mono">
+                              <span className="text-primary font-semibold font-mono">
                                 {log.actorId?.fullName || "Hệ thống"}
                               </span>
                               <span>({log.actorId?.email || "N/A"})</span>
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
                             <time dateTime={log.createdAt}>
                               {new Date(log.createdAt).toLocaleString("vi-VN")}
                             </time>
-                            <span className="text-[#F27024] opacity-0 group-hover:opacity-100 transition-all text-xs font-mono flex items-center gap-1 mt-1">
+                            <span className="text-primary opacity-0 group-hover:opacity-100 transition-all text-xs font-mono flex items-center gap-1 mt-1">
                               <span>Chi tiết</span>
                               <Eye size={12} />
                             </span>
@@ -313,7 +313,7 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-md transition-all duration-300">
           <div className="relative w-full max-w-lg border border-slate-800/80 bg-slate-950 p-6 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] space-y-6 font-sans text-slate-200 animate-in fade-in zoom-in-95 duration-200">
             {/* Top decorative line */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent"></div>
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-cyan-500/50 to-transparent"></div>
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
@@ -336,7 +336,7 @@ export default function AdminDashboard() {
               {/* Event Name */}
               <div className="flex justify-between items-center bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">
                 <span className="text-xs text-slate-400 font-mono">Sự kiện:</span>
-                <span className="text-xs text-cyan-400 font-bold font-mono bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+                <span className="text-xs text-cyan-400 font-bold font-mono bg-cyan-500/10 px-2 py-0.5 rounded-sm border border-cyan-500/20">
                   {selectedLog.eventId?.name || "HỆ THỐNG CHUNG"}
                 </span>
               </div>

@@ -87,10 +87,10 @@ function TimeSelect({
                   : "text-slate-800 opacity-20 cursor-not-allowed"
                 : active
                 ? usesLightShell
-                  ? "bg-[#F27024] text-white font-bold cursor-pointer"
+                  ? "bg-primary text-white font-bold cursor-pointer"
                   : "bg-cyan-500 text-slate-955 font-bold cursor-pointer"
                 : usesLightShell
-                ? "text-slate-600 hover:bg-slate-100 hover:text-[#F27024] cursor-pointer"
+                ? "text-slate-600 hover:bg-slate-100 hover:text-primary cursor-pointer"
                 : "text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer"
             }`}
           >
@@ -410,12 +410,12 @@ export default function CustomDateTimePicker({
         onClick={toggleOpen}
         className={`w-full border rounded-xl px-4 py-2.5 text-xs flex justify-between items-center cursor-pointer select-none transition-all ${
           usesLightShell
-            ? "bg-white border-slate-300 hover:border-[#F27024] text-slate-800"
+            ? "bg-white border-slate-300 hover:border-primary text-slate-800"
             : "bg-slate-900/80 border-slate-700 hover:border-cyan-500/50 text-white"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${
           isOpen
             ? usesLightShell
-              ? "border-[#F27024] shadow-[0_0_10px_rgba(242,112,36,0.15)]"
+              ? "border-primary shadow-[0_0_10px_rgba(242,112,36,0.15)]"
               : "border-cyan-500/80 shadow-[0_0_10px_rgba(0,240,255,0.1)]"
             : ""
         }`}
@@ -423,7 +423,7 @@ export default function CustomDateTimePicker({
         <span className={value ? usesLightShell ? "text-slate-800 font-mono" : "text-white font-mono" : "text-slate-400"}>
           {value ? displayFormat(getCombinedDate(selectedDate, selectedHour, selectedMinute)) : placeholder}
         </span>
-        <Calendar size={16} className={usesLightShell ? "text-[#F27024] shrink-0 cursor-pointer" : "text-cyan-300 hover:text-cyan-400 shrink-0 cursor-pointer transition-colors"} />
+        <Calendar size={16} className={usesLightShell ? "text-primary shrink-0 cursor-pointer" : "text-cyan-300 hover:text-cyan-400 shrink-0 cursor-pointer transition-colors"} />
       </div>
 
       {/* Popover DateTime Picker Dropdown */}
@@ -442,7 +442,7 @@ export default function CustomDateTimePicker({
                 onClick={handlePrevMonth}
                 className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                   usesLightShell 
-                    ? "border-slate-200 hover:border-[#F27024]/40 hover:bg-[#F27024]/10 text-slate-600 hover:text-[#F27024]" 
+                    ? "border-slate-200 hover:border-primary/40 hover:bg-primary/10 text-slate-600 hover:text-primary" 
                     : "border-slate-800 hover:border-cyan-500/30 hover:bg-cyan-500/10 text-slate-400 hover:text-cyan-400"
                 }`}
               >
@@ -458,7 +458,7 @@ export default function CustomDateTimePicker({
                 onClick={handleNextMonth}
                 className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
                   usesLightShell 
-                    ? "border-slate-200 hover:border-[#F27024]/40 hover:bg-[#F27024]/10 text-slate-600 hover:text-[#F27024]" 
+                    ? "border-slate-200 hover:border-primary/40 hover:bg-primary/10 text-slate-600 hover:text-primary" 
                     : "border-slate-800 hover:border-cyan-500/30 hover:bg-cyan-500/10 text-slate-400 hover:text-cyan-400"
                 }`}
               >
@@ -499,14 +499,14 @@ export default function CustomDateTimePicker({
                           : "text-slate-600 hover:text-slate-400 hover:bg-slate-900 cursor-pointer"
                         : isSelected
                         ? usesLightShell
-                          ? "bg-[#F27024] text-white font-bold shadow-[0_0_12px_rgba(242,112,36,0.35)] cursor-pointer"
+                          ? "bg-primary text-white font-bold shadow-[0_0_12px_rgba(242,112,36,0.35)] cursor-pointer"
                           : "bg-cyan-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(0,240,255,0.4)] cursor-pointer"
                         : isToday
                         ? usesLightShell
-                          ? "border border-[#F27024]/50 text-[#F27024] cursor-pointer"
+                          ? "border border-primary/50 text-primary cursor-pointer"
                           : "border border-cyan-500/50 text-cyan-400 cursor-pointer"
                         : usesLightShell
-                        ? "text-slate-700 hover:bg-slate-100 hover:text-[#F27024] cursor-pointer"
+                        ? "text-slate-700 hover:bg-slate-100 hover:text-primary cursor-pointer"
                         : "text-slate-300 hover:bg-slate-900 hover:text-white cursor-pointer"
                     }`}
                   >
@@ -530,7 +530,7 @@ export default function CustomDateTimePicker({
                 type="button"
                 onClick={handleToday}
                 className={`text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${
-                  usesLightShell ? 'text-[#F27024] hover:text-[#e05e1b]' : 'text-cyan-400 hover:text-cyan-300'
+                  usesLightShell ? 'text-primary hover:text-[#e05e1b]' : 'text-cyan-400 hover:text-cyan-300'
                 }`}
               >
                 Hôm nay
@@ -539,10 +539,10 @@ export default function CustomDateTimePicker({
           </div>
 
           {/* RIGHT: Time Selection Section */}
-          <div className="flex-grow flex flex-col justify-between pl-4">
+          <div className="grow flex flex-col justify-between pl-4">
             <div>
               <div className={`border-b pb-2 mb-3 flex items-center gap-1.5 ${usesLightShell ? 'border-slate-200' : 'border-slate-800/80'}`}>
-                <Clock size={12} className={usesLightShell ? 'text-[#F27024]' : 'text-cyan-400'} />
+                <Clock size={12} className={usesLightShell ? 'text-primary' : 'text-cyan-400'} />
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Thời gian</span>
               </div>
 
@@ -576,7 +576,7 @@ export default function CustomDateTimePicker({
                 disabled={!!timeError || !selectedDate}
                 className={`w-full py-2 text-xs font-bold uppercase tracking-wider font-mono rounded-xl transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
                   usesLightShell
-                    ? "bg-[#F27024] hover:bg-[#e05e1b] text-white shadow-[0_0_16px_rgba(242,112,36,0.25)]"
+                    ? "bg-primary hover:bg-[#e05e1b] text-white shadow-[0_0_16px_rgba(242,112,36,0.25)]"
                     : "bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-[0_0_16px_rgba(0,240,255,0.25)]"
                 }`}
               >

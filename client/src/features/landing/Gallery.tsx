@@ -207,7 +207,7 @@ export default function Gallery({ user, roles }: GalleryProps) {
       {/* Title Header Section */}
       <div>
         <h1 className="text-3xl font-extrabold text-slate-900">
-          <span className="text-[#F27024] font-mono-tech">ALBUM ẢNH CUỘC THI</span>
+          <span className="text-primary font-mono-tech">ALBUM ẢNH CUỘC THI</span>
         </h1>
         <p className="text-slate-600 text-sm mt-1">
           Nơi lưu giữ các khoảnh khắc đáng nhớ của các đội thi trong khuôn khổ SEAL Hackathon.
@@ -215,15 +215,15 @@ export default function Gallery({ user, roles }: GalleryProps) {
       </div>
 
       {/* Filter Tabs & Search Bar */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-[6px] border border-[#F27024]/15 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-white p-4 rounded-[6px] border border-primary/15 shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-2 items-center">
           <button
             onClick={() => setSelectedCatId("all")}
             className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer ${
               selectedCatId === "all"
-                ? "bg-[#F27024] text-white shadow-lg shadow-[#F27024]/20"
-                : "text-slate-600 hover:text-[#F27024] bg-white hover:bg-[#F27024]/5 border border-slate-200 hover:border-[#F27024]/30"
+                ? "bg-primary text-white shadow-lg shadow-[#F27024]/20"
+                : "text-slate-600 hover:text-primary bg-white hover:bg-primary/5 border border-slate-200 hover:border-primary/30"
             }`}
           >
             TẤT CẢ ({totalPhotosCount})
@@ -234,8 +234,8 @@ export default function Gallery({ user, roles }: GalleryProps) {
               onClick={() => setSelectedCatId(cat.id)}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition-all duration-300 cursor-pointer ${
                 selectedCatId === cat.id
-                  ? "bg-[#F27024] text-white shadow-lg shadow-[#F27024]/20"
-                  : "text-slate-600 hover:text-[#F27024] bg-white hover:bg-[#F27024]/5 border border-slate-200 hover:border-[#F27024]/30"
+                  ? "bg-primary text-white shadow-lg shadow-[#F27024]/20"
+                  : "text-slate-600 hover:text-primary bg-white hover:bg-primary/5 border border-slate-200 hover:border-primary/30"
               }`}
             >
               {cat.name} ({cat.count})
@@ -249,10 +249,10 @@ export default function Gallery({ user, roles }: GalleryProps) {
             <button
               onClick={handleSync}
               disabled={syncing || loading}
-              className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-[#F27024]/5 disabled:opacity-50 text-slate-700 hover:text-[#F27024] rounded-[6px] text-xs font-mono font-bold transition-all border border-[#F27024]/20 cursor-pointer shadow-sm active:scale-95"
+              className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-primary/5 disabled:opacity-50 text-slate-700 hover:text-primary rounded-[6px] text-xs font-mono font-bold transition-all border border-primary/20 cursor-pointer shadow-xs active:scale-95"
               title="Đồng bộ lại hình ảnh từ Google Drive"
             >
-              <RefreshCw size={14} className={syncing ? "animate-spin text-[#F27024]" : "text-[#F27024]"} />
+              <RefreshCw size={14} className={syncing ? "animate-spin text-primary" : "text-primary"} />
               <span>ĐỒNG BỘ</span>
             </button>
           </div>
@@ -263,11 +263,11 @@ export default function Gallery({ user, roles }: GalleryProps) {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {Array.from({ length: 8 }).map((_, idx) => (
-            <div key={idx} className="bg-white border border-slate-200 rounded-[6px] p-3 space-y-4 animate-pulse shadow-sm">
+            <div key={idx} className="bg-white border border-slate-200 rounded-[6px] p-3 space-y-4 animate-pulse shadow-xs">
               <div className="aspect-video bg-slate-200 rounded-[6px]"></div>
               <div className="space-y-2">
-                <div className="h-3 bg-slate-200 rounded w-2/3"></div>
-                <div className="h-2 bg-slate-100 rounded w-1/3"></div>
+                <div className="h-3 bg-slate-200 rounded-sm w-2/3"></div>
+                <div className="h-2 bg-slate-100 rounded-sm w-1/3"></div>
               </div>
             </div>
           ))}
@@ -285,10 +285,10 @@ export default function Gallery({ user, roles }: GalleryProps) {
                     <div
                       key={photo.id}
                       ref={isSentinel ? sentinelRef : null}
-                      className="group bg-white hover:bg-[#F27024]/[0.03] border border-slate-200 hover:border-[#F27024]/30 rounded-[6px] p-3 flex flex-col justify-between transition-all duration-300 shadow-sm hover:shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
+                      className="group bg-white hover:bg-primary/3 border border-slate-200 hover:border-primary/30 rounded-[6px] p-3 flex flex-col justify-between transition-all duration-300 shadow-xs hover:shadow-[0_18px_45px_rgba(15,23,42,0.08)]"
                     >
                       {/* Photo Box */}
-                      <div className="relative rounded-[6px] overflow-hidden bg-slate-100 border border-slate-200 group-hover:border-[#F27024]/25 transition-colors">
+                      <div className="relative rounded-[6px] overflow-hidden bg-slate-100 border border-slate-200 group-hover:border-primary/25 transition-colors">
                         <img
                           src={photo.url}
                           alt={photo.name}
@@ -300,7 +300,7 @@ export default function Gallery({ user, roles }: GalleryProps) {
                         <div className="absolute inset-0 bg-slate-950/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                           <button
                             onClick={() => setLightboxPhoto(photo)}
-                            className="p-3 rounded-full bg-[#F27024] hover:bg-[#d95f1f] text-white transition-all transform scale-90 group-hover:scale-100 hover:scale-105 shadow-lg shadow-[#F27024]/25 cursor-pointer"
+                            className="p-3 rounded-full bg-primary hover:bg-[#d95f1f] text-white transition-all transform scale-90 group-hover:scale-100 hover:scale-105 shadow-lg shadow-[#F27024]/25 cursor-pointer"
                             title="Xem chi tiết"
                           >
                             <Eye size={18} />
@@ -317,15 +317,15 @@ export default function Gallery({ user, roles }: GalleryProps) {
           {/* Infinite Scroll Sentinel */}
           {visibleCount < filteredPhotos.length && (
             <div ref={sentinelRef} className="flex justify-center items-center py-10 space-x-2">
-              <RefreshCw size={16} className="animate-spin text-[#F27024]" />
+              <RefreshCw size={16} className="animate-spin text-primary" />
               <span className="text-xs font-mono text-slate-500 uppercase tracking-widest">Đang tải thêm ảnh...</span>
             </div>
           )}
         </>
       ) : (
         /* Empty State */
-        <div className="text-center py-24 bg-white border border-slate-200 rounded-[6px] shadow-sm">
-          <AlertCircle size={40} className="mx-auto text-[#F27024] mb-3" />
+        <div className="text-center py-24 bg-white border border-slate-200 rounded-[6px] shadow-xs">
+          <AlertCircle size={40} className="mx-auto text-primary mb-3" />
           <p className="text-sm font-semibold text-slate-600">Không tìm thấy ảnh nào phù hợp.</p>
         </div>
       )}
@@ -334,7 +334,7 @@ export default function Gallery({ user, roles }: GalleryProps) {
 
       {/* Lightbox / Details Modal */}
       {lightboxPhoto && createPortal(
-        <div className="fixed inset-0 bg-[linear-gradient(135deg,#fff7f2_0%,#f8fafc_48%,#eef4ff_100%)] flex flex-col justify-between p-4 sm:p-6 z-[9999] animate-fadeIn text-slate-900">
+        <div className="fixed inset-0 bg-[linear-gradient(135deg,#fff7f2_0%,#f8fafc_48%,#eef4ff_100%)] flex flex-col justify-between p-4 sm:p-6 z-9999 animate-fadeIn text-slate-900">
           {/* Top Bar */}
           <div className="flex justify-between items-center w-full max-w-7xl mx-auto py-2 z-10">
             <div className="font-mono text-left min-w-0">
@@ -344,7 +344,7 @@ export default function Gallery({ user, roles }: GalleryProps) {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setLightboxPhoto(null)}
-                className="bg-white hover:bg-[#F27024]/5 text-slate-500 hover:text-[#F27024] p-2.5 rounded-[6px] border border-[#F27024]/20 hover:border-[#F27024]/45 transition-all cursor-pointer shadow-sm active:scale-95"
+                className="bg-white hover:bg-primary/5 text-slate-500 hover:text-primary p-2.5 rounded-[6px] border border-primary/20 hover:border-primary/45 transition-all cursor-pointer shadow-xs active:scale-95"
               >
                 <X size={18} />
               </button>
@@ -356,7 +356,7 @@ export default function Gallery({ user, roles }: GalleryProps) {
             {/* Prev Button */}
             <button
               onClick={handlePrevPhoto}
-              className="p-3.5 rounded-full bg-white/95 hover:bg-[#F27024] text-[#F27024] hover:text-white border border-[#F27024]/20 hover:border-[#F27024] transition-all cursor-pointer shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-95 shrink-0"
+              className="p-3.5 rounded-full bg-white/95 hover:bg-primary text-primary hover:text-white border border-primary/20 hover:border-primary transition-all cursor-pointer shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-95 shrink-0"
               title="Ảnh trước"
             >
               <ChevronLeft size={24} />
@@ -367,14 +367,14 @@ export default function Gallery({ user, roles }: GalleryProps) {
               <img
                 src={lightboxPhoto.url}
                 alt={lightboxPhoto.name}
-                className="max-w-full max-h-full object-contain rounded-[6px] border border-[#F27024]/20 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.14)] animate-scaleUp"
+                className="max-w-full max-h-full object-contain rounded-[6px] border border-primary/20 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.14)] animate-scaleUp"
               />
             </div>
 
             {/* Next Button */}
             <button
               onClick={handleNextPhoto}
-              className="p-3.5 rounded-full bg-white/95 hover:bg-[#F27024] text-[#F27024] hover:text-white border border-[#F27024]/20 hover:border-[#F27024] transition-all cursor-pointer shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-95 shrink-0"
+              className="p-3.5 rounded-full bg-white/95 hover:bg-primary text-primary hover:text-white border border-primary/20 hover:border-primary transition-all cursor-pointer shadow-[0_18px_45px_rgba(15,23,42,0.10)] active:scale-95 shrink-0"
               title="Ảnh sau"
             >
               <ChevronRight size={24} />

@@ -83,7 +83,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       return {
         label: "CHƯA DIỄN RA",
         classes:
-          "text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded bg-slate-100/50",
+          "text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded-sm bg-slate-100/50",
       };
     }
 
@@ -95,7 +95,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       return {
         label: "ĐÃ KẾT THÚC",
         classes:
-          "text-slate-500 border border-slate-250 px-1.5 py-0.5 rounded bg-slate-150/50",
+          "text-slate-500 border border-slate-250 px-1.5 py-0.5 rounded-sm bg-slate-150/50",
       };
     }
 
@@ -122,19 +122,19 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       return {
         label: "ĐANG DIỄN RA",
         classes:
-          "text-[#F27024] border border-[#F27024]/30 px-1.5 py-0.5 rounded bg-[#F27024]/10",
+          "text-primary border border-primary/30 px-1.5 py-0.5 rounded-sm bg-primary/10",
       };
     } else if (phase < currentPhase) {
       return {
         label: "ĐÃ KẾT THÚC",
         classes:
-          "text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded bg-slate-100",
+          "text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded-sm bg-slate-100",
       };
     } else {
       return {
         label: "CHƯA DIỄN RA",
         classes:
-          "text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded bg-slate-50",
+          "text-slate-400 border border-slate-200 px-1.5 py-0.5 rounded-sm bg-slate-50",
       };
     }
   };
@@ -217,9 +217,9 @@ export default function GuestPortal({ user }: GuestPortalProps) {
         <div className="text-center space-y-4">
           <Terminal
             size={32}
-            className="mx-auto text-[#F27024] animate-pulse"
+            className="mx-auto text-primary animate-pulse"
           />
-          <p className="text-[#F27024] text-sm tracking-widest animate-pulse">
+          <p className="text-primary text-sm tracking-widest animate-pulse">
             [ACCESSING_PORTAL_TERMINAL...]
           </p>
         </div>
@@ -240,13 +240,13 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
     if (label === "ĐANG DIỄN RA") {
       headingClass =
-        "text-xs text-[#F27024] text-orange-glow font-bold uppercase tracking-wider";
-      dateClass = "text-[9px] text-[#F27024]/80 font-mono";
+        "text-xs text-primary text-orange-glow font-bold uppercase tracking-wider";
+      dateClass = "text-[9px] text-primary/80 font-mono";
       descClass = "text-[11px] text-slate-700";
       renderDot = () => (
-        <span className="absolute -left-[20px] top-1 flex h-2.5 w-2.5">
+        <span className="absolute left-[-20px] top-1 flex h-2.5 w-2.5">
 
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#F27024] shadow-[0_0_8px_rgba(242,112,36,0.6)]"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary shadow-[0_0_8px_rgba(242,112,36,0.6)]"></span>
         </span>
       );
     } else if (label === "ĐÃ KẾT THÚC") {
@@ -255,7 +255,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       dateClass = "text-[9px] text-slate-500 font-mono";
       descClass = "text-[11px] text-slate-500";
       renderDot = () => (
-        <div className="absolute -left-[19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-[#F27024]"></div>
+        <div className="absolute left-[-19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-primary"></div>
       );
     } else {
       // CHƯA DIỄN RA
@@ -264,7 +264,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       dateClass = "text-[9px] text-slate-400 font-mono";
       descClass = "text-[11px] text-slate-400";
       renderDot = () => (
-        <div className="absolute -left-[19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-slate-300"></div>
+        <div className="absolute left-[-19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-slate-300"></div>
       );
     }
 
@@ -289,22 +289,22 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 font-mono">
         {/* Hero Section */}
-        <section className="relative grid grid-cols-1 items-center gap-8 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-8 transition-all hover:border-[#F27024]/40 hover:shadow-[0_0_20px_rgba(242,112,36,0.06)] md:grid-cols-2">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F27024]/5 rounded-full blur-3xl"></div>
+        <section className="relative grid grid-cols-1 items-center gap-8 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_20px_rgba(242,112,36,0.06)] md:grid-cols-2">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
           <div className="z-10 w-full space-y-6 text-left">
             <div className="flex items-center space-x-2">
               <span className="relative flex h-2 w-2">
 
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#F27024]"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <span className="text-xs text-[#F27024] tracking-widest uppercase font-bold">
+              <span className="text-xs text-primary tracking-widest uppercase font-bold">
                 [TRẠNG_THÁI: HOẠT_ĐỘNG]
               </span>
             </div>
 
             <h1 className="text-3xl md:text-5xl text-slate-900 font-extrabold tracking-tight leading-tight">
               Chào mừng,
-              <span className="block mt-1 text-[#F27024] text-orange-glow font-sans">
+              <span className="block mt-1 text-primary text-orange-glow font-sans">
                 {displayName}.
               </span>
             </h1>
@@ -337,15 +337,13 @@ export default function GuestPortal({ user }: GuestPortalProps) {
           </div>
 
           <div className="relative mx-auto aspect-square w-full max-w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-inner md:max-w-[320px]">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="block w-full h-full object-contain"
-              src="/davinci_edit_the_existing_video_only__keep_the_exact_shiel.mp4"
+            <img
+              src="/seal_shield_badge.png"
+              alt="SEAL Shield"
+              draggable={false}
+              className="block w-full h-full object-contain p-4"
             />
-            <div className="absolute inset-0 border border-[#F27024]/20 pointer-events-none rounded-xl"></div>
+            <div className="absolute inset-0 border border-primary/20 pointer-events-none rounded-xl"></div>
           </div>
         </section>
 
@@ -353,7 +351,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div className="flex items-center gap-2.5">
-              <Terminal size={18} className="text-[#F27024] shrink-0" />
+              <Terminal size={18} className="text-primary shrink-0" />
               <h2 className="text-lg font-bold text-slate-900 uppercase tracking-wider">
                 Cuộc thi hiện có
               </h2>
@@ -367,9 +365,9 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                   key={n}
                   className="bg-white/75 h-48 rounded-2xl border border-slate-200 animate-pulse flex flex-col justify-between p-6"
                 >
-                  <div className="h-4 bg-slate-200 rounded w-1/3"></div>
-                  <div className="h-8 bg-slate-200 rounded w-3/4"></div>
-                  <div className="h-4 bg-slate-200 rounded w-full"></div>
+                  <div className="h-4 bg-slate-200 rounded-sm w-1/3"></div>
+                  <div className="h-8 bg-slate-200 rounded-sm w-3/4"></div>
+                  <div className="h-4 bg-slate-200 rounded-sm w-full"></div>
                 </div>
               ))}
             </div>
@@ -395,7 +393,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                       statusColor =
                         teamCountVal >= maxTeamsVal
                           ? "text-rose-600 font-extrabold"
-                          : "text-[#F27024]";
+                          : "text-primary";
                       break;
                     case "prepare":
                       statusLabel = "[ĐANG CHUẨN BỊ]";
@@ -421,9 +419,9 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                   return (
                     <div
                       key={e._id}
-                      className="border border-slate-200 bg-white/95 p-6 md:p-8 rounded-2xl hover:border-[#F27024]/40 hover:shadow-[0_0_30px_rgba(242,112,36,0.08)] transition-all flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group w-full text-left"
+                      className="border border-slate-200 bg-white/95 p-6 md:p-8 rounded-2xl hover:border-primary/40 hover:shadow-[0_0_30px_rgba(242,112,36,0.08)] transition-all flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group w-full text-left"
                     >
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F27024]/40 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
+                      <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024]/40 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
 
                       {/* Left block: Title, Semester, Year, Description */}
                       <div className="flex-1 space-y-4">
@@ -439,7 +437,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                           </span>
                         </div>
 
-                        <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono group-hover:text-[#F27024] transition-colors uppercase tracking-tight">
+                        <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono group-hover:text-primary transition-colors uppercase tracking-tight">
                           {e.name}
                         </h3>
 
@@ -462,7 +460,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
                         <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
                           <div
-                            className="h-full bg-[#F27024] transition-all duration-500 shadow-[0_0_8px_rgba(242,112,36,0.4)]"
+                            className="h-full bg-primary transition-all duration-500 shadow-[0_0_8px_rgba(242,112,36,0.4)]"
                             style={{ width: `${percent}%` }}
                           ></div>
                         </div>
@@ -482,7 +480,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                     navigate(`/team-area?eventId=${e._id}`);
                                   }
                                 }}
-                                className="w-full py-3 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-sm font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                               >
                                 {hasTeam
                                   ? "Vào khu vực đội"
@@ -494,7 +492,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             (hasTeam ? (
                               <button
                                 onClick={() => navigate("/team-area")}
-                                className="w-full py-3 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-sm font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                               >
                                 Vào khu vực đội
                               </button>
@@ -508,7 +506,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             (hasTeam ? (
                               <button
                                 onClick={() => navigate("/team-area")}
-                                className="w-full py-3 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-sm font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                               >
                                 Vào khu vực đội
                               </button>
@@ -544,7 +542,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                       statusColor =
                         teamCountVal >= maxTeamsVal
                           ? "text-rose-500 font-extrabold"
-                          : "text-[#F27024]";
+                          : "text-primary";
                       break;
                     case "prepare":
                       statusLabel = "[ĐANG CHUẨN BỊ]";
@@ -570,9 +568,9 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                   return (
                     <div
                       key={e._id}
-                      className="border border-slate-200 bg-white/95 p-6 rounded-2xl hover:border-[#F27024]/40 hover:shadow-[0_0_25px_rgba(242,112,36,0.06)] transition-all flex flex-col justify-between gap-6 relative overflow-hidden group text-left"
+                      className="border border-slate-200 bg-white/95 p-6 rounded-2xl hover:border-primary/40 hover:shadow-[0_0_25px_rgba(242,112,36,0.06)] transition-all flex flex-col justify-between gap-6 relative overflow-hidden group text-left"
                     >
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#F27024]/0 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
+                      <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024]/0 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
 
                       <div className="space-y-4">
                         <div className="flex justify-between items-center text-[10px]">
@@ -586,7 +584,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                           </span>
                         </div>
 
-                        <h3 className="text-lg font-bold text-slate-900 font-mono group-hover:text-[#F27024] transition-colors uppercase tracking-tight">
+                        <h3 className="text-lg font-bold text-slate-900 font-mono group-hover:text-primary transition-colors uppercase tracking-tight">
                           {e.name}
                         </h3>
 
@@ -608,7 +606,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
                         <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
                           <div
-                            className="h-full bg-[#F27024] transition-all duration-500"
+                            className="h-full bg-primary transition-all duration-500"
                             style={{ width: `${percent}%` }}
                           ></div>
                         </div>
@@ -627,7 +625,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                   navigate(`/team-area?eventId=${e._id}`);
                                 }
                               }}
-                              className="w-full mt-2 py-2 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-xs font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                             >
                               {hasTeam ? "Vào khu vực đội" : "Đăng ký tham gia"}
                             </button>
@@ -637,7 +635,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                           (hasTeam ? (
                             <button
                               onClick={() => navigate("/team-area")}
-                              className="w-full mt-2 py-2 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-xs font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                             >
                               Vào khu vực đội
                             </button>
@@ -651,7 +649,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                           (hasTeam ? (
                             <button
                               onClick={() => navigate("/team-area")}
-                              className="w-full mt-2 py-2 border border-[#F27024]/30 rounded-xl bg-[#F27024]/5 text-[#F27024] text-xs font-bold hover:bg-[#F27024]/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
+                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
                             >
                               Vào khu vực đội
                             </button>
@@ -676,18 +674,18 @@ export default function GuestPortal({ user }: GuestPortalProps) {
         {/* Intelligence & Roadmap Grid */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-6 text-left">
           {/* Event Intelligence Panel */}
-          <div className="col-span-1 md:col-span-5 bg-white/95 p-6 rounded-2xl flex flex-col justify-between border border-slate-200 hover:border-[#F27024]/30 transition-all">
+          <div className="col-span-1 md:col-span-5 bg-white/95 p-6 rounded-2xl flex flex-col justify-between border border-slate-200 hover:border-primary/30 transition-all">
             <div>
               <div className="border-b border-slate-100 pb-3 mb-6 flex justify-between items-center">
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Shield size={18} className="text-[#F27024]" />
+                  <Shield size={18} className="text-primary" />
                   <span>Thông tin cuộc thi</span>
                 </h2>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-xs text-[#F27024] font-bold uppercase tracking-wider mb-2">
+                  <h3 className="text-xs text-primary font-bold uppercase tracking-wider mb-2">
                     Mục tiêu chính
                   </h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
@@ -718,12 +716,12 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                       <div className="text-[9px] text-slate-500 mb-1">
                         QUỸ GIẢI THƯỞNG
                       </div>
-                      <div className="text-sm font-bold text-[#F27024]">
+                      <div className="text-sm font-bold text-primary">
                         {activeEvent?.prizePoolText ||
                           "Tiền thưởng và chứng nhận"}
                       </div>
                     </div>
-                    <DollarSign size={20} className="text-[#F27024]/40" />
+                    <DollarSign size={20} className="text-primary/40" />
                   </div>
                 </div>
               </div>
@@ -731,11 +729,11 @@ export default function GuestPortal({ user }: GuestPortalProps) {
           </div>
 
           {/* Mission Roadmap Panel */}
-          <div className="col-span-1 md:col-span-7 bg-white/95 p-6 rounded-2xl flex flex-col justify-between border border-slate-200 hover:border-[#F27024]/30 transition-all">
+          <div className="col-span-1 md:col-span-7 bg-white/95 p-6 rounded-2xl flex flex-col justify-between border border-slate-200 hover:border-primary/30 transition-all">
             <div>
               <div className="border-b border-slate-100 pb-3 mb-6 flex justify-between items-center">
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Compass size={18} className="text-[#F27024]" />
+                  <Compass size={18} className="text-primary" />
                   <span>
                     Lộ trình cuộc thi{" "}
                     {activeEvent ? `- ${activeEvent.name}` : ""}
@@ -743,7 +741,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                 </h2>
               </div>
 
-              <div className="relative pl-4 space-y-6 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-200">
+              <div className="relative pl-4 space-y-6 before:content-[''] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-px before:bg-slate-200">
                 {/* Phase 1 */}
                 <div className="relative pl-6">
                   {phase1.renderDot()}
@@ -883,7 +881,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
             <section className="bg-white/95 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-8 text-left">
               <div className="border-b border-slate-100 pb-4 flex justify-between items-center flex-wrap gap-4">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <Scale size={24} className="text-[#F27024]" />
+                  <Scale size={24} className="text-primary" />
                   <span className="font-mono-tech tracking-wide">
                     Điều lệ & Quy định cuộc thi
                   </span>
@@ -907,7 +905,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                   })()}/THÔNG%20TIN%20VỀ%20CUỘC%20THI.pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 border border-[#F27024]/30 hover:border-[#F27024]/80 bg-[#F27024]/5 hover:bg-[#F27024]/10 rounded-xl text-xs font-mono font-bold text-[#F27024] hover:text-[#F27024] transition-all cursor-pointer shadow-lg shadow-[#F27024]/5 hover:scale-[1.02]"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-primary/30 hover:border-primary/80 bg-primary/5 hover:bg-primary/10 rounded-xl text-xs font-mono font-bold text-primary hover:text-primary transition-all cursor-pointer shadow-lg shadow-[#F27024]/5 hover:scale-[1.02]"
                 >
                   <Download size={14} />
                   <span>TẢI THỂ LỆ PDF</span>
@@ -919,8 +917,8 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                 {/* Left Highlight (Điều 8: Tiêu chí chấm điểm) - Spans 6 cols on XL */}
                 <div className="xl:col-span-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-200/60 flex flex-col">
                   <div className="space-y-4 flex-1 flex flex-col">
-                    <h3 className="text-xs text-[#F27024] font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
-                      <Award size={18} className="text-[#F27024]" />
+                    <h3 className="text-xs text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                      <Award size={18} className="text-primary" />
                       <span>Tiêu chí chấm điểm</span>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm font-sans flex-1">
@@ -939,13 +937,13 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             <div key={i} className="space-y-1">
                               <div className="flex justify-between text-xs text-slate-700">
                                 <span>{item.label}</span>
-                                <span className="text-[#F27024] font-mono font-bold">
+                                <span className="text-primary font-mono font-bold">
                                   {item.val}
                                 </span>
                               </div>
                               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gradient-to-r from-[#F27024]/80 to-[#F27024] rounded-full shadow-[0_0_8px_rgba(242,112,36,0.3)]"
+                                  className="h-full bg-linear-to-r from-[#F27024]/80 to-[#F27024] rounded-full shadow-[0_0_8px_rgba(242,112,36,0.3)]"
                                   style={{ width: item.val }}
                                 />
                               </div>
@@ -968,13 +966,13 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             <div key={i} className="space-y-1">
                               <div className="flex justify-between text-xs text-slate-700">
                                 <span>{item.label}</span>
-                                <span className="text-[#F27024] font-mono font-bold">
+                                <span className="text-primary font-mono font-bold">
                                   {item.val}
                                 </span>
                               </div>
                               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gradient-to-r from-[#F27024]/80 to-[#F27024] rounded-full shadow-[0_0_8px_rgba(242,112,36,0.3)]"
+                                  className="h-full bg-linear-to-r from-[#F27024]/80 to-[#F27024] rounded-full shadow-[0_0_8px_rgba(242,112,36,0.3)]"
                                   style={{ width: item.val }}
                                 />
                               </div>
@@ -989,21 +987,21 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                 {/* Right Highlight (Quy chế thi đấu cốt lõi) - Spans 6 cols on XL */}
                 <div className="xl:col-span-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-200/60 flex flex-col">
                   <div className="space-y-4 w-full flex-1 flex flex-col">
-                    <h3 className="text-xs text-[#F27024] font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
-                      <Terminal size={18} className="text-[#F27024]" />
+                    <h3 className="text-xs text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                      <Terminal size={18} className="text-primary" />
                       <span>Quy chế thi đấu cốt lõi</span>
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 text-sm font-sans flex-1">
                       {[
                         {
-                          icon: <Clock className="text-[#F27024]" size={16} />,
+                          icon: <Clock className="text-primary" size={16} />,
                           title: "Thời gian thi đấu",
                           desc: "Theo quy định",
                           detail: "Trễ quá 60 phút sẽ bị hủy quyền tham gia.",
                         },
                         {
                           icon: (
-                            <GitBranch className="text-[#F27024]" size={16} />
+                            <GitBranch className="text-primary" size={16} />
                           ),
                           title: "Lưu trữ mã nguồn",
                           desc: "GitHub",
@@ -1012,7 +1010,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                         },
                         {
                           icon: (
-                            <Terminal className="text-[#F27024]" size={16} />
+                            <Terminal className="text-primary" size={16} />
                           ),
                           title: "Hồ sơ tài liệu",
                           desc: "Jira, Confluence, Notion",
@@ -1021,7 +1019,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                         },
                         {
                           icon: (
-                            <FileText className="text-[#F27024]" size={16} />
+                            <FileText className="text-primary" size={16} />
                           ),
                           title: "Sản phẩm báo cáo",
                           desc: "Thuyết trình Slide",
@@ -1031,18 +1029,18 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                       ].map((item, i) => (
                         <div
                           key={i}
-                          className="bg-white/60 p-4 rounded-xl border border-slate-200 flex flex-col justify-between hover:border-[#F27024]/20 transition-colors"
+                          className="bg-white/60 p-4 rounded-xl border border-slate-200 flex flex-col justify-between hover:border-primary/20 transition-colors"
                         >
                           <div className="space-y-1.5 text-left">
                             <div className="flex items-center gap-2">
-                              <div className="p-1 rounded bg-[#F27024]/5 border border-[#F27024]/20">
+                              <div className="p-1 rounded-sm bg-primary/5 border border-primary/20">
                                 {item.icon}
                               </div>
                               <span className="text-[10px] text-slate-500 font-bold uppercase font-mono tracking-wider">
                                 {item.title}
                               </span>
                             </div>
-                            <p className="text-[#F27024] font-bold text-xs font-mono">
+                            <p className="text-primary font-bold text-xs font-mono">
                               {item.desc}
                             </p>
                           </div>
@@ -1059,8 +1057,8 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
               {/* All Rules Grid (Fully visible, no nested scrolling) */}
               <div className="space-y-5 text-left pt-4">
-                <h3 className="text-base text-[#F27024] font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
-                  <Compass size={18} className="text-[#F27024]" />
+                <h3 className="text-base text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                  <Compass size={18} className="text-primary" />
                   <span>Chi tiết các Điều lệ &amp; Quy định</span>
                 </h3>
 
@@ -1094,18 +1092,18 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                     return (
                       <div
                         key={idx}
-                        className="p-6 border border-slate-200 hover:border-[#F27024]/30 bg-white/50 hover:bg-white/80 rounded-2xl flex flex-col space-y-3 hover:shadow-[0_0_20px_-5px_rgba(242,112,36,0.15)] transition-all duration-300 group"
+                        className="p-6 border border-slate-200 hover:border-primary/30 bg-white/50 hover:bg-white/80 rounded-2xl flex flex-col space-y-3 hover:shadow-[0_0_20px_-5px_rgba(242,112,36,0.15)] transition-all duration-300 group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-xl bg-[#F27024]/5 border border-[#F27024]/20 text-[#F27024] group-hover:scale-110 transition-transform duration-300">
+                          <div className="p-2 rounded-xl bg-primary/5 border border-primary/20 text-primary group-hover:scale-110 transition-transform duration-300">
                             {getRuleIcon(idx)}
                           </div>
-                          <span className="text-[10px] sm:text-xs font-mono font-bold px-2.5 py-1 bg-[#F27024]/5 border border-[#F27024]/20 text-[#F27024] rounded-full uppercase tracking-wider">
+                          <span className="text-[10px] sm:text-xs font-mono font-bold px-2.5 py-1 bg-primary/5 border border-primary/20 text-primary rounded-full uppercase tracking-wider">
                             Điều {idx + 1}
                           </span>
                         </div>
                         <div className="space-y-2">
-                          <h4 className="text-sm sm:text-base font-extrabold text-slate-800 group-hover:text-[#F27024] transition-colors leading-snug">
+                          <h4 className="text-sm sm:text-base font-extrabold text-slate-800 group-hover:text-primary transition-colors leading-snug">
                             {r.title.replace(/^Điều\s+\d+\.\s*/i, "")}
                           </h4>
                           <div className="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans font-normal space-y-1.5">
@@ -1131,7 +1129,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                   return (
                                     <div key={sIdx} className="space-y-1.5">
                                       <p className="flex items-start gap-2">
-                                        <span className="text-[#F27024] font-extrabold select-none shrink-0">
+                                        <span className="text-primary font-extrabold select-none shrink-0">
                                           •
                                         </span>
                                         <span>{introText}</span>
@@ -1142,7 +1140,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                             key={pIdx}
                                             className="flex items-start gap-2"
                                           >
-                                            <span className="text-[#F27024] font-extrabold select-none shrink-0">
+                                            <span className="text-primary font-extrabold select-none shrink-0">
                                               •
                                             </span>
                                             <span>{part}</span>
@@ -1157,7 +1155,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                     key={sIdx}
                                     className="flex items-start gap-2"
                                   >
-                                    <span className="text-[#F27024] font-extrabold select-none shrink-0">
+                                    <span className="text-primary font-extrabold select-none shrink-0">
                                       •
                                     </span>
                                     <span>{sentence}</span>

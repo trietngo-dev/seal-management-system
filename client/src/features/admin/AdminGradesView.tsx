@@ -390,10 +390,10 @@ export default function AdminGradesView({ user, roles = [] }: AdminGradesViewPro
             <button
               onClick={handleDownloadBulkTemplate}
               disabled={!selectedRoundId || !selectedTrackId || downloadingBulkTemplate}
-              className="text-xs font-bold px-3.5 py-2 rounded-xl text-white font-mono transition-all flex items-center justify-center gap-1.5 bg-orange-950/40 hover:bg-orange-950/70 border border-[#F27024]/30 shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="text-xs font-bold px-3.5 py-2 rounded-xl text-white font-mono transition-all flex items-center justify-center gap-1.5 bg-orange-950/40 hover:bg-orange-950/70 border border-primary/30 shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               title="Tải file Excel mẫu chấm điểm cho toàn bộ đội và toàn bộ giám khảo trong bảng đấu"
             >
-              <Download size={14} className="text-[#F27024]" />
+              <Download size={14} className="text-primary" />
               <span>{downloadingBulkTemplate ? "Đang tạo..." : "Tải Form Mẫu Bảng"}</span>
             </button>
 
@@ -401,7 +401,7 @@ export default function AdminGradesView({ user, roles = [] }: AdminGradesViewPro
             <button
               onClick={() => setIsImportModalOpen(true)}
               disabled={!selectedRoundId || !selectedTrackId}
-              className="text-xs font-bold px-3.5 py-2 rounded-xl text-white font-mono transition-all flex items-center justify-center gap-1.5 bg-[#F27024] hover:bg-[#d95d16] border border-[#F27024] shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
+              className="text-xs font-bold px-3.5 py-2 rounded-xl text-white font-mono transition-all flex items-center justify-center gap-1.5 bg-primary hover:bg-[#d95d16] border border-primary shadow-md disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]"
               title="Import điểm hàng loạt từ file Excel"
             >
               <Upload size={14} className="text-white" />
@@ -500,7 +500,7 @@ export default function AdminGradesView({ user, roles = [] }: AdminGradesViewPro
                 placeholder="Tìm kiếm đội thi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-slate-950/80 border border-slate-800 rounded-xl text-xs pl-9 pr-4 py-2 w-full text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
+                className="bg-slate-950/80 border border-slate-800 rounded-xl text-xs pl-9 pr-4 py-2 w-full text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500"
               />
             </div>
 
@@ -567,7 +567,7 @@ export default function AdminGradesView({ user, roles = [] }: AdminGradesViewPro
                       href={gradingsData.team.topicSubmission.demoUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 bg-slate-900/60 px-4 py-2 rounded-xl transition-all shadow-sm"
+                      className="flex items-center gap-1.5 text-xs font-bold text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 bg-slate-900/60 px-4 py-2 rounded-xl transition-all shadow-xs"
                     >
                       <ExternalLink size={14} />
                       <span>Xem Demo</span>

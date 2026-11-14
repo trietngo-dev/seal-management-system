@@ -22,7 +22,7 @@ export default function LandingPage({ user }: LandingPageProps) {
   }, []);
 
   return (
-    <div className="relative overflow-hidden font-sans bg-[#FDFCFB] text-[#1E1E24]">
+    <div className="relative overflow-hidden font-sans bg-canvas text-ink">
       {/* Background Grid & Glow */}
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(242,112,36,0.05)_0%,transparent_40%)]"></div>
 

@@ -315,14 +315,14 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
       if (isLandingPage) {
         return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono
           ${active
-            ? "bg-[#F27024]/20 text-[#F27024] border border-[#F27024]/30 shadow-[0_0_15px_-3px_rgba(242,112,36,0.3)]"
-            : "text-slate-350 hover:text-[#F27024] hover:bg-white/5 border border-transparent"
+            ? "bg-primary/20 text-primary border border-primary/30 shadow-[0_0_15px_-3px_rgba(242,112,36,0.3)]"
+            : "text-slate-350 hover:text-primary hover:bg-white/5 border border-transparent"
           }`;
       }
       return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono
         ${active
-          ? "bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/20 shadow-[0_0_15px_-3px_rgba(242,112,36,0.2)]"
-          : "text-slate-700 hover:text-[#F27024] hover:bg-slate-100 border border-transparent"
+          ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_-3px_rgba(242,112,36,0.2)]"
+          : "text-slate-700 hover:text-primary hover:bg-slate-100 border border-transparent"
         }`;
     }
     return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono
@@ -359,15 +359,16 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
       <div className={`w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 ${isLandingPage ? (isScrolled ? "py-3" : "py-4") : "py-4"}`}>
         {/* Brand Logo */}
         <div className="flex-1 flex justify-start">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div>
-              <span className={`font-extrabold text-lg tracking-wider font-mono-tech ${isLandingPage ? "text-white" : (usesLightShell ? "text-[#F27024] text-orange-glow" : "text-cyan-400 text-cyan-glow")}`}>
-                SEAL
-              </span>
-              <span className={`font-semibold text-xs ml-1 px-2 py-0.5 font-mono-tech ${isLandingPage ? "bg-[#F27024] text-white" : (usesLightShell ? "bg-[#F27024] text-white" : "bg-slate-800 text-white")}`}>
-                HACKATHON
-              </span>
-            </div>
+          <Link
+            to="/"
+            className="flex items-center group rounded-xl bg-white/90 px-3 py-1.5 shadow-xs"
+          >
+            <img
+              src="/seal_hackathon_logo.png"
+              alt="SEAL Hackathon - Software Engineering Agile League"
+              className="h-8 w-auto object-contain"
+              draggable={false}
+            />
           </Link>
         </div>
 
@@ -475,7 +476,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                 <div className="relative">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className={`relative p-2 rounded-lg border border-transparent transition-all duration-200 ${usesLightShell ? "text-slate-500 hover:text-[#F27024] hover:bg-[#F27024]/10" : "text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"}`}
+                    className={`relative p-2 rounded-lg border border-transparent transition-all duration-200 ${usesLightShell ? "text-slate-500 hover:text-primary hover:bg-primary/10" : "text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"}`}
                   >
                     <Bell size={18} />
                     {unreadCount > 0 && (
@@ -489,7 +490,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                   {/* Notifications Dropdown */}
                   {showNotifications && (
                     <div className="absolute right-0 mt-2 w-[420px] max-h-96 overflow-y-auto border border-slate-200 rounded-xl shadow-2xl z-50 bg-white text-slate-800 notif-scroll">
-                      <div className="flex justify-between items-center p-3 border-b sticky top-0 z-10 bg-white/100 border-slate-200 text-slate-800">
+                      <div className="flex justify-between items-center p-3 border-b sticky top-0 z-10 bg-white border-slate-200 text-slate-800">
                         <h4 className="text-sm font-semibold text-slate-800">
                           Thông báo
                         </h4>
@@ -498,7 +499,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                             <button
                               onClick={markAllAsRead}
                               className={`font-semibold ${usesLightShell
-                                  ? "text-[#F27024] hover:text-[#e05e1b]"
+                                  ? "text-primary hover:text-primary-hover"
                                   : "text-cyan-400 hover:text-cyan-300"
                                 }`}
                             >
@@ -530,17 +531,17 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                               }}
                               className={`group relative p-3 border-b cursor-pointer transition-colors flex gap-3 items-start ${!notif.isRead
                                   ? usesLightShell
-                                    ? "bg-[#F27024]/5 hover:bg-[#F27024]/10 border-slate-200/50"
+                                    ? "bg-primary/5 hover:bg-primary/10 border-slate-200/50"
                                     : "bg-cyan-950/20 hover:bg-cyan-950/30 border-slate-800/50"
                                   : usesLightShell
                                     ? "hover:bg-slate-100/50 border-slate-200/50"
                                     : "hover:bg-slate-800/50 border-slate-800/50"
                                 }`}
                             >
-                              <div className={`mt-0.5 flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm ${notif.type === 'chat_message'
+                              <div className={`mt-0.5 shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm ${notif.type === 'chat_message'
                                   ? 'bg-blue-500/20 text-blue-400'
                                   : usesLightShell
-                                    ? 'bg-[#F27024]/10 text-[#F27024]'
+                                    ? 'bg-primary/10 text-primary'
                                     : 'bg-cyan-500/20 text-cyan-400'
                                 }`}>
                                 {notif.type === 'chat_message'
@@ -556,24 +557,24 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                                   }`}>
                                   {notif.title}
                                 </p>
-                                <p className="text-xs text-slate-500 mt-0.5 whitespace-normal break-words leading-relaxed">
+                                <p className="text-xs text-slate-500 mt-0.5 whitespace-normal wrap-break-word leading-relaxed">
                                   {notif.body}
                                 </p>
                                 <p className="text-[10px] text-slate-400 mt-1.5">
                                   {new Date(notif.createdAt).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <div className="flex items-center gap-1.5 shrink-0">
                                 {!notif.isRead && (
                                   <div className={`w-2 h-2 rounded-full ${usesLightShell
-                                      ? "bg-[#F27024] shadow-[0_0_6px_rgba(242,112,36,0.8)]"
+                                      ? "bg-primary shadow-[0_0_6px_rgba(242,112,36,0.8)]"
                                       : "bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)]"
                                     }`} />
                                 )}
                                 <button
                                   type="button"
                                   onClick={(e) => deleteNotification(notif._id, e)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 rounded transition-all"
+                                  className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-rose-500 rounded-sm transition-all"
                                   title="Xóa thông báo"
                                 >
                                   <Trash2 size={13} />
@@ -609,7 +610,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold font-mono transition-all hover:scale-105 active:scale-95 cursor-pointer ${usesLightShell
-                        ? "bg-[#F27024]/10 text-[#F27024] border border-[#F27024]/25 shadow-[0_0_10px_rgba(242,112,36,0.12)] hover:bg-[#F27024]/20 hover:border-[#F27024]/40"
+                        ? "bg-primary/10 text-primary border border-primary/25 shadow-[0_0_10px_rgba(242,112,36,0.12)] hover:bg-primary/20 hover:border-primary/40"
                         : "bg-cyan-950/50 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] hover:bg-cyan-950/80 hover:border-cyan-500/50"
                       }`}
                     title="Menu tài khoản"
@@ -619,7 +620,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
 
                   {showUserMenu && (
                     <div
-                      className={`absolute right-0 mt-2 w-48 rounded-xl border shadow-2xl p-1.5 z-[9999] font-sans ${usesLightShell
+                      className={`absolute right-0 mt-2 w-48 rounded-xl border shadow-2xl p-1.5 z-9999 font-sans ${usesLightShell
                           ? "bg-[#faf9f6] border-slate-200 text-slate-800"
                           : "bg-[#0c1322] border-cyan-500/30 text-slate-200 shadow-[0_0_20px_rgba(6,182,212,0.15)]"
                         }`}
@@ -633,7 +634,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                               : "hover:bg-cyan-950/30 text-slate-300 hover:text-cyan-400"
                             }`}
                         >
-                          <ShieldAlert size={14} className={usesLightShell ? "text-[#F27024]" : "text-cyan-400"} />
+                          <ShieldAlert size={14} className={usesLightShell ? "text-primary" : "text-cyan-400"} />
                           <span>{isCoordinator ? "Trang Quản trị" : "Trang Công tác sinh viên"}</span>
                         </Link>
                       )}
@@ -647,7 +648,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                             : "hover:bg-cyan-950/30 text-slate-300 hover:text-cyan-400"
                           }`}
                       >
-                        <UserCog size={14} className={usesLightShell ? "text-[#F27024]" : "text-cyan-400"} />
+                        <UserCog size={14} className={usesLightShell ? "text-primary" : "text-cyan-400"} />
                         <span>Hồ sơ</span>
                       </button>
                       <div className={`my-1 border-t ${usesLightShell ? "border-slate-200" : "border-slate-800"}`}></div>
@@ -672,7 +673,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
               !isLoginPage && (
                 <Link
                   to="/login"
-                  className={`${isLandingPage ? "border border-[#F27024]/40 text-[#F27024] hover:bg-[#F27024]/10 rounded-xl hover:border-[#F27024]/75 transition-all duration-300 gap-1.5" : (usesLightShell ? "btn-fpt" : "btn-primary")} text-xs font-bold uppercase tracking-wider px-5 py-2.5 flex items-center justify-center`}
+                  className={`${isLandingPage ? "border border-primary/40 text-primary hover:bg-primary/10 rounded-xl hover:border-primary/75 transition-all duration-300 gap-1.5" : (usesLightShell ? "btn-fpt" : "btn-primary")} text-xs font-bold uppercase tracking-wider px-5 py-2.5 flex items-center justify-center`}
                 >
                   <LogIn size={14} />
                   <span>Đăng nhập</span>

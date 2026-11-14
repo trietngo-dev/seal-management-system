@@ -105,7 +105,7 @@ export default function MyAchievements() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-800 flex items-center gap-3">
-              <Award size={32} className="text-[#F27024]" />
+              <Award size={32} className="text-primary" />
               <span className="text-slate-800 font-mono-tech">THÀNH TÍCH CỦA TÔI</span>
             </h1>
             <p className="text-slate-500 text-sm mt-1.5 font-sans">
@@ -114,21 +114,21 @@ export default function MyAchievements() {
           </div>
           <button
             onClick={() => navigate("/guest-portal")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:border-[#F27024]/40 text-slate-700 text-xs font-bold uppercase rounded-xl transition-all shadow-sm cursor-pointer w-fit"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 hover:border-primary/40 text-slate-700 text-xs font-bold uppercase rounded-xl transition-all shadow-xs cursor-pointer w-fit"
           >
             <span>Trang chủ</span>
-            <ChevronRight size={14} className="text-[#F27024]" />
+            <ChevronRight size={14} className="text-primary" />
           </button>
         </div>
 
         {!Array.isArray(teams) || teams.length === 0 ? (
-          <div className="bg-white p-12 rounded-3xl text-center max-w-xl mx-auto space-y-4 border border-slate-200 shadow-sm text-slate-800">
+          <div className="bg-white p-12 rounded-3xl text-center max-w-xl mx-auto space-y-4 border border-slate-200 shadow-xs text-slate-800">
             <Trophy size={48} className="mx-auto text-slate-400" />
             <p className="text-sm font-bold text-slate-700">Bạn chưa có thành tích nào</p>
             <div className="pt-2">
               <button
                 onClick={() => navigate("/guest-portal")}
-                className="px-6 py-2.5 bg-[#F27024] hover:bg-[#d95f1f] !text-white text-xs font-bold uppercase rounded-xl transition-all cursor-pointer font-sans shadow-md shadow-orange-500/20"
+                className="px-6 py-2.5 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase rounded-xl transition-all cursor-pointer font-sans shadow-md shadow-orange-500/20"
               >
                 Trở về Trang chủ
               </button>
@@ -142,13 +142,13 @@ export default function MyAchievements() {
               return (
                 <div
                   key={t._id}
-                  className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 relative overflow-hidden text-slate-800"
+                  className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6 relative overflow-hidden text-slate-800"
                 >
                   {/* Team & Event Header */}
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-bold text-[#F27024] border border-[#F27024]/20 px-3 py-1 rounded-xl bg-[#F27024]/10 tracking-wider">
+                        <span className="text-sm font-bold text-primary border border-primary/20 px-3 py-1 rounded-xl bg-primary/10 tracking-wider">
                           Cuộc thi: {t.event?.name}
                         </span>
                       </div>
@@ -168,7 +168,7 @@ export default function MyAchievements() {
                     {/* Left block (Col 4): Members List */}
                     <div className="lg:col-span-4 space-y-4">
                       <h4 className="text-xs font-bold text-slate-500 flex items-center gap-1.5 uppercase font-mono-tech border-b border-slate-200 pb-2">
-                        <Users size={14} className="text-[#F27024]" />
+                        <Users size={14} className="text-primary" />
                         <span>Đồng đội của bạn</span>
                       </h4>
                       <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
@@ -187,7 +187,7 @@ export default function MyAchievements() {
                     {/* Right block (Col 8): Achievements / Round Rankings */}
                     <div className="lg:col-span-8 space-y-4">
                       <h4 className="text-xs font-bold text-slate-500 flex items-center gap-1.5 uppercase font-mono-tech border-b border-slate-200 pb-2">
-                        <Trophy size={14} className="text-[#F27024]" />
+                        <Trophy size={14} className="text-primary" />
                         <span>Thành tích các vòng đấu</span>
                       </h4>
 
@@ -213,7 +213,7 @@ export default function MyAchievements() {
                             return (
                               <div
                                 key={ach._id}
-                                className="border border-slate-200 p-4 bg-slate-50 rounded-2xl flex flex-col justify-between gap-4 hover:border-[#F27024]/40 transition-all group"
+                                className="border border-slate-200 p-4 bg-slate-50 rounded-2xl flex flex-col justify-between gap-4 hover:border-primary/40 transition-all group"
                               >
                                 <div className="space-y-2">
                                   <div className="flex justify-between items-start gap-2">
@@ -237,7 +237,7 @@ export default function MyAchievements() {
                                 <div className="flex justify-between items-center border-t border-slate-200 pt-3">
                                   <div>
                                     <span className="text-[9px] text-slate-400 block uppercase font-mono">ĐIỂM TRUNG BÌNH</span>
-                                    <span className="text-sm font-extrabold text-[#F27024] font-mono-tech">
+                                    <span className="text-sm font-extrabold text-primary font-mono-tech">
                                       {ach.averageScore != null ? ach.averageScore.toFixed(2) : "—"}
                                     </span>
                                   </div>
@@ -246,15 +246,15 @@ export default function MyAchievements() {
                                     {!isFinalRound && (
                                       <>
                                         {ach.isAdvanced ? (
-                                          <span className="text-[9px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded font-bold">
+                                          <span className="text-[9px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded-sm font-bold">
                                             ĐÃ ĐI TIẾP
                                           </span>
                                         ) : ach.roundId?.status === "completed" ? (
-                                          <span className="text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded font-bold">
+                                          <span className="text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-sm font-bold">
                                             DỪNG BƯỚC
                                           </span>
                                         ) : (
-                                          <span className="text-[9px] bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded font-bold">
+                                          <span className="text-[9px] bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2 py-0.5 rounded-sm font-bold">
                                             ĐANG CHẤM
                                           </span>
                                         )}

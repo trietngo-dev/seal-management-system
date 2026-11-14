@@ -144,7 +144,7 @@ export default function UniversityCombobox({
           onChange={handleInput}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          className={`w-full pr-16 bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-[#F27024] transition-all font-mono disabled:opacity-50 disabled:cursor-not-allowed ${inputClassName}`}
+          className={`w-full pr-16 bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-800 text-slate-900 dark:text-white px-3 py-2 rounded-xl text-xs focus:outline-hidden focus:border-primary transition-all font-mono disabled:opacity-50 disabled:cursor-not-allowed ${inputClassName}`}
         />
         <div className="absolute right-2 flex items-center gap-1">
           {loading && (
@@ -169,7 +169,7 @@ export default function UniversityCombobox({
           >
             <ChevronDown
               size={13}
-              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#F27024]' : 'text-slate-400'}`}
+              className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : 'text-slate-400'}`}
             />
           </button>
         </div>
@@ -177,7 +177,7 @@ export default function UniversityCombobox({
 
       {/* Dropdown List */}
       {isOpen && (
-        <div className="absolute z-[9999] left-0 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-900/5 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-100 uni-combobox-dropdown">
+        <div className="absolute z-9999 left-0 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-900/5 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-100 uni-combobox-dropdown">
           <div className="max-h-60 overflow-y-auto p-1.5 space-y-1 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
             {filtered.length > 0 ? (
               filtered.map(u => {
@@ -189,17 +189,17 @@ export default function UniversityCombobox({
                     onMouseDown={e => { e.preventDefault(); handleSelect(u); }}
                     className={`w-full text-left px-3.5 py-2 rounded-lg text-xs font-mono transition-all cursor-pointer flex flex-col justify-center gap-0.5 ${
                       isSelected
-                        ? 'bg-orange-500/10 text-[#F27024] font-semibold border border-orange-500/25'
-                        : 'text-slate-700 hover:bg-orange-500/10 hover:text-[#F27024]'
+                        ? 'bg-orange-500/10 text-primary font-semibold border border-orange-500/25'
+                        : 'text-slate-700 hover:bg-orange-500/10 hover:text-primary'
                     }`}
                   >
                     {/* Primary acronym / short name */}
-                    <span className={`font-bold text-xs block leading-tight ${isSelected ? 'text-[#F27024]' : 'text-slate-800'}`}>
+                    <span className={`font-bold text-xs block leading-tight ${isSelected ? 'text-primary' : 'text-slate-800'}`}>
                       {u.short}
                     </span>
                     {/* Secondary full name */}
                     {u.short !== u.name && (
-                      <span className={`text-[9.5px] font-mono leading-normal block whitespace-normal break-words ${
+                      <span className={`text-[9.5px] font-mono leading-normal block whitespace-normal wrap-break-word ${
                         isSelected ? 'text-orange-500/80' : 'text-slate-400'
                       }`}>
                         {u.name}
@@ -216,9 +216,9 @@ export default function UniversityCombobox({
           </div>
           {inputValue.trim() && !universities.some(u => u.name.toLowerCase() === inputValue.trim().toLowerCase() || u.short.toLowerCase() === inputValue.trim().toLowerCase()) && (
             <div className="border-t border-slate-200 px-3 py-2.5 bg-slate-50">
-              <p className="text-[10px] font-mono text-[#F27024] flex items-center gap-1.5 leading-relaxed">
+              <p className="text-[10px] font-mono text-primary flex items-center gap-1.5 leading-relaxed">
                 <span>✎ Sẽ lưu tên tự nhập:</span>
-                <span className="text-slate-900 font-bold bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                <span className="text-slate-900 font-bold bg-white px-1.5 py-0.5 rounded-sm border border-slate-200">
                   {inputValue.trim()}
                 </span>
               </p>
