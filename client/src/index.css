@@ -45,6 +45,9 @@
   --font-display: Roboto, sans-serif;
   --font-sans: Roboto, sans-serif;
   --font-mono: Roboto Mono, monospace;
+
+  /* Gentle up/down bob for hero artwork (keyframes `float` defined below) */
+  --animate-float: float 5s ease-in-out infinite;
 }
 
 /*
