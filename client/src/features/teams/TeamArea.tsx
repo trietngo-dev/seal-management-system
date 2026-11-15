@@ -13,6 +13,11 @@ import {
   ExternalLink,
   AlertTriangle,
   Megaphone,
+  ArrowRight,
+  LifeBuoy,
+  Calendar,
+  LayoutGrid,
+  CircleCheck,
 } from "lucide-react";
 import RegisterTeam from "./RegisterTeam";
 import { useConform } from "../shared/ModalConform";
@@ -121,7 +126,7 @@ function SeminarWidget({ seminar }: SeminarWidgetProps) {
         <div className="space-y-2 min-w-0 text-left">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[10px] text-cyan-400 font-bold border border-cyan-500/30 px-2 py-0.5 rounded-sm bg-cyan-950/20 tracking-widest uppercase">
-              [SEMINAR_HƯỚNG_DẪN]
+              Seminar hướng dẫn
             </span>
             {isOngoing ? (
               <span className="flex items-center gap-1 text-[9px] font-extrabold px-2.5 py-0.5 rounded-sm bg-emerald-500/15 border border-emerald-500/30 text-emerald-450 uppercase tracking-wider animate-pulse">
@@ -165,7 +170,7 @@ function SeminarWidget({ seminar }: SeminarWidgetProps) {
             <span className="text-[8px] text-slate-500 uppercase tracking-wider font-bold">
               Thời gian đếm ngược
             </span>
-            <div className="text-xl font-black text-cyan-400 font-mono tracking-widest text-cyan-glow mt-0.5">
+            <div className="text-xl font-bold text-cyan-400 tabular-nums tracking-wide mt-0.5">
               {getCountdownText()}
             </div>
           </div>
@@ -454,11 +459,11 @@ export default function TeamArea() {
   const getTeamStatusText = (status: string) => {
     switch (status?.toLowerCase()) {
       case "confirmed":
-        return "ĐÃ XÁC NHẬN";
+        return "Đã xác nhận";
       case "pending_confirm":
-        return "ĐANG CHỜ DUYỆT";
+        return "Đang chờ duyệt";
       default:
-        return status?.toUpperCase() || "";
+        return status || "";
     }
   };
 
@@ -663,7 +668,7 @@ export default function TeamArea() {
 
   if (loading) {
     return (
-      <div className="team-area-light relative overflow-hidden font-sans bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center font-mono">
+      <div className="team-area-light relative overflow-hidden font-sans bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
         {/* Background Grid & Glow */}
         <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(242,112,36,0.05)_0%,transparent_40%)]"></div>
         <p className="relative z-10 text-slate-500 text-lg animate-pulse">
@@ -675,7 +680,7 @@ export default function TeamArea() {
 
   if (error && !data) {
     return (
-      <div className="team-area-light relative overflow-hidden font-sans bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center font-mono">
+      <div className="team-area-light relative overflow-hidden font-sans bg-slate-50 text-slate-900 min-h-screen flex items-center justify-center">
         {/* Background Grid & Glow */}
         <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(242,112,36,0.05)_0%,transparent_40%)]"></div>
         <div className="relative z-10 glass p-8 rounded-3xl border border-rose-500/20 max-w-md mx-auto text-center">
@@ -704,187 +709,459 @@ export default function TeamArea() {
     return <RegisterTeam />;
   }
 
-  return (
-    <div className="team-area-light relative overflow-hidden font-sans bg-[#faf9f6] text-slate-900 min-h-screen">
-      {/* Background Grid & Glow */}
-      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(242,112,36,0.05)_0%,transparent_40%)]"></div>
+  const isConfirmedTeam = team?.status?.toLowerCase() === "confirmed";
+  const isRegistrationPhase =
+    !hasContestStarted ||
+    team?.eventId?.status === "registration" ||
+    team?.eventId?.status === "upcoming";
+  const roundCountdown = getRoundCountdown();
+  const contestStartAt = team?.eventId?.contestStart;
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 space-y-8 font-mono">
-        {/* Top Banner team details */}
-        <div className="bg-white p-8 rounded-3xl relative overflow-hidden border border-slate-200 shadow-xs transition-all text-slate-800">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
-            {/* Main Info (Col 5): Team name & Status */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={`text-[10px] px-2.5 py-0.5 rounded font-extrabold tracking-wider ${team?.status?.toLowerCase() === "confirmed"
-                    ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                    : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                    }`}
-                >
-                  {getTeamStatusText(team?.status)}
+  const phase: {
+    label: string;
+    value: string;
+    timerLabel?: string;
+    timerValue?: string;
+  } | null = isRegistrationPhase
+    ? {
+        label: "Trạng thái giải đấu",
+        value: "Đang mở đăng ký",
+        ...(contestStartAt && {
+          timerLabel: "Cuộc thi bắt đầu sau",
+          timerValue:
+            new Date(contestStartAt) > currentTime
+              ? getRemainingTimeText(contestStartAt)
+              : "Sắp diễn ra",
+        }),
+      }
+    : team?.currentEventRound
+      ? {
+          label: "Vòng thi hiện tại",
+          value: team.currentEventRound,
+          ...(roundCountdown && {
+            timerLabel: "Thời gian làm bài",
+            timerValue: roundCountdown.text,
+          }),
+        }
+      : null;
+
+  const showMentorChat = team?.eventId?.status === "ongoing" && !team?.isEliminated;
+  const showZalo = !!team?.eventId?.zaloUrl;
+  const hasSupport = showMentorChat || showZalo;
+  const hasSidebar = isExamVisible || hasSupport;
+
+  const initialOf = (name?: string) =>
+    (name || "").trim().split(/\s+/).pop()?.charAt(0).toUpperCase() || "?";
+
+  const renderMembersCard = (wide: boolean) => (
+    <section className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+      <header className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+          <Users size={20} className="text-primary" />
+          Thành viên
+          <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-semibold text-primary">
+            {members?.length || 0}
+          </span>
+        </h2>
+        {isLeader && !hasContestStarted && (
+          <button
+            type="button"
+            onClick={handleOpenEditModal}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-secondary/25 px-3 py-1.5 text-xs font-semibold text-secondary transition-colors hover:bg-secondary-soft cursor-pointer"
+          >
+            <Edit3 size={14} />
+            Sửa thông tin
+          </button>
+        )}
+      </header>
+
+      {!hasContestStarted && (
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm leading-relaxed text-amber-800">
+          <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          <span>
+            Kiểm tra kỹ thông tin đội và thành viên trước khi cuộc thi chính
+            thức bắt đầu.
+          </span>
+        </div>
+      )}
+
+      <ul
+        className={
+          wide
+            ? "grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            : "max-h-[420px] space-y-2.5 overflow-y-auto pr-1"
+        }
+      >
+        {members?.map((m: any) => {
+          const isLeaderRow = m.role === "leader";
+          const isConfirmed = m.confirmStatus === "confirmed";
+          return (
+            <li
+              key={m._id}
+              className="flex items-center gap-3 rounded-xl border border-line bg-canvas p-3"
+            >
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  isLeaderRow ? "bg-primary text-white!" : "bg-secondary-soft text-secondary"
+                }`}
+              >
+                {initialOf(m.userId?.fullName)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-semibold text-ink">
+                    {m.userId?.fullName}
+                  </p>
+                  {isLeaderRow && (
+                    <Crown size={14} className="shrink-0 fill-amber-400/30 text-amber-500" />
+                  )}
+                </div>
+                <p className="truncate text-xs text-ink-muted">{m.userId?.email}</p>
+                {(m.userId?.studentId || m.userId?.university) && (
+                  <p className="truncate text-xs text-ink-muted">
+                    {m.userId?.studentId}
+                    {m.userId?.studentId && m.userId?.university && " · "}
+                    {m.userId?.university}
+                  </p>
+                )}
+              </div>
+              {isConfirmed ? (
+                isLeaderRow ? (
+                  <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                    Trưởng nhóm
+                  </span>
+                ) : (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                    <CircleCheck size={12} />
+                    Đã xác nhận
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                  <Clock size={12} />
+                  Chờ duyệt
                 </span>
-              </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 
-              <div>
-                <h1 className="text-3xl sm:text-4xl font-black text-slate-800 uppercase tracking-tight">
-                  {team?.name}
-                </h1>
-              </div>
+  const renderSupportCard = () =>
+    hasSupport && (
+      <section className="space-y-3 rounded-2xl border border-line bg-white p-6 shadow-sm">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+          <LifeBuoy size={20} className="text-primary" />
+          Hỗ trợ
+        </h2>
+        {showMentorChat && (
+          <button
+            type="button"
+            onClick={() =>
+              window.dispatchEvent(
+                new CustomEvent("open_chat_room", { detail: { teamId: team._id } }),
+              )
+            }
+            className="group flex w-full items-center gap-3 rounded-xl border border-line bg-canvas p-3 text-left transition-colors hover:border-primary/30 hover:bg-primary-soft/50 cursor-pointer"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary">
+              <MessageSquare size={18} />
             </div>
-
-            {/* Vertical Divider (Hidden on mobile) */}
-            <div className="hidden lg:block lg:col-span-1 h-16 border-l border-slate-200 mx-auto"></div>
-
-            {/* Contest Metadata (Col 3): Event & Semester */}
-            <div className="lg:col-span-3 space-y-3 font-sans">
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  CUỘC THI
-                </span>
-                <span className="text-xl font-extrabold text-slate-800 font-mono uppercase truncate block">
-                  {team?.eventId?.name || "---"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  HỌC KỲ
-                </span>
-                <span className="text-xl font-bold text-slate-600 font-mono">
-                  {team?.eventId?.semester
-                    ? `${team.eventId.semester} ${team.eventId.year}`
-                    : "---"}
-                </span>
-              </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-ink">Nhắn tin Mentor</p>
+              <p className="text-xs text-ink-muted">Hỏi đáp trực tiếp với Mentor hướng dẫn.</p>
             </div>
+            <ArrowRight size={16} className="shrink-0 text-ink-muted transition-colors group-hover:text-primary" />
+          </button>
+        )}
+        {showZalo && (
+          <a
+            href={team.eventId.zaloUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="group flex w-full items-center gap-3 rounded-xl border border-line bg-canvas p-3 text-left transition-colors hover:border-blue-300 hover:bg-blue-50/60"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <MessageSquare size={18} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-ink">Nhóm Zalo đội thi</p>
+              <p className="text-xs text-ink-muted">Hỗ trợ kỹ thuật và thông báo khẩn từ BTC.</p>
+            </div>
+            <ExternalLink size={16} className="shrink-0 text-ink-muted transition-colors group-hover:text-blue-600" />
+          </a>
+        )}
+      </section>
+    );
 
-            {/* Track & Size Info (Col 3): Bảng đấu & Thành viên */}
-            <div className="lg:col-span-3 space-y-3 font-sans">
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  BẢNG ĐẤU
-                </span>
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full mt-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                  {team?.trackId?.name || "Chờ phân bảng"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[9px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  THÀNH VIÊN
-                </span>
-                <span className="text-xl font-semibold text-slate-600 flex items-center gap-1.5 mt-1 font-mono">
-                  <Users size={14} className="text-slate-400" />
-                  <span>{members?.length || 0} Thành viên</span>
-                </span>
-              </div>
+  const renderExamCountdown = (title: string, openAt: string) => (
+    <div className="flex flex-col items-center gap-4 py-6 text-center">
+      <p className="text-sm font-medium text-amber-700">{title}</p>
+      <div className="rounded-xl bg-primary-soft px-6 py-3.5 text-3xl font-bold tracking-wide text-primary tabular-nums">
+        {getRemainingTimeText(openAt)}
+      </div>
+      <p className="text-xs text-ink-muted">
+        Thời gian mở đề: {new Date(openAt).toLocaleString("vi-VN")}
+      </p>
+    </div>
+  );
+
+  const renderExamCard = () => (
+    <section className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-ink">
+          <BookOpen size={20} className="text-primary" />
+          Đề bài &amp; tài liệu thi
+        </h2>
+        {round && (
+          <span className="rounded-full bg-secondary-soft px-2.5 py-1 text-xs font-semibold text-secondary">
+            Vòng {round.name}
+          </span>
+        )}
+      </header>
+
+      {team?.eventId?.contestStart &&
+      new Date(team.eventId.contestStart) > currentTime &&
+      !hasContestStarted ? (
+        renderExamCountdown(
+          `Đề bài cuộc thi "${team.eventId.name}" sẽ được mở sau`,
+          team.eventId.contestStart,
+        )
+      ) : round?.startTime &&
+        new Date(round.startTime) > currentTime &&
+        !round?.isExamManualOpen &&
+        round?.status !== "active" &&
+        !team?.trackId?.examAccess?.examOpened ? (
+        renderExamCountdown(`Đề bài vòng "${round.name}" sẽ được mở sau`, round.startTime)
+      ) : team?.trackId?.examAccess?.examOpened ? (
+        (() => {
+          const effectiveTrackName =
+            team.trackId.originalTrackName || team.trackId.name || "";
+          return (
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Đề đã mở khóa · Bảng {effectiveTrackName}
+              </span>
+              <h3
+                className="text-xl font-bold leading-snug text-ink"
+                title={team.trackId.examAccess.examDriveFileName || `Đề bảng ${effectiveTrackName}`}
+              >
+                {team.trackId.examAccess.examDriveFileName ||
+                  `Đề thi & tài liệu hướng dẫn — Bảng ${effectiveTrackName}`}
+              </h3>
+              <p className="text-sm leading-relaxed text-ink-muted">
+                Tài liệu đề bài, sơ đồ kiến trúc hệ thống và dữ liệu mẫu nằm trong
+                thư mục Google Drive riêng của bảng {effectiveTrackName}. Tải về để
+                bắt đầu nghiên cứu và thiết lập môi trường làm bài.
+              </p>
+              <a
+                href={team.trackId.examAccess.examDriveFileUrl || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white! shadow-sm transition-colors hover:bg-primary-hover"
+              >
+                <BookOpen size={16} />
+                Mở đề thi
+                <ExternalLink size={14} />
+              </a>
+            </div>
+          );
+        })()
+      ) : team?.trackId?.examAccess?.hasExamMaterial ? (
+        <div className="py-6 text-center">
+          <Clock size={32} className="mx-auto mb-2 text-amber-500" />
+          <p className="font-semibold text-ink">Đề thi đang được chuẩn bị</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            Đề đã được gắn nhưng chưa đến giờ mở khóa hoặc chưa cấu hình thời gian mở đề.
+          </p>
+        </div>
+      ) : (
+        <div className="py-6 text-center">
+          <BookOpen size={32} className="mx-auto mb-2 text-slate-300" />
+          <p className="text-sm text-ink-muted">
+            Hiện chưa có đề bài hoặc tài liệu thi được phân phối cho vòng này.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+
+  const renderGithubCard = () =>
+    repository ? (
+      <section className="rounded-2xl border border-line bg-white p-6 shadow-sm">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink text-white!">
+              <Github size={20} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-ink-muted">GitHub repository</p>
+              <p className="truncate font-semibold text-ink">
+                {repository.orgName
+                  ? `${repository.orgName}/${repository.repoName}`
+                  : repository.repoName}
+              </p>
             </div>
           </div>
-        </div>
+          {repository.repoUrl && (
+            <a
+              href={repository.repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-secondary/25 px-4 py-2 text-sm font-semibold text-secondary transition-colors hover:bg-secondary-soft"
+            >
+              Mở repo
+              <ExternalLink size={14} />
+            </a>
+          )}
+        </header>
 
-        {/* Active Round Banner */}
-        {(() => {
-          const countdown = getRoundCountdown();
-          const isRegistration =
-            !hasContestStarted ||
-            team?.eventId?.status === "registration" ||
-            team?.eventId?.status === "upcoming";
-
-          if (isRegistration) {
-            const hasContestStart = team?.eventId?.contestStart;
-            return (
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs text-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-                  <div>
-                    <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                      Trạng thái giải đấu
-                    </span>
-                    <p className="text-xs sm:text-sm font-bold text-slate-800">
-                      Chưa mở{" "}
-                      <span className="text-primary font-extrabold uppercase font-mono">
-                        (Đang mở đăng ký đội thi)
-                      </span>
+        <div className="pt-4">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+            Commit gần đây
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+              {commits.length}
+            </span>
+          </h3>
+          {commits.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-line py-8 text-center text-sm text-ink-muted">
+              Chưa có commit nào. Commit được đồng bộ mỗi{" "}
+              {team?.eventId?.commitSyncInterval || 30} phút.
+            </p>
+          ) : (
+            <ul className="max-h-[520px] space-y-2.5 overflow-y-auto pr-1">
+              {commits.map((c: any) => (
+                <li
+                  key={c._id}
+                  className="rounded-xl border border-line bg-canvas p-4 transition-colors hover:border-primary/30"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 wrap-break-word font-semibold leading-snug text-ink">
+                      {c.message}
                     </p>
+                    <code className="shrink-0 rounded-md bg-white px-2 py-0.5 font-mono text-xs text-secondary ring-1 ring-line">
+                      {c.commitSha.substring(0, 7)}
+                    </code>
                   </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
+                    <span>
+                      <span className="font-medium text-ink">{c.authorName}</span> @{c.authorGithubUsername}
+                    </span>
+                    <span>{new Date(c.committedAt).toLocaleString("vi-VN")}</span>
+                    <span className="font-medium text-emerald-600">+{c.additions}</span>
+                    <span className="font-medium text-rose-600">−{c.deletions}</span>
+                    <span>{c.changedFilesCount} tệp</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+    ) : (
+      <section className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-line bg-white p-8 text-center shadow-sm">
+        <Github size={44} className="mb-3 text-slate-300" />
+        <p className="text-lg font-semibold text-ink">Chưa thiết lập GitHub repository</p>
+        <p className="mt-1 max-w-sm text-sm text-ink-muted">
+          Repository sẽ được tự động tạo và phân quyền sau khi tất cả thành viên
+          xác nhận tham gia qua email.
+        </p>
+      </section>
+    );
+
+  return (
+    <div className="team-area-light relative min-h-screen overflow-hidden bg-canvas text-ink">
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(1,67,145,0.05)_0%,transparent_40%)]"></div>
+
+      <div className="relative z-10 mx-auto max-w-7xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
+        {/* Team banner */}
+        <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-secondary to-secondary-hover p-6 text-white! shadow-lg shadow-secondary/20 sm:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10" />
+          <div className="pointer-events-none absolute -bottom-24 right-1/3 h-48 w-48 rounded-full bg-primary/25 blur-3xl" />
+
+          <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/15 text-3xl font-bold ring-1 ring-white/30 sm:h-20 sm:w-20 sm:text-4xl">
+                {(team?.name || "?").trim().charAt(0).toUpperCase()}
+              </div>
+              <div className="min-w-0 space-y-2">
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${
+                    isConfirmedTeam
+                      ? "bg-emerald-400/20 text-emerald-100 ring-emerald-300/40"
+                      : "bg-amber-400/20 text-amber-100 ring-amber-300/40"
+                  }`}
+                >
+                  {isConfirmedTeam ? <CircleCheck size={12} /> : <Clock size={12} />}
+                  {getTeamStatusText(team?.status)}
+                </span>
+                <h1 className="truncate text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  {team?.name}
+                </h1>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-white/80">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Trophy size={14} />
+                    {team?.eventId?.name || "---"}
+                  </span>
+                  {team?.eventId?.semester && (
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar size={14} />
+                      {team.eventId.semester} {team.eventId.year}
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1.5">
+                    <LayoutGrid size={14} />
+                    {team?.trackId?.name ? `Bảng ${team.trackId.name}` : "Chờ phân bảng"}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Users size={14} />
+                    {members?.length || 0} thành viên
+                  </span>
                 </div>
-                {/* Timer / Info section */}
-                {hasContestStart && (
-                  <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
-                    <Clock size={14} className="text-primary" />
-                    <div className="text-xs font-mono">
-                      <span className="text-slate-400 uppercase tracking-wider text-[9px] block">
-                        Thời gian mở cuộc thi
-                      </span>
-                      <span className="text-amber-600 font-bold">
-                        {new Date(hasContestStart) > currentTime
-                          ? getRemainingTimeText(hasContestStart)
-                          : "Sắp diễn ra"}
-                      </span>
+              </div>
+            </div>
+
+            {phase && (
+              <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-sm lg:min-w-72">
+                <p className="text-xs font-medium uppercase tracking-wide text-white/70">
+                  {phase.label}
+                </p>
+                <p className="mt-1 text-xl font-bold">{phase.value}</p>
+                {phase.timerLabel && (
+                  <div className="mt-3 flex items-center gap-2.5 border-t border-white/15 pt-3">
+                    <Clock size={18} className="shrink-0 text-primary" />
+                    <div>
+                      <p className="text-xs text-white/70">{phase.timerLabel}</p>
+                      <p className="font-semibold tabular-nums">{phase.timerValue}</p>
                     </div>
                   </div>
                 )}
               </div>
-            );
-          }
+            )}
+          </div>
+        </section>
 
-          if (!team?.currentEventRound) return null;
-
-          return (
-            <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs text-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-primary"></div>
-                <div>
-                  <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                    Trạng thái giải đấu
-                  </span>
-                  <p className="text-xs sm:text-sm font-bold text-slate-800">
-                    Vòng thi hiện tại:{" "}
-                    <span className="text-primary font-extrabold uppercase font-mono">
-                      {team.currentEventRound}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              {/* Timer section */}
-              {countdown && (
-                <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">
-                  <Clock size={14} className="text-primary" />
-                  <div className="text-xs font-mono">
-                    <span className="text-slate-400 uppercase tracking-wider text-[9px] block">
-                      Thời gian làm bài
-                    </span>
-                    <span className={`${countdown.color} font-bold`}>
-                      {countdown.text}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* Prominent Team Area Announcement (Location / Preliminary Round Notice) */}
+        {/* Announcement from organisers */}
         {team?.eventId?.locationAnnouncement &&
           team.eventId.locationAnnouncement.trim().length > 0 && (
-            <div className="relative overflow-hidden bg-linear-to-r from-orange-500/8 via-amber-500/4 to-slate-50/80 p-5 sm:p-6 rounded-2xl border-2 border-primary/30 shadow-xs transition-all hover:border-primary/50">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/15 text-primary rounded-xl border border-primary/30 shrink-0 shadow-inner">
-                  <Megaphone size={22} className="animate-pulse" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-primary text-white shadow-xs shadow-orange-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-                      Thông báo từ BTC
-                    </span>
-                    <span className="text-[11px] text-slate-500 font-mono font-bold">
-                      Khu vực thi &amp; Địa điểm
-                    </span>
-                  </div>
-                  <div className="text-xs sm:text-sm text-slate-800 leading-relaxed font-sans font-medium whitespace-pre-line wrap-break-word">
-                    {team.eventId.locationAnnouncement}
-                  </div>
+            <div className="flex items-start gap-4 rounded-2xl border border-primary/30 bg-primary-soft p-5 sm:p-6">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white!">
+                <Megaphone size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                  Thông báo từ BTC
+                </p>
+                {team.eventId.locationAnnouncementTitle?.trim() && (
+                  <h3 className="mt-0.5 text-lg font-bold leading-snug text-ink wrap-break-word">
+                    {team.eventId.locationAnnouncementTitle.trim()}
+                  </h3>
+                )}
+                <div className="mt-2 whitespace-pre-line wrap-break-word text-sm leading-relaxed text-ink">
+                  {team.eventId.locationAnnouncement}
                 </div>
               </div>
             </div>
@@ -895,474 +1172,71 @@ export default function TeamArea() {
           !isExamVisible &&
           team?.eventId?.status !== "ongoing" &&
           team?.eventId?.status !== "completed" &&
-          !team?.isEliminated && (
-            <SeminarWidget seminar={team.eventId.seminar} />
-          )}
+          !team?.isEliminated && <SeminarWidget seminar={team.eventId.seminar} />}
 
-        {/* Chat Section */}
-        {team && team.eventId?.status === "ongoing" && !team.isEliminated && (
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs mb-8 flex flex-col md:flex-row items-center justify-between gap-4 text-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-primary/10 text-primary rounded-xl border border-primary/20">
-                <MessageSquare size={20} />
-              </div>
-              <div>
-                <h3 className="text-slate-800 font-bold">Hỗ trợ từ Mentor</h3>
-                <p className="text-xs text-slate-500 font-sans">
-                  Bạn có câu hỏi hoặc cần sự giúp đỡ? Hãy nhắn tin trao đổi trực
-                  tiếp với Mentor hướng dẫn.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                window.dispatchEvent(
-                  new CustomEvent("open_chat_room", {
-                    detail: { teamId: team._id },
-                  }),
-                );
-              }}
-              className="px-5 py-2.5 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase rounded-xl transition-all shadow-md shadow-orange-500/20 whitespace-nowrap cursor-pointer font-sans"
-            >
-              Nhắn tin ngay
-            </button>
-          </div>
-        )}
-
-        {/* Dynamic Exam / Topic / Round / Code Dashboard Grid */}
+        {/* Main content + sidebar */}
         {team && !team.isEliminated && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 items-stretch">
-            {/* Left: Exam & Materials Card */}
-            {isExamVisible && (
-              <div
-                className={`lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs text-slate-800 relative overflow-hidden flex flex-col justify-between`}
-              >
-                <div className="flex flex-col justify-between h-full">
-                  <div className="flex justify-between items-center border-b border-slate-100 pb-3 mb-5">
-                    <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 font-mono-tech">
-                      <BookOpen size={18} className="text-primary" />
-                      <span className="text-primary">
-                        [ĐỀ_BÀI_&amp;_TÀI_LIỆU_THI]
-                      </span>
-                    </h2>
-                    {round && (
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-sm bg-slate-100 border border-slate-200 text-slate-600 font-mono uppercase tracking-wider">
-                        Vòng: {round.name}
-                      </span>
-                    )}
-                  </div>
-
-                  {team?.eventId?.contestStart &&
-                    new Date(team.eventId.contestStart) > currentTime &&
-                    !hasContestStarted ? (
-                    <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                      <div className="space-y-1.5 text-center">
-                        <p className="text-xs text-amber-600 font-sans font-semibold uppercase tracking-wider">
-                          Đề bài cuộc thi &quot;{team.eventId.name}&quot; sẽ
-                          được mở sau:
-                        </p>
-                        <p className="text-[9px] text-slate-400 font-mono">
-                          Thời gian mở đề:{" "}
-                          {new Date(team.eventId.contestStart).toLocaleString(
-                            "vi-VN",
-                          )}
-                        </p>
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-black text-primary font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
-                        {getRemainingTimeText(team.eventId.contestStart)}
-                      </div>
-                    </div>
-                  ) : round?.startTime &&
-                    new Date(round.startTime) > currentTime &&
-                    !round?.isExamManualOpen &&
-                    round?.status !== "active" &&
-                    !team?.trackId?.examAccess?.examOpened ? (
-                    <div className="flex flex-col items-center justify-center py-6 space-y-4">
-                      <div className="space-y-1.5 text-center">
-                        <p className="text-xs text-amber-600 font-sans font-semibold uppercase tracking-wider">
-                          Đề bài vòng thi &quot;{round.name}&quot; sẽ được mở
-                          sau:
-                        </p>
-                        <p className="text-[9px] text-slate-400 font-mono">
-                          Thời gian mở đề:{" "}
-                          {new Date(round.startTime).toLocaleString("vi-VN")}
-                        </p>
-                      </div>
-                      <div className="text-2xl sm:text-3xl font-black text-primary font-mono bg-slate-50 px-6 py-3.5 rounded-xl border border-slate-200 tracking-widest">
-                        {getRemainingTimeText(round.startTime)}
-                      </div>
-                    </div>
-                  ) : team?.trackId?.examAccess?.examOpened ? (() => {
-                    const effectiveTrackName = team.trackId.originalTrackName || team.trackId.name || "";
-                    return (
-                      <div className="flex flex-col justify-between h-full space-y-4 py-1">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <p className="text-[10px] font-bold text-emerald-600 uppercase font-mono tracking-wider">
-                              ĐỀ BÀI ĐÃ MỞ KHÓA — BẢNG{" "}
-                              {effectiveTrackName.toUpperCase()}
-                            </p>
-                          </div>
-                          <h3
-                            className="text-sm sm:text-base font-extrabold text-slate-800 leading-snug font-sans flex items-center gap-2"
-                            title={
-                              team.trackId.examAccess.examDriveFileName ||
-                              `Đề bảng ${effectiveTrackName}`
-                            }
-                          >
-                            <BookOpen
-                              size={18}
-                              className="text-primary shrink-0"
-                            />
-                            {team.trackId.examAccess.examDriveFileName ||
-                              `Đề thi & Tài liệu hướng dẫn — Bảng ${effectiveTrackName}`}
-                          </h3>
-                          <p className="text-xs text-slate-500 font-sans leading-relaxed">
-                            Tài liệu đề bài, sơ đồ kiến trúc hệ thống và dữ liệu
-                            mẫu được lưu trữ trên thư mục Google Drive riêng của
-                            bảng {effectiveTrackName}. Thí sinh vui lòng tải về để
-                            bắt đầu nghiên cứu và thiết lập thiết bị làm bài.
-                          </p>
-                        </div>
-
-                        <div className="pt-2 mt-auto">
-                          <a
-                            href={team.trackId.examAccess.examDriveFileUrl || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase py-2.5 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
-                          >
-                            <BookOpen size={14} />
-                            Mở đề thi
-                          </a>
-                        </div>
-                      </div>
-                    );
-                  })() : team?.trackId?.examAccess?.hasExamMaterial ? (
-                    <div className="text-center py-6 text-slate-500 font-sans text-xs">
-                      <Clock
-                        size={32}
-                        className="mx-auto text-amber-500 mb-2"
-                      />
-                      <p className="font-semibold text-slate-700">
-                        Đề thi đang được chuẩn bị
-                      </p>
-                      <p className="text-[10px] text-slate-400 mt-1">
-                        Đề đã được gắn nhưng chưa đến giờ mở khóa hoặc chưa cấu
-                        hình thời gian mở đề.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="text-center py-6 text-slate-400 italic font-sans text-xs">
-                      <BookOpen
-                        size={32}
-                        className="mx-auto text-slate-300 mb-2"
-                      />
-                      <p>
-                        Hiện chưa có đề bài hoặc tài liệu thi được phân phối cho
-                        vòng này.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Right: Members Card */}
-            <div
-              className={`${isExamVisible ? "lg:col-span-6" : "lg:col-span-12"} flex flex-col h-full`}
-            >
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs text-slate-800 text-left h-full flex flex-col justify-between flex-1">
-                <div>
-                  <h2 className="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between font-mono-tech border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Users size={18} className="text-primary" />
-                      <span className="text-primary">THÀNH VIÊN NHÓM</span>
-                    </div>
-                    {isLeader && !hasContestStarted && (
-                      <button
-                        onClick={handleOpenEditModal}
-                        className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary hover:bg-primary/10 px-2.5 py-1 rounded-sm border border-primary/20 transition-all cursor-pointer font-sans uppercase tracking-wider"
-                      >
-                        <Edit3 size={10} />
-                        Sửa thông tin
-                      </button>
-                    )}
-                  </h2>
-                  {!hasContestStarted && (
-                    <div className="mb-4 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-2.5 text-xs text-amber-600 leading-relaxed font-sans">
-                      <AlertTriangle size={15} className="shrink-0 mt-0.5" />
-                      <span>
-                        Đảm bảo đúng thông tin đội thi và thành viên trước khi
-                        cuộc thi chính thức bắt đầu.
-                      </span>
-                    </div>
-                  )}
-                  <div
-                    className={
-                      !isExamVisible
-                        ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5"
-                        : "space-y-3.5 max-h-[300px] overflow-y-auto pr-1"
-                    }
-                  >
-                    {members?.map((m: any) => (
-                      <div
-                        key={m._id}
-                        className={`flex items-center justify-between p-3 bg-slate-50 rounded-xl border text-xs ${m.role === "leader"
-                          ? "border-amber-500/30"
-                          : "border-slate-200"
-                          }`}
-                      >
-                        <div className="min-w-0 flex-1 pr-2">
-                          <div className="flex items-center gap-1.5">
-                            <p
-                              className={`font-bold truncate ${m.role === "leader" ? "text-amber-600" : "text-slate-800"}`}
-                            >
-                              {m.userId?.fullName}
-                            </p>
-                            {m.role === "leader" && (
-                              <Crown
-                                size={12}
-                                className="text-amber-500 shrink-0 fill-amber-500/20"
-                              />
-                            )}
-                          </div>
-                          <p className="text-[10px] text-slate-400 truncate">
-                            {m.userId?.email}
-                          </p>
-                          {(m.userId?.studentId || m.userId?.university) && (
-                            <p className="text-[10px] text-slate-500 font-mono mt-0.5 truncate">
-                              {m.userId?.studentId &&
-                                `MSSV: ${m.userId.studentId}`}
-                              {m.userId?.studentId &&
-                                m.userId?.university &&
-                                " • "}
-                              {m.userId?.university}
-                            </p>
-                          )}
-                        </div>
-                        <div className="shrink-0 flex items-center gap-1">
-                          {m.confirmStatus === "confirmed" ? (
-                            m.role === "leader" ? (
-                              <span className="flex items-center gap-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 px-2.5 py-0.5 rounded-sm text-[9px] font-extrabold uppercase">
-                                Leader
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-0.5 bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-0.5 rounded-sm text-[9px] font-extrabold uppercase">
-                                Member
-                              </span>
-                            )
-                          ) : (
-                            <span className="flex items-center gap-0.5 bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded-sm text-[9px] font-bold">
-                              <Clock size={8} /> {m.role === "leader" ? "Leader (Chờ duyệt)" : "Chờ duyệt"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Zalo Card */}
-              {team.eventId?.zaloUrl && (
-                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs text-slate-800 relative overflow-hidden text-left">
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-600 shrink-0">
-                      <MessageSquare size={20} />
-                    </div>
-                    <div className="space-y-3 flex-1 min-w-0">
-                      <div>
-                        <h3 className="text-xs font-bold text-slate-800 font-mono uppercase tracking-wide">
-                          KÊNH ZALO HỖ TRỢ ĐỘI THI
-                        </h3>
-                        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed font-sans">
-                          Tham gia nhóm Zalo hỗ trợ kỹ thuật và nhận thông báo
-                          khẩn cấp từ BTC.
-                        </p>
-                      </div>
-                      <a
-                        href={team.eventId.zaloUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white! font-bold text-[10px] uppercase rounded-xl transition-all shadow-md shadow-blue-600/10 tracking-wider font-mono cursor-pointer border border-blue-400/20"
-                      >
-                        <span>Tham gia ngay</span>
-                        <ExternalLink size={12} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
+          <div className={`grid items-start gap-6 ${hasSidebar ? "lg:grid-cols-12" : ""}`}>
+            <div className={`space-y-6 ${hasSidebar ? "lg:col-span-8" : ""}`}>
+              {isExamVisible ? (
+                <>
+                  {renderExamCard()}
+                  {renderGithubCard()}
+                </>
+              ) : (
+                renderMembersCard(!hasSidebar)
               )}
             </div>
-          </div>
-        )}
-
-        {isExamVisible && !team?.isEliminated && (
-          <div className="w-full space-y-8 mt-8">
-            {/* GitHub Integration & AI Commit Reviews */}
-            {repository ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Repository Info Column */}
-                <div className="lg:col-span-3 bg-white p-5 rounded-2xl space-y-4 border border-slate-200 shadow-xs text-slate-800 text-left">
-                  <h3 className="text-sm font-bold text-slate-800 flex items-center gap-1.5 font-mono-tech border-b border-slate-100 pb-3">
-                    <Github size={16} className="text-primary" />
-                    <span className="text-primary">[GITHUB_REPOSITORY]</span>
-                  </h3>
-
-                  <div className="space-y-4 font-mono text-xs">
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">
-                        Tên Repo
-                      </span>
-                      <p className="text-xs font-bold text-slate-800 mt-1 break-all">
-                        {repository.orgName
-                          ? `${repository.orgName}/${repository.repoName}`
-                          : repository.repoName}
-                      </p>
-                    </div>
-
-                    {repository.repoUrl && (
-                      <div className="pt-2">
-                        <a
-                          href={repository.repoUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-[#d95f1f] text-white! text-xs font-bold uppercase py-2 px-4 rounded-xl transition-all shadow-md shadow-orange-500/20 text-center cursor-pointer"
-                        >
-                          <ExternalLink size={12} />
-                          Mở GitHub Repo
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Commits Area Card (Merged list and details) */}
-                <div className="lg:col-span-9 glass p-6 rounded-2xl border border-slate-800 text-left">
-                  <h3 className="text-sm font-bold text-slate-200 flex items-center gap-1.5 font-mono-tech border-b border-slate-800 pb-3 mb-4">
-                    <Github size={16} className="text-cyan-400" />
-                    <span className="text-cyan-400">
-                      [GITHUB_COMMITS_({commits.length})]
-                    </span>
-                  </h3>
-
-                  {commits.length === 0 ? (
-                    <p className="text-xs text-slate-500 italic py-8 text-center">
-                      Chưa crawl được commit nào. Commit sẽ được đồng bộ mỗi{" "}
-                      {team?.eventId?.commitSyncInterval || 30} phút.
-                    </p>
-                  ) : (
-                    <div className="space-y-4 max-h-[550px] overflow-y-auto pr-1">
-                      {commits.map((c: any) => (
-                        <div
-                          key={c._id}
-                          className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2 text-left font-mono"
-                        >
-                          <div className="flex justify-between items-center text-[10px] text-cyan-400 font-bold font-mono-tech">
-                            <span>SHA: {c.commitSha.substring(0, 8)}</span>
-                            <span>
-                              {new Date(c.committedAt).toLocaleString("vi-VN")}
-                            </span>
-                          </div>
-                          <h4 className="text-sm font-bold text-white leading-snug">
-                            {c.message}
-                          </h4>
-                          <p className="text-xs text-slate-400">
-                            Tác giả:{" "}
-                            <span className="text-slate-350 font-semibold">
-                              {c.authorName} (@{c.authorGithubUsername})
-                            </span>
-                          </p>
-                          <div className="flex gap-3 text-[10px] pt-1">
-                            <span className="text-emerald-400">
-                              +{c.additions} dòng
-                            </span>
-                            <span className="text-rose-400">
-                              -{c.deletions} dòng
-                            </span>
-                            <span className="text-slate-400">
-                              {c.changedFilesCount} tệp
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xs text-slate-800 text-center flex flex-col items-center justify-center min-h-[300px]">
-                <Github size={48} className="text-slate-400 mb-3" />
-                <p className="font-semibold text-lg text-slate-800">
-                  Chưa thiết lập GitHub Repository
-                </p>
-                <p className="text-sm text-slate-500 max-w-sm mt-1">
-                  Đường dẫn repository sẽ tự động được tạo và phân quyền sau khi
-                  tất cả các thành viên xác nhận tham gia nhóm qua link email.
-                </p>
-              </div>
+            {hasSidebar && (
+              <aside className="space-y-6 lg:sticky lg:top-24 lg:col-span-4">
+                {isExamVisible && renderMembersCard(false)}
+                {renderSupportCard()}
+              </aside>
             )}
           </div>
         )}
 
         {team?.isEliminated && (
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xs text-slate-800 text-center space-y-6 max-w-2xl mx-auto mt-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
+          <section className="mx-auto max-w-2xl space-y-6 rounded-3xl border border-line bg-white p-8 text-center shadow-sm">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-primary">
               <Trophy size={28} />
             </div>
 
-            <div className="space-y-2 font-sans">
-              <h2 className="text-xl font-black text-slate-800 uppercase tracking-wider font-mono-tech">
-                Kết Quả Đạt Được
-              </h2>
-              <p className="text-xs text-slate-500">
-                Thành tích chính thức của đội thi{" "}
-                <strong className="text-slate-800">{team.name}</strong> ghi nhận
-                tại cuộc thi.
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-ink">Kết quả đạt được</h2>
+              <p className="text-sm text-ink-muted">
+                Thành tích chính thức của đội{" "}
+                <strong className="text-ink">{team.name}</strong> tại cuộc thi.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
-                <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  Thứ hạng (Bảng)
-                </span>
-                <p className="text-2xl font-black text-primary font-mono">
-                  {team.achievedResult?.rank
-                    ? `Top ${team.achievedResult.rank}`
-                    : "---"}
+            <div className="mx-auto grid max-w-md grid-cols-2 gap-4">
+              <div className="space-y-1 rounded-2xl border border-line bg-canvas p-4">
+                <span className="block text-xs font-medium text-ink-muted">Thứ hạng (bảng)</span>
+                <p className="text-2xl font-bold text-primary tabular-nums">
+                  {team.achievedResult?.rank ? `Top ${team.achievedResult.rank}` : "---"}
                 </p>
               </div>
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
-                <span className="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-bold">
-                  Điểm trung bình
-                </span>
-                <p className="text-2xl font-black text-emerald-600 font-mono">
-                  {team.achievedResult?.score
-                    ? `${team.achievedResult.score.toFixed(2)}`
-                    : "---"}
+              <div className="space-y-1 rounded-2xl border border-line bg-canvas p-4">
+                <span className="block text-xs font-medium text-ink-muted">Điểm trung bình</span>
+                <p className="text-2xl font-bold text-emerald-600 tabular-nums">
+                  {team.achievedResult?.score ? `${team.achievedResult.score.toFixed(2)}` : "---"}
                 </p>
               </div>
             </div>
 
             {team.achievedResult && (
-              <div className="text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-100 max-w-sm mx-auto">
-                <span>
-                  Ghi nhận tại: {team.achievedResult.roundName} (
-                  {team.achievedResult.trackName})
-                </span>
-              </div>
+              <p className="mx-auto max-w-sm border-t border-line pt-3 text-xs text-ink-muted">
+                Ghi nhận tại: {team.achievedResult.roundName} ({team.achievedResult.trackName})
+              </p>
             )}
 
-            <p className="text-xs text-slate-500 leading-relaxed font-sans max-w-md mx-auto pt-2">
-              Cảm ơn bạn đã cống hiến hết mình tại giải đấu năm nay! Chúc đội
-              thi <strong className="text-slate-800">{team.name}</strong> gặt
-              hái được nhiều thành công hơn nữa trên con đường phát triển công
-              nghệ sắp tới.
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-ink-muted">
+              Cảm ơn bạn đã cống hiến hết mình tại giải đấu năm nay! Chúc đội{" "}
+              <strong className="text-ink">{team.name}</strong> gặt hái nhiều thành
+              công hơn nữa trên con đường phát triển công nghệ.
             </p>
-          </div>
+          </section>
         )}
 
         {/* Edit Basic Info Modal */}

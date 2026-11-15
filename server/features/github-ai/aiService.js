@@ -1,4 +1,6 @@
 const isMock = process.env.GEMINI_SERVICE_MOCK === 'true';
+// Provider tag stored on placeholder results; sync code uses it to tell them apart from real reviews.
+const MOCK_PROVIDER = 'Mock Service';
 
 // Import Global System-Level Harness Layers
 const promptsManager = require('../../harness/boundaries/promptsManager');
@@ -334,21 +336,70 @@ function filterCriteriaComments(result, roundCriteria) {
   return result;
 }
 
+// Statuses worth retrying when the workflow does not say otherwise (rate limit / transient upstream errors).
+const N8N_RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504]);
+const N8N_MAX_RETRY_DELAY_MS = 90000;
+
+// Swappable so tests do not have to wait for real backoff delays.
+let sleepFn = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+function parseRetryAfterSeconds(headerValue) {
+  if (!headerValue) return null;
+  const seconds = Number(headerValue);
+  if (Number.isFinite(seconds)) return seconds;
+  const date = Date.parse(headerValue);
+  return Number.isNaN(date) ? null : Math.max(0, (date - Date.now()) / 1000);
+}
+
 /**
- * Call n8n webhook workflow asynchronously or synchronously with retry support.
+ * Decides whether a failed n8n call is worth retrying and how long to wait first.
+ * The workflow's own `retryable` / `retryAfter` fields take precedence over the HTTP status,
+ * so a 4xx validation error is never re-sent (it would fail the same way and still cost a call).
  */
-async function callN8nWebhook(payload, maxRetries = 2) {
+function classifyN8nFailure({ status = 0, body = null, retryAfterHeader = null, networkError = false } = {}) {
+  const retryable = typeof body?.retryable === 'boolean'
+    ? body.retryable
+    : networkError || N8N_RETRYABLE_STATUSES.has(status);
+
+  const hintedSeconds = Number(body?.retryAfter) > 0
+    ? Number(body.retryAfter)
+    : parseRetryAfterSeconds(retryAfterHeader);
+  // A rate limit needs the per-minute window to roll over; other transient errors recover sooner.
+  const fallbackSeconds = status === 429 ? 60 : 30;
+  const delayMs = Math.min((hintedSeconds ?? fallbackSeconds) * 1000, N8N_MAX_RETRY_DELAY_MS);
+
+  return { retryable, delayMs };
+}
+
+function getN8nMaxRetries() {
+  const parsed = parseInt(process.env.N8N_MAX_RETRIES, 10);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : 1;
+}
+
+/**
+ * Calls the n8n webhook workflow, retrying only transient failures.
+ * Returns the parsed AI result, or null when n8n is not configured or every attempt failed.
+ * The last failure reason is written to `diagnostics.lastError` so callers can surface it.
+ */
+async function callN8nWebhook(payload, diagnostics = {}) {
   const n8nUrl = process.env.N8N_WEBHOOK_URL;
-  if (!n8nUrl) return null;
+  if (!n8nUrl) {
+    diagnostics.lastError = 'N8N_WEBHOOK_URL chưa được cấu hình';
+    return null;
+  }
 
   const timeoutMs = process.env.N8N_TIMEOUT_MS ? parseInt(process.env.N8N_TIMEOUT_MS, 10) : 180000;
-  
-  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
+  const maxRetries = getN8nMaxRetries();
+  const totalAttempts = maxRetries + 1;
+
+  for (let attempt = 1; attempt <= totalAttempts; attempt++) {
     const startTime = Date.now();
-    console.log(`[N8N] Calling n8n webhook (Attempt ${attempt}/${maxRetries + 1}): ${n8nUrl} for ${payload.analysisType}...`);
-    
+    console.log(`[N8N] Calling n8n webhook (Attempt ${attempt}/${totalAttempts}): ${n8nUrl} for ${payload.analysisType}...`);
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    let responded = false;
+    let failure;
 
     try {
       const response = await fetch(n8nUrl, {
@@ -359,76 +410,82 @@ async function callN8nWebhook(payload, maxRetries = 2) {
         body: JSON.stringify(payload),
         signal: controller.signal
       });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        // Retry on 429 Rate Limit, 502/503/504 Gateway errors if attempts remain
-        const retryableStatuses = [429, 502, 503, 504];
-        if (retryableStatuses.includes(response.status) && attempt <= maxRetries) {
-          const backoffDelay = attempt * 5000;
-          console.warn(`[N8N] Received status ${response.status} from n8n. Retrying in ${backoffDelay / 1000}s...`);
-          await new Promise(resolve => setTimeout(resolve, backoffDelay));
-          continue;
-        }
-        throw new Error(`n8n returned status ${response.status}: ${response.statusText}`);
-      }
-      
+      responded = true;
       const text = await response.text();
-      let resultJson = resilienceEngine.autoFixJsonString(text);
-      if (!resultJson) {
-        throw new Error(`Failed to parse/fix n8n response as JSON: ${text.substring(0, 200)}`);
-      }
-      
-      // Normalize response if wrapped in array
-      if (Array.isArray(resultJson)) {
-        resultJson = resultJson[0];
-      }
-      
-      // Extract nested data if n8n returns standard wrappers
-      if (resultJson && typeof resultJson === 'object') {
-        if (resultJson.structured_output) {
-          resultJson = typeof resultJson.structured_output === 'string'
-            ? resilienceEngine.autoFixJsonString(resultJson.structured_output) || resultJson.structured_output
-            : resultJson.structured_output;
-        } else if (resultJson.output) {
-          resultJson = typeof resultJson.output === 'string'
-            ? resilienceEngine.autoFixJsonString(resultJson.output) || resultJson.output
-            : resultJson.output;
-        } else if (resultJson.result && typeof resultJson.result === 'object') {
-          resultJson = resultJson.result;
-        } else if (resultJson.data && typeof resultJson.data === 'object') {
-          resultJson = resultJson.data;
-        } else if (resultJson.json && typeof resultJson.json === 'object') {
-          resultJson = resultJson.json;
-        } else if (resultJson.body && typeof resultJson.body === 'object') {
-          resultJson = resultJson.body;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        let body = null;
+        try { body = JSON.parse(text); } catch { /* gateways often answer with HTML */ }
+        const detail = (typeof body?.message === 'string' && body.message)
+          || (typeof body?.error === 'string' && body.error)
+          || text.substring(0, 200)
+          || response.statusText;
+        const { retryable, delayMs } = classifyN8nFailure({
+          status: response.status,
+          body,
+          retryAfterHeader: response.headers.get('retry-after')
+        });
+        failure = { message: `n8n ${response.status}: ${detail}`, retryable, delayMs };
+      } else {
+        let resultJson = resilienceEngine.autoFixJsonString(text);
+        if (!resultJson) {
+          // The workflow answered 2xx with a broken body; re-sending would break the same way.
+          failure = { message: `n8n trả về JSON không hợp lệ: ${text.substring(0, 200)}`, retryable: false, delayMs: 0 };
+        } else {
+          // Normalize response if wrapped in array
+          if (Array.isArray(resultJson)) {
+            resultJson = resultJson[0];
+          }
+
+          // Extract nested data if n8n returns standard wrappers
+          if (resultJson && typeof resultJson === 'object') {
+            if (resultJson.structured_output) {
+              resultJson = typeof resultJson.structured_output === 'string'
+                ? resilienceEngine.autoFixJsonString(resultJson.structured_output) || resultJson.structured_output
+                : resultJson.structured_output;
+            } else if (resultJson.output) {
+              resultJson = typeof resultJson.output === 'string'
+                ? resilienceEngine.autoFixJsonString(resultJson.output) || resultJson.output
+                : resultJson.output;
+            } else if (resultJson.result && typeof resultJson.result === 'object') {
+              resultJson = resultJson.result;
+            } else if (resultJson.data && typeof resultJson.data === 'object') {
+              resultJson = resultJson.data;
+            } else if (resultJson.json && typeof resultJson.json === 'object') {
+              resultJson = resultJson.json;
+            } else if (resultJson.body && typeof resultJson.body === 'object') {
+              resultJson = resultJson.body;
+            }
+          }
+
+          const latency = Date.now() - startTime;
+          hitlManager.recordTelemetry(latency, 0, true);
+          console.log(`[N8N] Received successful response from n8n in ${(latency / 1000).toFixed(1)}s.`);
+          return schemaValidator.parseAiResult(resultJson);
         }
       }
-      
-      const latency = Date.now() - startTime;
-      hitlManager.recordTelemetry(latency, 0, true);
-      console.log(`[N8N] Received successful response from n8n in ${(latency / 1000).toFixed(1)}s.`);
-      return schemaValidator.parseAiResult(resultJson);
     } catch (error) {
       clearTimeout(timeoutId);
-      const latency = Date.now() - startTime;
-      hitlManager.recordTelemetry(latency, 0, false);
-      
       if (error.name === 'AbortError') {
-        console.error(`[N8N] Webhook call timed out after ${timeoutMs / 1000}s.`);
+        failure = { message: `n8n không phản hồi sau ${timeoutMs / 1000}s (timeout)`, retryable: false, delayMs: 0 };
+      } else if (responded) {
+        failure = { message: `Lỗi xử lý phản hồi n8n: ${error.message}`, retryable: false, delayMs: 0 };
       } else {
-        console.error(`[N8N] Webhook call failed (Attempt ${attempt}/${maxRetries + 1}):`, error.message);
-      }
-
-      if (attempt <= maxRetries && error.name !== 'AbortError') {
-        const backoffDelay = attempt * 5000;
-        console.log(`[N8N] Retrying webhook in ${backoffDelay / 1000}s...`);
-        await new Promise(resolve => setTimeout(resolve, backoffDelay));
-      } else {
-        return null;
+        const { retryable, delayMs } = classifyN8nFailure({ networkError: true });
+        failure = { message: `Lỗi kết nối n8n: ${error.message}`, retryable, delayMs };
       }
     }
+
+    hitlManager.recordTelemetry(Date.now() - startTime, 0, false);
+    diagnostics.lastError = failure.message;
+    console.error(`[N8N] Attempt ${attempt}/${totalAttempts} failed for ${payload.analysisType}: ${failure.message} (retryable=${failure.retryable})`);
+
+    if (!failure.retryable || attempt >= totalAttempts) {
+      return null;
+    }
+    console.log(`[N8N] Retrying ${payload.analysisType} in ${Math.round(failure.delayMs / 1000)}s...`);
+    await sleepFn(failure.delayMs);
   }
 
   return null;
@@ -471,6 +528,7 @@ async function analyzeCommit(commit, files, extraContext = {}) {
   const prompt = promptsManager.promptsRegistry.commit_review(runtimeInput);
 
   // 1. Try n8n webhook first if configured
+  const n8nDiagnostics = {};
   const n8nResult = await callN8nWebhook({
     analysisType: 'commit_review',
     runtimeInput,
@@ -489,7 +547,7 @@ async function analyzeCommit(commit, files, extraContext = {}) {
       patch: promptsManager.enforceFilePatchBoundary(f.patch)
     })),
     prompt
-  });
+  }, n8nDiagnostics);
   
   if (n8nResult) {
     n8nResult._provider = 'n8n-gemini';
@@ -530,7 +588,7 @@ async function analyzeCommit(commit, files, extraContext = {}) {
         significant_change: false,
         push_summary: `Đợt này gồm ${extraContext.commitCount || 1} commit: [MOCK] tóm tắt giả lập.`
       },
-      _provider: 'Mock Service',
+      _provider: MOCK_PROVIDER,
       _model: 'mock'
     };
 
@@ -540,7 +598,7 @@ async function analyzeCommit(commit, files, extraContext = {}) {
     return normalizeCommitReviewV2(mockResult);
   }
 
-  throw new Error("Gọi webhook n8n thất bại hoặc hết hạn phản hồi (timeout). Vui lòng kiểm tra lại dịch vụ n8n và quota của API Gemini.");
+  throw new Error(`Gọi webhook n8n thất bại hoặc hết hạn phản hồi (timeout). Vui lòng kiểm tra lại dịch vụ n8n và quota của API Gemini.${n8nDiagnostics.lastError ? ` Chi tiết: ${n8nDiagnostics.lastError}` : ''}`);
 }
 
 /**
@@ -578,6 +636,7 @@ async function analyzeTeamAggregate(teamId, commits, priorReviews, options = {})
   const prompt = promptsManager.promptsRegistry.repository_review(runtimeInput);
 
   // 1. Try n8n webhook first if configured
+  const n8nDiagnostics = {};
   const n8nResult = await callN8nWebhook({
     analysisType: 'repository_review',
     runtimeInput,
@@ -603,7 +662,7 @@ async function analyzeTeamAggregate(teamId, commits, priorReviews, options = {})
       result: r.result
     })),
     prompt
-  });
+  }, n8nDiagnostics);
   
   if (n8nResult) {
     try {
@@ -676,14 +735,14 @@ async function analyzeTeamAggregate(teamId, commits, priorReviews, options = {})
       suggested_test_cases: ['[MOCK] Given ..., When ..., Then ...'],
       suggested_questions_for_team: ['[MOCK] Câu hỏi giả lập cho đội thi?'],
       final_summary: '[MOCK] Kết luận giả lập — không phải kết quả AI thật.',
-      _provider: 'Mock Service',
+      _provider: MOCK_PROVIDER,
       _model: 'mock'
     };
 
     return normalizeAggregateReviewV2(mockAggregate, activeCriteria);
   }
 
-  throw new Error("Gọi webhook n8n thất bại hoặc hết hạn phản hồi (timeout). Vui lòng kiểm tra lại dịch vụ n8n và quota của API Gemini.");
+  throw new Error(`Gọi webhook n8n thất bại hoặc hết hạn phản hồi (timeout). Vui lòng kiểm tra lại dịch vụ n8n và quota của API Gemini.${n8nDiagnostics.lastError ? ` Chi tiết: ${n8nDiagnostics.lastError}` : ''}`);
 }
 
 /**
@@ -729,9 +788,40 @@ async function generateScoringSuggestion(repositorySnapshot, commits, criteria) 
   });
 }
 
+/**
+ * Mock results look like real reviews once saved. When the mock service is on while this
+ * server points at a shared (non-local) database, its cron/queue workers can write placeholder
+ * reviews into data that judges see, so make that configuration impossible to miss.
+ */
+function warnIfMockOnSharedDatabase() {
+  if (!isMock) return;
+  const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || '';
+  const hostMatch = mongoUri.match(/^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?]+)/i);
+  const hosts = hostMatch ? hostMatch[1].split(',').map(h => h.split(':')[0].toLowerCase()) : [];
+  const isLocal = hosts.length > 0 && hosts.every(h => ['localhost', '127.0.0.1', 'mongo', 'mongodb'].includes(h));
+  if (!mongoUri || isLocal) return;
+  const line = '='.repeat(78);
+  console.warn([
+    line,
+    `[AI SERVICE WARNING] GEMINI_SERVICE_MOCK=true while MONGO_URI points to a shared database (${hosts.join(', ')}).`,
+    'Whenever n8n fails, this server saves [MOCK] reviews into that database, and its cron/queue',
+    'workers may pick up sync jobs meant for other environments. Use a local database or set',
+    'GEMINI_SERVICE_MOCK=false.',
+    line
+  ].join('\n'));
+}
+
 module.exports = {
+  warnIfMockOnSharedDatabase,
   analyzeCommit,
   analyzeTeamAggregate,
   generateScoringSuggestion,
-  parseAiResult: schemaValidator.parseAiResult
+  parseAiResult: schemaValidator.parseAiResult,
+  MOCK_PROVIDER,
+  // Exposed for unit tests only
+  _internal: {
+    callN8nWebhook,
+    classifyN8nFailure,
+    setSleep: (fn) => { sleepFn = fn; }
+  }
 };

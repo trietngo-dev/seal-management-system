@@ -40,6 +40,7 @@ server.listen(port, async () => {
   } catch (e) {
     console.error('[DRIVE] Config check skipped:', e.message);
   }
+  require('../features/github-ai/aiService').warnIfMockOnSharedDatabase();
   cronService.startCronJobs();
 });
 server.on('error', onError);
