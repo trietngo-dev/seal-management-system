@@ -9,6 +9,7 @@ const GithubRepository = mongoose.model('GithubRepository');
 const Commit = mongoose.model('Commit');
 const CommitFile = mongoose.model('CommitFile');
 const AiAnalysis = mongoose.model('AiAnalysis');
+const { MOCK_PROVIDER } = aiService;
 const Team = mongoose.model('Team');
 const Event = mongoose.model('Event');
 
@@ -357,10 +358,12 @@ async function syncRepo(repoId) {
       }).sort({ committedAt: -1 }).limit(10);
 
       for (const commitRecord of recentCommits) {
+        // A placeholder from the local mock service is not a real review, so it must not block a re-run.
         const hasCompletedAnalysis = await AiAnalysis.exists({
           commitId: commitRecord._id,
           analysisType: 'commit_review',
-          status: 'completed'
+          status: 'completed',
+          provider: { $ne: MOCK_PROVIDER }
         });
 
         if (!hasCompletedAnalysis) {
@@ -551,11 +554,12 @@ async function syncRepo(repoId) {
 
         // 1. Save Per-Push Commit Review
         if (aiResult) {
-          // Delete any existing failed analyses for this commit before saving
+          // Delete any existing failed or mock analyses for this commit before saving,
+          // so placeholder data never sits next to a real review.
           await AiAnalysis.deleteMany({
             commitId: latestCommit._id,
             analysisType: 'commit_review',
-            status: 'failed'
+            $or: [{ status: 'failed' }, { provider: MOCK_PROVIDER }]
           });
 
           const aiAnalysis = new AiAnalysis({
