@@ -116,6 +116,13 @@ const EventSchema = new Schema({
 - Track B: Tầng G Thư viện.
 
 - Track C: LB24 tầng 2 Thư viện.`
+  },
+  // Heading shown above the announcement in the participant Team Area
+  locationAnnouncementTitle: {
+    type: String,
+    trim: true,
+    maxlength: 120,
+    default: "Khu vực thi & Địa điểm"
   }
 }, {
   timestamps: true

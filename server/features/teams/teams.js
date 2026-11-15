@@ -1239,7 +1239,7 @@ router.get("/my-team", authenticateToken, async (req, res) => {
       const foundTeam = await Team.findById(record.teamId)
         .populate(
           "eventId",
-          "name semester year status contestStart contestEnd registrationOpen registrationClose seminar commitSyncInterval zaloUrl locationAnnouncement",
+          "name semester year status contestStart contestEnd registrationOpen registrationClose seminar commitSyncInterval zaloUrl locationAnnouncement locationAnnouncementTitle",
         )
         .populate("mentorId", "fullName email")
         .populate({

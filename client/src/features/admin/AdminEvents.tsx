@@ -298,6 +298,7 @@ export default function AdminEvents({
   const [editPhase2Description, setEditPhase2Description] = useState("");
   const [editPhase3Description, setEditPhase3Description] = useState("");
   const [editLocationAnnouncement, setEditLocationAnnouncement] = useState("");
+  const [editLocationAnnouncementTitle, setEditLocationAnnouncementTitle] = useState("");
   const [editRules, setEditRules] = useState<any[]>([]);
   const [editCustomTimeline, setEditCustomTimeline] = useState<any[]>([]);
   const [editPrizes, setEditPrizes] = useState<any[]>([]);
@@ -1194,6 +1195,11 @@ export default function AdminEvents({
             ? eventObj.locationAnnouncement
             : defaultAnnouncement)
     );
+    setEditLocationAnnouncementTitle(
+      draft?.editLocationAnnouncementTitle !== undefined
+        ? draft.editLocationAnnouncementTitle
+        : (eventObj.locationAnnouncementTitle ?? "Khu vực thi & Địa điểm")
+    );
     setEditRules(
       eventObj.rules || [
         {
@@ -1478,6 +1484,7 @@ export default function AdminEvents({
           phase2Description: editPhase2Description,
           phase3Description: editPhase3Description,
           locationAnnouncement: editLocationAnnouncement,
+          locationAnnouncementTitle: editLocationAnnouncementTitle,
           rules: editRules,
         },
         { headers: { Authorization: `Bearer ${token}` } },
@@ -1518,6 +1525,7 @@ export default function AdminEvents({
         `http://localhost:5000/api/events/${selectedEvent._id}`,
         {
           locationAnnouncement: editLocationAnnouncement,
+          locationAnnouncementTitle: editLocationAnnouncementTitle,
         },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -2024,6 +2032,7 @@ export default function AdminEvents({
         editPhase2Description,
         editPhase3Description,
         editLocationAnnouncement,
+        editLocationAnnouncementTitle,
       };
       sessionStorage.setItem(`event_draft_${selectedEvent._id}`, JSON.stringify(draftData));
     }
@@ -2049,6 +2058,7 @@ export default function AdminEvents({
     editPhase2Description,
     editPhase3Description,
     editLocationAnnouncement,
+    editLocationAnnouncementTitle,
   ]);
 
   useEffect(() => {
@@ -4083,6 +4093,17 @@ export default function AdminEvents({
                               (Để trống nếu muốn ẩn)
                             </span>
                           </div>
+                          <input
+                            type="text"
+                            maxLength={120}
+                            value={editLocationAnnouncementTitle}
+                            onChange={(e) =>
+                              setEditLocationAnnouncementTitle(e.target.value)
+                            }
+                            className="mb-2 w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl px-4 py-2.5 text-xs text-white font-semibold focus:outline-hidden focus:border-emerald-500/80 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            placeholder="Tiêu đề thông báo (VD: Khu vực thi & Địa điểm)"
+                            disabled={readOnly}
+                          />
                           <textarea
                             rows={4}
                             value={editLocationAnnouncement}
@@ -4655,6 +4676,28 @@ export default function AdminEvents({
                         <div>
                           <div className="flex justify-between items-center mb-1.5">
                             <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider font-mono">
+                              Tiêu đề thông báo
+                            </label>
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              {editLocationAnnouncementTitle.length}/120
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            maxLength={120}
+                            value={editLocationAnnouncementTitle}
+                            onChange={(e) =>
+                              setEditLocationAnnouncementTitle(e.target.value)
+                            }
+                            className="w-full bg-slate-900/80 border border-slate-700 hover:border-emerald-500/50 rounded-xl px-4 py-3 text-sm text-white font-semibold focus:outline-hidden focus:border-emerald-500/80 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                            placeholder="VD: Khu vực thi & Địa điểm — để trống sẽ chỉ hiện &quot;Thông báo từ BTC&quot;"
+                            disabled={readOnly}
+                          />
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between items-center mb-1.5">
+                            <label className="block text-[10px] font-bold uppercase text-slate-400 tracking-wider font-mono">
                               Nội dung thông báo (Hiển thị cho thí sinh)
                             </label>
                             <span className="text-[10px] text-slate-500 font-mono">
@@ -4689,6 +4732,7 @@ export default function AdminEvents({
                               onClick={() => {
                                 const defaultNotice = `THÔNG BÁO KHU VỰC VÒNG SƠ LOẠI:.\n\n- Track A: Seminar 1 Thư viện.\n\n- Track B: Tầng G Thư viện.\n\n- Track C: LB24 tầng 2 Thư viện.`;
                                 setEditLocationAnnouncement(defaultNotice);
+                                setEditLocationAnnouncementTitle("Khu vực thi & Địa điểm");
                               }}
                               className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono font-medium transition-all cursor-pointer flex items-center gap-1.5"
                             >
@@ -4717,24 +4761,22 @@ export default function AdminEvents({
                             <span className="text-[10px] text-slate-500 font-mono block">
                               Mô phỏng giao diện trang Khu vực đội thi:
                             </span>
-                            <div className="relative overflow-hidden bg-linear-to-r from-orange-500/8 via-amber-500/4 to-slate-900/60 p-5 rounded-2xl border-2 border-primary/30 shadow-xs">
-                              <div className="flex items-start gap-4">
-                                <div className="p-3 bg-primary/15 text-primary rounded-xl border border-primary/30 shrink-0 shadow-inner">
-                                  <Megaphone size={22} className="animate-pulse" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-2.5 flex-wrap">
-                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-md bg-primary text-white shadow-xs shadow-orange-500/20">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
-                                      Thông báo từ BTC
-                                    </span>
-                                    <span className="text-[11px] text-slate-400 font-mono font-bold">
-                                      Khu vực thi &amp; Địa điểm
-                                    </span>
-                                  </div>
-                                  <div className="text-xs text-slate-200 leading-relaxed font-sans font-medium whitespace-pre-line wrap-break-word">
-                                    {editLocationAnnouncement}
-                                  </div>
+                            {/* Mirrors the announcement block in client/src/features/teams/TeamArea.tsx */}
+                            <div className="flex items-start gap-4 rounded-2xl border border-primary/30 bg-primary-soft p-5">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white!">
+                                <Megaphone size={20} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                                  Thông báo từ BTC
+                                </p>
+                                {editLocationAnnouncementTitle.trim() && (
+                                  <h3 className="mt-0.5 text-lg font-bold leading-snug text-ink wrap-break-word">
+                                    {editLocationAnnouncementTitle.trim()}
+                                  </h3>
+                                )}
+                                <div className="mt-2 whitespace-pre-line wrap-break-word font-sans text-sm leading-relaxed text-ink">
+                                  {editLocationAnnouncement}
                                 </div>
                               </div>
                             </div>
