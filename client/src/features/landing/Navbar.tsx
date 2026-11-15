@@ -319,10 +319,10 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
             : "text-slate-350 hover:text-primary hover:bg-white/5 border border-transparent"
           }`;
       }
-      return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono
+      return `flex items-center gap-2 px-3.5 py-2 rounded-full text-sm transition-colors duration-200
         ${active
-          ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_-3px_rgba(242,112,36,0.2)]"
-          : "text-slate-700 hover:text-primary hover:bg-slate-100 border border-transparent"
+          ? "bg-primary-soft text-primary font-semibold"
+          : "text-ink-muted font-medium hover:text-primary hover:bg-primary-soft/60"
         }`;
     }
     return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 font-mono
@@ -361,7 +361,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
         <div className="flex-1 flex justify-start">
           <Link
             to="/"
-            className="flex items-center group rounded-xl bg-white/90 px-3 py-1.5 shadow-xs"
+            className={`flex items-center group ${usesLightShell && !isLandingPage ? "" : "rounded-xl bg-white/90 px-3 py-1.5 shadow-xs"}`}
           >
             <img
               src="/seal_hackathon_logo.png"
@@ -482,7 +482,7 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                     {unreadCount > 0 && (
                       <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
 
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 border border-slate-900"></span>
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 border ${usesLightShell ? "border-white" : "border-slate-900"}`}></span>
                       </span>
                     )}
                   </button>
@@ -609,9 +609,9 @@ export default function Navbar({ user, roles, onLogout, onOpenProfile }: NavbarP
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold font-mono transition-all hover:scale-105 active:scale-95 cursor-pointer ${usesLightShell
-                        ? "bg-primary/10 text-primary border border-primary/25 shadow-[0_0_10px_rgba(242,112,36,0.12)] hover:bg-primary/20 hover:border-primary/40"
-                        : "bg-cyan-950/50 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] hover:bg-cyan-950/80 hover:border-cyan-500/50"
+                    className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer ${usesLightShell
+                        ? "bg-primary text-white shadow-sm hover:bg-primary-hover"
+                        : "font-mono bg-cyan-950/50 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.15)] hover:bg-cyan-950/80 hover:border-cyan-500/50"
                       }`}
                     title="Menu tài khoản"
                   >

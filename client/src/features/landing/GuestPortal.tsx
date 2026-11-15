@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
-  Terminal,
   ArrowRight,
   Shield,
   Compass,
@@ -16,6 +15,11 @@ import {
   Award,
   FileText,
   Target,
+  Sparkles,
+  Trophy,
+  ListChecks,
+  FolderKanban,
+  BookOpen,
 } from "lucide-react";
 
 interface GuestPortalProps {
@@ -213,21 +217,124 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-mono">
+      <div className="min-h-screen bg-canvas flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Terminal
-            size={32}
-            className="mx-auto text-primary animate-pulse"
-          />
-          <p className="text-primary text-sm tracking-widest animate-pulse">
-            [ACCESSING_PORTAL_TERMINAL...]
-          </p>
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
+          <p className="text-sm text-ink-muted">Đang tải trang chủ...</p>
         </div>
       </div>
     );
   }
 
-  const displayName = user?.fullName || "GUEST_USER";
+  const displayName = user?.fullName || "bạn";
+
+  const getEventStatus = (e: any) => {
+    const isFull = (e.teamCount || 0) >= (e.maxTeams || 10);
+    switch (e.status) {
+      case "registration":
+        return isFull
+          ? { label: "Đã đủ số đội", className: "bg-rose-50 text-rose-600 border-rose-200" }
+          : { label: "Đang mở đăng ký", className: "bg-primary-soft text-primary border-primary/20" };
+      case "prepare":
+        return { label: "Đang chuẩn bị", className: "bg-amber-50 text-amber-700 border-amber-200" };
+      case "ongoing":
+        return { label: "Đang diễn ra", className: "bg-secondary-soft text-secondary border-secondary/20" };
+      case "completed":
+        return { label: "Đã kết thúc", className: "bg-emerald-50 text-emerald-700 border-emerald-200" };
+      case "cancelled":
+        return { label: "Đã hủy", className: "bg-rose-50 text-rose-600 border-rose-200" };
+      default:
+        return { label: String(e.status || ""), className: "bg-slate-50 text-slate-600 border-slate-200" };
+    }
+  };
+
+  const renderEventAction = (e: any) => {
+    const isFull = (e.teamCount || 0) >= (e.maxTeams || 10);
+    const primaryButton = (label: string, to: string) => (
+      <button
+        type="button"
+        onClick={() => navigate(to)}
+        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-white transition-colors hover:bg-primary-hover cursor-pointer"
+      >
+        <span>{label}</span>
+        <ArrowRight size={16} />
+      </button>
+    );
+    const note = (label: string, tone: "muted" | "danger" = "muted") => (
+      <div
+        className={`w-full rounded-xl border py-3 text-center text-sm font-medium ${tone === "danger"
+          ? "border-rose-200 bg-rose-50 text-rose-600"
+          : "border-line bg-white text-ink-muted"
+          }`}
+      >
+        {label}
+      </div>
+    );
+
+    if (hasTeam && ["registration", "prepare", "ongoing"].includes(e.status)) {
+      return primaryButton("Vào khu vực đội", "/team-area");
+    }
+    if (e.status === "registration") {
+      return isFull
+        ? note("Đăng ký đã đầy", "danger")
+        : primaryButton("Đăng ký tham gia", `/team-area?eventId=${e._id}`);
+    }
+    if (e.status === "prepare") return note("Đã đóng đăng ký · Đang chuẩn bị");
+    if (e.status === "ongoing") return note("Đã đóng đăng ký · Đang diễn ra");
+    return null;
+  };
+
+  const renderEventCard = (e: any, wide: boolean) => {
+    const maxTeams = e.maxTeams || 10;
+    const teamCount = e.teamCount || 0;
+    const percent = Math.min(100, (teamCount / maxTeams) * 100);
+    const status = getEventStatus(e);
+
+    return (
+      <article
+        key={e._id}
+        className={`grid gap-6 rounded-2xl border border-line bg-white p-6 shadow-sm transition-all hover:border-primary/30 hover:shadow-md ${wide ? "md:grid-cols-[1fr_20rem] md:items-center md:p-8" : ""
+          }`}
+      >
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className={`inline-flex items-center rounded-full border px-2.5 py-1 font-semibold ${status.className}`}>
+              {status.label}
+            </span>
+            {(e.semester || e.year) && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas px-2.5 py-1 font-medium text-ink-muted">
+                <Calendar size={12} />
+                Học kỳ {e.semester} {e.year}
+              </span>
+            )}
+          </div>
+          <h3 className="text-2xl font-bold tracking-tight text-ink md:text-3xl">
+            {e.name}
+          </h3>
+          <p className={`max-w-3xl text-sm leading-relaxed text-ink-muted md:text-base ${wide ? "" : "line-clamp-3"}`}>
+            {e.description || "Chưa có mô tả chi tiết cho cuộc thi này."}
+          </p>
+        </div>
+
+        <div className="space-y-4 rounded-xl border border-line bg-canvas p-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-sm text-ink-muted">Số đội đã đăng ký</span>
+            <span className="text-lg font-bold text-ink tabular-nums">
+              {teamCount}
+              <span className="text-sm font-medium text-ink-muted"> / {maxTeams}</span>
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200/70">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+          {renderEventAction(e)}
+        </div>
+      </article>
+    );
+  };
 
   const getPhaseStyles = (phaseNum: number) => {
     const statusObj = getPhaseStatus(phaseNum);
@@ -240,8 +347,8 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
     if (label === "ĐANG DIỄN RA") {
       headingClass =
-        "text-xs text-primary text-orange-glow font-bold uppercase tracking-wider";
-      dateClass = "text-[9px] text-primary/80 font-mono";
+        "text-xs text-primary font-bold uppercase tracking-wider";
+      dateClass = "text-[9px] text-primary/80";
       descClass = "text-[11px] text-slate-700";
       renderDot = () => (
         <span className="absolute left-[-20px] top-1 flex h-2.5 w-2.5">
@@ -252,7 +359,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
     } else if (label === "ĐÃ KẾT THÚC") {
       headingClass =
         "text-xs text-slate-750 font-bold uppercase tracking-wider";
-      dateClass = "text-[9px] text-slate-500 font-mono";
+      dateClass = "text-[9px] text-slate-500";
       descClass = "text-[11px] text-slate-500";
       renderDot = () => (
         <div className="absolute left-[-19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-primary"></div>
@@ -261,7 +368,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
       // CHƯA DIỄN RA
       headingClass =
         "text-xs text-slate-400 font-bold uppercase tracking-wider";
-      dateClass = "text-[9px] text-slate-400 font-mono";
+      dateClass = "text-[9px] text-slate-400";
       descClass = "text-[11px] text-slate-400";
       renderDot = () => (
         <div className="absolute left-[-19px] top-1 w-2.5 h-2.5 rounded-full bg-white border border-slate-300"></div>
@@ -283,390 +390,113 @@ export default function GuestPortal({ user }: GuestPortalProps) {
   const phase3 = getPhaseStyles(3);
 
   return (
-    <div className="relative overflow-hidden font-sans bg-[#faf9f6] text-slate-900 min-h-screen">
+    <div className="relative overflow-hidden bg-canvas text-ink min-h-screen">
       {/* Background Grid & Glow */}
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_15%_15%,rgba(242,112,36,0.08)_0%,transparent_40%),radial-gradient(circle_at_85%_85%,rgba(242,112,36,0.05)_0%,transparent_40%)]"></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12 font-mono">
-        {/* Hero Section */}
-        <section className="relative grid grid-cols-1 items-center gap-8 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 p-8 transition-all hover:border-primary/40 hover:shadow-[0_0_20px_rgba(242,112,36,0.06)] md:grid-cols-2">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="z-10 w-full space-y-6 text-left">
-            <div className="flex items-center space-x-2">
-              <span className="relative flex h-2 w-2">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-12">
+        {/* Welcome */}
+        <section className="relative overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 right-1/3 h-72 w-72 rounded-full bg-secondary/10 blur-3xl" />
 
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          <div className="relative grid items-center gap-6 p-6 sm:p-10 md:grid-cols-[1fr_auto] lg:gap-8 lg:pr-12">
+            <div className="space-y-6 text-left">
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
+                <Sparkles size={14} />
+                SEAL Hackathon
+                {activeEvent?.semester ? ` · ${activeEvent.semester} ${activeEvent.year ?? ""}` : ""}
               </span>
-              <span className="text-xs text-primary tracking-widest uppercase font-bold">
-                [TRẠNG_THÁI: HOẠT_ĐỘNG]
-              </span>
-            </div>
 
-            <h1 className="text-3xl md:text-5xl text-slate-900 font-extrabold tracking-tight leading-tight">
-              Chào mừng,
-              <span className="block mt-1 text-primary text-orange-glow font-sans">
-                {displayName}.
-              </span>
-            </h1>
+              <div className="space-y-3">
+                <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-ink sm:text-4xl md:text-5xl">
+                  Xin chào, <span className="text-primary">{displayName}</span>
+                </h1>
+                <p className="max-w-xl text-base leading-relaxed text-ink-muted">
+                  {hasTeam
+                    ? "Vào 'Khu vực đội thi' để xem nhiệm!"
+                    : "Bạn chưa có đội thi. Hoàn tất đăng ký đội để nhận nhiệm vụ và bắt đầu thi đấu."}
+                </p>
+              </div>
 
-            <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl font-sans">
-              {hasTeam
-                ? `Hệ thống của bạn đang hoạt động. Bạn hiện đã tham gia đội thi "${teamName}". Hãy truy cập khu vực quản lý của đội thi để xem nhiệm vụ dự án, đồng bộ commits và kiểm tra đánh giá từ AI.`
-                : "Hệ thống của bạn đang hoạt động. Cuộc thi SEAL Hackathon đang chờ bạn nhập thông tin. Bạn đã sẵn sàng khởi tạo các tham số nhiệm vụ và gia nhập một đội chưa?"}
-            </p>
-
-            <div className="pt-2">
-              {hasTeam ? (
-                <button
-                  onClick={() => navigate("/team-area")}
-                  className="btn-fpt font-bold px-8 py-3 uppercase tracking-wider flex items-center gap-2"
-                >
-                  <Terminal size={18} />
-                  <span>Vào Khu vực Đội thi</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => navigate("/team-area")}
-                  className="btn-fpt font-bold px-8 py-3 uppercase tracking-wider flex items-center gap-2"
-                >
-                  <Users size={18} />
-                  <span>Hoàn tất đăng ký đội</span>
-                </button>
+              {hasTeam && (
+                <div className="relative inline-flex max-w-full items-center gap-3 overflow-hidden rounded-xl bg-linear-to-br from-secondary to-secondary-hover py-3 pl-3 pr-6 text-white shadow-lg shadow-secondary/25">
+                  <div className="pointer-events-none absolute -right-8 -top-12 h-32 w-32 rounded-full bg-white/10" />
+                  <div className="pointer-events-none absolute -bottom-10 right-10 h-20 w-20 rounded-full bg-primary/30 blur-xl" />
+                  <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/15 text-lg font-bold ring-1 ring-white/30">
+                    {teamName.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="relative min-w-0">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-white/75">
+                      <Users size={12} />
+                      Đội của bạn
+                    </p>
+                    <p className="truncate text-lg font-bold leading-tight sm:text-xl">
+                      {teamName}
+                    </p>
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
 
-          <div className="relative mx-auto aspect-square w-full max-w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-inner md:max-w-[320px]">
-            <img
-              src="/seal_shield_badge.png"
-              alt="SEAL Shield"
-              draggable={false}
-              className="block w-full h-full object-contain p-4"
-            />
-            <div className="absolute inset-0 border border-primary/20 pointer-events-none rounded-xl"></div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/team-area")}
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover cursor-pointer"
+                >
+                  {hasTeam ? <GitBranch size={18} /> : <Users size={18} />}
+                  <span>{hasTeam ? "Vào khu vực đội thi" : "Hoàn tất đăng ký đội"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById("rules")?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl border border-secondary/25 bg-white px-6 py-3 text-sm font-semibold text-secondary transition-colors hover:bg-secondary-soft cursor-pointer"
+                >
+                  <BookOpen size={18} />
+                  <span>Xem điều lệ</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="relative mx-auto flex h-60 w-60 items-center justify-center sm:h-72 sm:w-72 md:-my-4 lg:h-88 lg:w-88 xl:h-96 xl:w-96">
+              <img
+                src="/seal_shield_badge.png"
+                alt="Huy hiệu SEAL"
+                draggable={false}
+                className="relative h-full w-full object-contain drop-shadow-[0_18px_28px_rgba(1,67,145,0.22)] motion-safe:animate-float"
+              />
+            </div>
           </div>
         </section>
 
-        {/* Active Competitions Widget */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Terminal size={18} className="text-primary shrink-0" />
-              <h2 className="text-lg font-bold text-slate-900 uppercase tracking-wider">
-                Cuộc thi hiện có
-              </h2>
+        {/* Active Competitions */}
+        <section className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+              <Trophy size={20} />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-ink sm:text-2xl">Cuộc thi hiện có</h2>
+              <p className="text-sm text-ink-muted">Trạng thái đăng ký và lối vào khu vực đội của bạn.</p>
             </div>
           </div>
 
           {loadingEvents ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className="bg-white/75 h-48 rounded-2xl border border-slate-200 animate-pulse flex flex-col justify-between p-6"
-                >
-                  <div className="h-4 bg-slate-200 rounded-sm w-1/3"></div>
-                  <div className="h-8 bg-slate-200 rounded-sm w-3/4"></div>
-                  <div className="h-4 bg-slate-200 rounded-sm w-full"></div>
-                </div>
-              ))}
+            <div className="h-48 animate-pulse rounded-2xl border border-line bg-white p-6">
+              <div className="h-4 w-1/4 rounded bg-slate-200" />
+              <div className="mt-4 h-8 w-1/2 rounded bg-slate-200" />
+              <div className="mt-4 h-4 w-3/4 rounded bg-slate-200" />
             </div>
           ) : events.length > 0 ? (
-            events.length === 1 ? (
-              <div className="w-full">
-                {events.map((e: any) => {
-                  const maxTeamsVal = e.maxTeams || 10;
-                  const teamCountVal = e.teamCount || 0;
-                  const percent = Math.min(
-                    100,
-                    (teamCountVal / maxTeamsVal) * 100,
-                  );
-
-                  let statusLabel: string;
-                  let statusColor: string;
-                  switch (e.status) {
-                    case "registration":
-                      statusLabel =
-                        teamCountVal >= maxTeamsVal
-                          ? "[ĐĂNG KÝ ĐÃ ĐẦY]"
-                          : "[MỞ ĐĂNG KÝ]";
-                      statusColor =
-                        teamCountVal >= maxTeamsVal
-                          ? "text-rose-600 font-extrabold"
-                          : "text-primary";
-                      break;
-                    case "prepare":
-                      statusLabel = "[ĐANG CHUẨN BỊ]";
-                      statusColor = "text-amber-600";
-                      break;
-                    case "ongoing":
-                      statusLabel = "[ĐANG DIỄN RA]";
-                      statusColor = "text-amber-600";
-                      break;
-                    case "completed":
-                      statusLabel = "[ĐÃ KẾT THÚC]";
-                      statusColor = "text-emerald-600";
-                      break;
-                    case "cancelled":
-                      statusLabel = "[ĐÃ HỦY]";
-                      statusColor = "text-rose-500";
-                      break;
-                    default:
-                      statusLabel = `[${e.status.toUpperCase()}]`;
-                      statusColor = "text-slate-500";
-                  }
-
-                  return (
-                    <div
-                      key={e._id}
-                      className="border border-slate-200 bg-white/95 p-6 md:p-8 rounded-2xl hover:border-primary/40 hover:shadow-[0_0_30px_rgba(242,112,36,0.08)] transition-all flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group w-full text-left"
-                    >
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024]/40 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
-
-                      {/* Left block: Title, Semester, Year, Description */}
-                      <div className="flex-1 space-y-4">
-                        <div className="flex items-center gap-3 text-[10px]">
-                          <span
-                            className={`font-bold uppercase tracking-wider ${statusColor}`}
-                          >
-                            {statusLabel}
-                          </span>
-                          <span className="text-slate-400 font-bold">•</span>
-                          <span className="text-slate-500 font-semibold font-mono">
-                            Học kỳ: {e.semester} {e.year}
-                          </span>
-                        </div>
-
-                        <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 font-mono group-hover:text-primary transition-colors uppercase tracking-tight">
-                          {e.name}
-                        </h3>
-
-                        <p className="text-xs md:text-sm text-slate-650 font-sans leading-relaxed max-w-4xl">
-                          {e.description ||
-                            "Chưa có mô tả chi tiết cho cuộc thi này."}
-                        </p>
-                      </div>
-
-                      {/* Right block: Progress & Actions */}
-                      <div className="w-full md:w-80 shrink-0 space-y-4 border-t md:border-t-0 md:border-l border-slate-200 pt-6 md:pt-0 md:pl-8">
-                        <div className="flex justify-between items-center text-xs font-mono">
-                          <span className="text-slate-500 font-semibold">
-                            Số đội đã đăng ký:
-                          </span>
-                          <span className="text-slate-700 font-bold">
-                            {teamCountVal} / {maxTeamsVal}
-                          </span>
-                        </div>
-
-                        <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
-                          <div
-                            className="h-full bg-primary transition-all duration-500 shadow-[0_0_8px_rgba(242,112,36,0.4)]"
-                            style={{ width: `${percent}%` }}
-                          ></div>
-                        </div>
-
-                        <div className="pt-2">
-                          {e.status === "registration" &&
-                            (teamCountVal >= maxTeamsVal && !hasTeam ? (
-                              <div className="w-full py-3 border border-rose-300 rounded-xl bg-rose-50 text-rose-600 text-sm font-bold text-center uppercase tracking-wider font-mono">
-                                Đăng ký đã đầy (Đủ số đội)
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  if (hasTeam) {
-                                    navigate("/team-area");
-                                  } else {
-                                    navigate(`/team-area?eventId=${e._id}`);
-                                  }
-                                }}
-                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                              >
-                                {hasTeam
-                                  ? "Vào khu vực đội"
-                                  : "Đăng ký tham gia"}
-                              </button>
-                            ))}
-
-                          {e.status === "prepare" &&
-                            (hasTeam ? (
-                              <button
-                                onClick={() => navigate("/team-area")}
-                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                              >
-                                Vào khu vực đội
-                              </button>
-                            ) : (
-                              <div className="w-full py-3 border border-slate-200 rounded-xl bg-slate-100 text-slate-400 text-sm font-bold text-center uppercase tracking-wider font-mono">
-                                Đã đóng đăng ký (Đang chuẩn bị)
-                              </div>
-                            ))}
-
-                          {e.status === "ongoing" &&
-                            (hasTeam ? (
-                              <button
-                                onClick={() => navigate("/team-area")}
-                                className="w-full py-3 border border-primary/30 rounded-xl bg-primary/5 text-primary text-sm font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                              >
-                                Vào khu vực đội
-                              </button>
-                            ) : (
-                              <div className="w-full py-3 border border-slate-200 rounded-xl bg-slate-100 text-slate-400 text-sm font-bold text-center uppercase tracking-wider font-mono">
-                                Đã đóng đăng ký (Đang diễn ra)
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {events.map((e: any) => {
-                  const maxTeamsVal = e.maxTeams || 10;
-                  const teamCountVal = e.teamCount || 0;
-                  const percent = Math.min(
-                    100,
-                    (teamCountVal / maxTeamsVal) * 100,
-                  );
-
-                  let statusLabel: string;
-                  let statusColor: string;
-                  switch (e.status) {
-                    case "registration":
-                      statusLabel =
-                        teamCountVal >= maxTeamsVal
-                          ? "[ĐĂNG KÝ ĐÃ ĐẦY]"
-                          : "[MỞ ĐĂNG KÝ]";
-                      statusColor =
-                        teamCountVal >= maxTeamsVal
-                          ? "text-rose-500 font-extrabold"
-                          : "text-primary";
-                      break;
-                    case "prepare":
-                      statusLabel = "[ĐANG CHUẨN BỊ]";
-                      statusColor = "text-amber-500";
-                      break;
-                    case "ongoing":
-                      statusLabel = "[ĐANG DIỄN RA]";
-                      statusColor = "text-amber-600";
-                      break;
-                    case "completed":
-                      statusLabel = "[ĐÃ KẾT THÚC]";
-                      statusColor = "text-emerald-600";
-                      break;
-                    case "cancelled":
-                      statusLabel = "[ĐÃ HỦY]";
-                      statusColor = "text-rose-500";
-                      break;
-                    default:
-                      statusLabel = `[${e.status.toUpperCase()}]`;
-                      statusColor = "text-slate-500";
-                  }
-
-                  return (
-                    <div
-                      key={e._id}
-                      className="border border-slate-200 bg-white/95 p-6 rounded-2xl hover:border-primary/40 hover:shadow-[0_0_25px_rgba(242,112,36,0.06)] transition-all flex flex-col justify-between gap-6 relative overflow-hidden group text-left"
-                    >
-                      <div className="absolute top-0 left-0 w-full h-[2px] bg-linear-to-r from-transparent via-[#F27024]/0 to-transparent group-hover:via-[#F27024]/60 transition-all duration-500"></div>
-
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center text-[10px]">
-                          <span
-                            className={`font-bold uppercase tracking-wider ${statusColor}`}
-                          >
-                            {statusLabel}
-                          </span>
-                          <span className="text-slate-500 font-semibold font-mono">
-                            {e.semester} {e.year}
-                          </span>
-                        </div>
-
-                        <h3 className="text-lg font-bold text-slate-900 font-mono group-hover:text-primary transition-colors uppercase tracking-tight">
-                          {e.name}
-                        </h3>
-
-                        <p className="text-xs text-slate-600 font-sans leading-relaxed line-clamp-3">
-                          {e.description ||
-                            "Chưa có mô tả chi tiết cho cuộc thi này."}
-                        </p>
-                      </div>
-
-                      <div className="space-y-3 pt-2">
-                        <div className="flex justify-between items-center text-[10px] font-mono">
-                          <span className="text-slate-500">
-                            Số đội đã đăng ký:
-                          </span>
-                          <span className="text-slate-700 font-bold">
-                            {teamCountVal} / {maxTeamsVal}
-                          </span>
-                        </div>
-
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-200">
-                          <div
-                            className="h-full bg-primary transition-all duration-500"
-                            style={{ width: `${percent}%` }}
-                          ></div>
-                        </div>
-
-                        {e.status === "registration" &&
-                          (teamCountVal >= maxTeamsVal && !hasTeam ? (
-                            <div className="w-full mt-2 py-2 border border-rose-300 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold text-center uppercase tracking-wider font-mono">
-                              Đăng ký đã đầy
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                if (hasTeam) {
-                                  navigate("/team-area");
-                                } else {
-                                  navigate(`/team-area?eventId=${e._id}`);
-                                }
-                              }}
-                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                            >
-                              {hasTeam ? "Vào khu vực đội" : "Đăng ký tham gia"}
-                            </button>
-                          ))}
-
-                        {e.status === "prepare" &&
-                          (hasTeam ? (
-                            <button
-                              onClick={() => navigate("/team-area")}
-                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                            >
-                              Vào khu vực đội
-                            </button>
-                          ) : (
-                            <div className="w-full mt-2 py-2 border border-slate-200 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold text-center uppercase tracking-wider font-mono">
-                              Đã đóng đăng ký (Đang chuẩn bị)
-                            </div>
-                          ))}
-
-                        {e.status === "ongoing" &&
-                          (hasTeam ? (
-                            <button
-                              onClick={() => navigate("/team-area")}
-                              className="w-full mt-2 py-2 border border-primary/30 rounded-xl bg-primary/5 text-primary text-xs font-bold hover:bg-primary/10 transition-all uppercase tracking-wider text-center cursor-pointer font-mono"
-                            >
-                              Vào khu vực đội
-                            </button>
-                          ) : (
-                            <div className="w-full mt-2 py-2 border border-slate-200 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold text-center uppercase tracking-wider font-mono">
-                              Đã đóng đăng ký (Đang diễn ra)
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )
+            <div className={events.length === 1 ? "" : "grid gap-6 md:grid-cols-2 xl:grid-cols-3"}>
+              {events.map((e: any) => renderEventCard(e, events.length === 1))}
+            </div>
           ) : (
-            <div className="border border-slate-200 text-center text-slate-500 italic text-xs font-mono py-8 bg-white/50 rounded-2xl">
-              [HIỆN_TẠI_CHƯA_CÓ_CUỘC_THI_NÀO_ĐƯỢC_CÔNG_BỐ]
+            <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-line bg-white/60 py-10 text-center">
+              <Trophy size={24} className="text-slate-300" />
+              <p className="text-sm text-ink-muted">Hiện chưa có cuộc thi nào được công bố.</p>
             </div>
           )}
         </section>
@@ -754,7 +584,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                         {formatEventDateRange(
                           activeEvent?.registrationOpen,
                           activeEvent?.registrationClose ||
-                            activeEvent?.contestStart,
+                          activeEvent?.contestStart,
                         )}
                       </span>
                       <span className={`text-[9px] ${phase1.classes}`}>
@@ -878,11 +708,11 @@ export default function GuestPortal({ user }: GuestPortalProps) {
             activeEvent?.rules?.length > 0 ? activeEvent.rules : defaultRules;
 
           return (
-            <section className="bg-white/95 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-8 text-left">
+            <section id="rules" className="scroll-mt-24 bg-white/95 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-8 text-left">
               <div className="border-b border-slate-100 pb-4 flex justify-between items-center flex-wrap gap-4">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-3">
                   <Scale size={24} className="text-primary" />
-                  <span className="font-mono-tech tracking-wide">
+                  <span>
                     Điều lệ & Quy định cuộc thi
                   </span>
                 </h2>
@@ -905,10 +735,10 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                   })()}/THÔNG%20TIN%20VỀ%20CUỘC%20THI.pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 border border-primary/30 hover:border-primary/80 bg-primary/5 hover:bg-primary/10 rounded-xl text-xs font-mono font-bold text-primary hover:text-primary transition-all cursor-pointer shadow-lg shadow-[#F27024]/5 hover:scale-[1.02]"
+                  className="flex items-center gap-2 px-5 py-2.5 border border-secondary/25 bg-white hover:bg-secondary-soft rounded-xl text-sm font-semibold text-secondary transition-colors cursor-pointer"
                 >
                   <Download size={14} />
-                  <span>TẢI THỂ LỆ PDF</span>
+                  <span>Tải thể lệ (PDF)</span>
                 </a>
               </div>
 
@@ -917,13 +747,13 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                 {/* Left Highlight (Điều 8: Tiêu chí chấm điểm) - Spans 6 cols on XL */}
                 <div className="xl:col-span-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-200/60 flex flex-col">
                   <div className="space-y-4 flex-1 flex flex-col">
-                    <h3 className="text-xs text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                    <h3 className="text-xs text-primary font-extrabold uppercase tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
                       <Award size={18} className="text-primary" />
                       <span>Tiêu chí chấm điểm</span>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm font-sans flex-1">
                       <div className="space-y-3.5 bg-white/60 p-4 rounded-xl border border-slate-200">
-                        <span className="text-xs text-slate-500 font-extrabold block uppercase border-b border-slate-200 pb-2 font-mono tracking-wider">
+                        <span className="text-xs text-slate-500 font-extrabold block uppercase border-b border-slate-200 pb-2 tracking-wider">
                           1. Vòng bảng
                         </span>
                         <div className="space-y-3">
@@ -937,7 +767,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             <div key={i} className="space-y-1">
                               <div className="flex justify-between text-xs text-slate-700">
                                 <span>{item.label}</span>
-                                <span className="text-primary font-mono font-bold">
+                                <span className="text-primary font-bold">
                                   {item.val}
                                 </span>
                               </div>
@@ -952,7 +782,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                         </div>
                       </div>
                       <div className="space-y-3.5 bg-white/60 p-4 rounded-xl border border-slate-200">
-                        <span className="text-xs text-slate-500 font-extrabold block uppercase border-b border-slate-200 pb-2 font-mono tracking-wider">
+                        <span className="text-xs text-slate-500 font-extrabold block uppercase border-b border-slate-200 pb-2 tracking-wider">
                           2. Vòng chung kết
                         </span>
                         <div className="space-y-3">
@@ -966,7 +796,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                             <div key={i} className="space-y-1">
                               <div className="flex justify-between text-xs text-slate-700">
                                 <span>{item.label}</span>
-                                <span className="text-primary font-mono font-bold">
+                                <span className="text-primary font-bold">
                                   {item.val}
                                 </span>
                               </div>
@@ -987,8 +817,8 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                 {/* Right Highlight (Quy chế thi đấu cốt lõi) - Spans 6 cols on XL */}
                 <div className="xl:col-span-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-200/60 flex flex-col">
                   <div className="space-y-4 w-full flex-1 flex flex-col">
-                    <h3 className="text-xs text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
-                      <Terminal size={18} className="text-primary" />
+                    <h3 className="text-xs text-primary font-extrabold uppercase tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                      <ListChecks size={18} className="text-primary" />
                       <span>Quy chế thi đấu cốt lõi</span>
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-4 text-sm font-sans flex-1">
@@ -1010,7 +840,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                         },
                         {
                           icon: (
-                            <Terminal className="text-primary" size={16} />
+                            <FolderKanban className="text-primary" size={16} />
                           ),
                           title: "Hồ sơ tài liệu",
                           desc: "Jira, Confluence, Notion",
@@ -1036,11 +866,11 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                               <div className="p-1 rounded-sm bg-primary/5 border border-primary/20">
                                 {item.icon}
                               </div>
-                              <span className="text-[10px] text-slate-500 font-bold uppercase font-mono tracking-wider">
+                              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
                                 {item.title}
                               </span>
                             </div>
-                            <p className="text-primary font-bold text-xs font-mono">
+                            <p className="text-primary font-bold text-xs">
                               {item.desc}
                             </p>
                           </div>
@@ -1057,7 +887,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
 
               {/* All Rules Grid (Fully visible, no nested scrolling) */}
               <div className="space-y-5 text-left pt-4">
-                <h3 className="text-base text-primary font-extrabold uppercase font-mono tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
+                <h3 className="text-base text-primary font-extrabold uppercase tracking-widest flex items-center gap-2.5 pb-2 border-b border-slate-200">
                   <Compass size={18} className="text-primary" />
                   <span>Chi tiết các Điều lệ &amp; Quy định</span>
                 </h3>
@@ -1098,7 +928,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                           <div className="p-2 rounded-xl bg-primary/5 border border-primary/20 text-primary group-hover:scale-110 transition-transform duration-300">
                             {getRuleIcon(idx)}
                           </div>
-                          <span className="text-[10px] sm:text-xs font-mono font-bold px-2.5 py-1 bg-primary/5 border border-primary/20 text-primary rounded-full uppercase tracking-wider">
+                          <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 bg-primary/5 border border-primary/20 text-primary rounded-full uppercase tracking-wider">
                             Điều {idx + 1}
                           </span>
                         </div>
@@ -1123,7 +953,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
                                   );
                                   const introText =
                                     parts[0].trim().endsWith("gồm") ||
-                                    parts[0].trim().endsWith("gồm:")
+                                      parts[0].trim().endsWith("gồm:")
                                       ? parts[0]
                                       : `${parts[0]} gồm:`;
                                   return (
@@ -1178,7 +1008,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
           {hasTeam ? (
             <button
               onClick={() => navigate("/team-area")}
-              className="btn-fpt font-bold text-sm px-12 py-4 uppercase tracking-widest flex items-center gap-2 group"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-10 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover cursor-pointer group"
             >
               <span>Tiếp tục vào Khu vực Đội thi</span>
               <ArrowRight
@@ -1189,7 +1019,7 @@ export default function GuestPortal({ user }: GuestPortalProps) {
           ) : (
             <button
               onClick={() => navigate("/team-area")}
-              className="btn-fpt font-bold text-sm px-12 py-4 uppercase tracking-widest flex items-center gap-2 group"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-10 py-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-hover cursor-pointer group"
             >
               <span>Đăng ký thành lập đội thi</span>
               <ArrowRight
